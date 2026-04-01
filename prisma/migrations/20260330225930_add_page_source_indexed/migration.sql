@@ -1,0 +1,6 @@
+-- CreateEnum
+CREATE TYPE "PageSource" AS ENUM ('MANUAL', 'SITEMAP', 'INTERNAL_LINK', 'SEARCH_CONSOLE', 'ROBOTS_TXT', 'LLMS_TXT');
+
+-- AlterTable
+ALTER TABLE "pages" ADD COLUMN     "indexed" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "source" "PageSource" NOT NULL DEFAULT 'MANUAL';

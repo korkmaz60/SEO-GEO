@@ -1,0 +1,652 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [vector]
+}
+
+// ============================================
+// KULLANICI & KİMLİK DOĞRULAMA
+// ============================================
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  password      String?
+  avatar        String?
+  emailVerified DateTime?
+  role          UserRole @default(USER)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  projects     Project[]
+  reports      Report[]
+  alerts       Alert[]
+  accounts     Account[]
+  sessions     Session[]
+  alertRules   AlertRule[]
+  scheduledReports ScheduledReport[]
+  activityLogs ActivityLog[]
+  notes        Note[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+  VIEWER
+}
+
+// ============================================
+// PROJE & SİTE YÖNETİMİ
+// ============================================
+
+model Project {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pages       Page[]
+  keywords    Keyword[]
+  competitors Competitor[]
+  geoScores   GeoScore[]
+  seoScores   SeoScore[]
+  reports     Report[]
+  alerts      Alert[]
+  crawls       CrawlSession[]
+  integrations Integration[]
+  backlinkSnapshots BacklinkSnapshot[]
+  internalLinks     InternalLink[]
+  alertRules        AlertRule[]
+  scheduledReports  ScheduledReport[]
+  activityLogs      ActivityLog[]
+  notes             Note[]
+  actionItems       ActionItem[]
+
+  @@map("projects")
+}
+
+// ============================================
+// SAYFA ANALİZİ
+// ============================================
+
+model Page {
+  id            String     @id @default(cuid())
+  projectId     String
+  url           String
+  title         String?
+  slug          String?
+  wordCount     Int?
+  status        PageStatus @default(ACTIVE)
+  source        PageSource @default(MANUAL)
+  indexed       Boolean    @default(false)
+  lastCrawl     DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  geoScores     GeoScore[]
+  seoScores     SeoScore[]
+  citations     Citation[]
+  contentChecks ContentCheck[]
+  techIssues    TechnicalIssue[]
+
+  @@unique([projectId, url])
+  @@map("pages")
+}
+
+enum PageStatus {
+  ACTIVE
+  REDIRECTED
+  NOT_FOUND
+  BLOCKED
+}
+
+enum PageSource {
+  MANUAL
+  SITEMAP
+  INTERNAL_LINK
+  SEARCH_CONSOLE
+  ROBOTS_TXT
+  LLMS_TXT
+}
+
+// ============================================
+// GEO (Generative Engine Optimization)
+// ============================================
+
+model GeoScore {
+  id            String   @id @default(cuid())
+  projectId     String
+  pageId        String?
+  overallScore  Float
+  authorityScore Float
+  readabilityScore Float
+  structureScore Float
+  technicalScore Float
+  measuredAt    DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  page    Page?   @relation(fields: [pageId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, measuredAt])
+  @@index([pageId, measuredAt])
+  @@map("geo_scores")
+}
+
+model Citation {
+  id         String        @id @default(cuid())
+  pageId     String
+  platform   AiPlatform
+  query      String
+  snippet    String?
+  position   Int?
+  detectedAt DateTime      @default(now())
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, platform])
+  @@index([platform, detectedAt])
+  @@map("citations")
+}
+
+enum AiPlatform {
+  GOOGLE_AI_OVERVIEW
+  CHATGPT
+  PERPLEXITY
+  CLAUDE
+  COPILOT
+}
+
+model AiVisibility {
+  id         String     @id @default(cuid())
+  projectId  String
+  platform   AiPlatform
+  visibility Float
+  citations  Int
+  change     Float
+  measuredAt DateTime   @default(now())
+
+  @@index([projectId, platform, measuredAt])
+  @@map("ai_visibility")
+}
+
+// ============================================
+// SEO (Search Engine Optimization)
+// ============================================
+
+model SeoScore {
+  id           String   @id @default(cuid())
+  projectId    String
+  pageId       String?
+  overallScore Float
+  healthScore  Float?
+  speedMobile  Float?
+  speedDesktop Float?
+  lcpValue     Float?
+  fidValue     Float?
+  clsValue     Float?
+  measuredAt   DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  page    Page?   @relation(fields: [pageId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, measuredAt])
+  @@map("seo_scores")
+}
+
+model Keyword {
+  id           String         @id @default(cuid())
+  projectId    String
+  keyword      String
+  position     Int?
+  prevPosition Int?
+  volume       Int?
+  clicks       Int?
+  impressions  Int?
+  ctr          Float?
+  difficulty   Int?
+  geoScore     Float?
+  tracked      Boolean        @default(false)
+  source       KeywordSource  @default(MANUAL)
+  trend        KeywordTrend   @default(STABLE)
+  updatedAt    DateTime       @updatedAt
+  createdAt    DateTime       @default(now())
+
+  project  Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  history  KeywordHistory[]
+
+  @@unique([projectId, keyword])
+  @@index([projectId, tracked])
+  @@map("keywords")
+}
+
+enum KeywordSource {
+  MANUAL
+  GOOGLE_SEARCH_CONSOLE
+  SERPER
+}
+
+enum KeywordTrend {
+  UP
+  DOWN
+  STABLE
+}
+
+model KeywordHistory {
+  id        String   @id @default(cuid())
+  keywordId String
+  position  Int
+  volume    Int?
+  recordedAt DateTime @default(now())
+
+  keyword Keyword @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+
+  @@index([keywordId, recordedAt])
+  @@map("keyword_history")
+}
+
+// ============================================
+// TEKNİK SEO
+// ============================================
+
+model CrawlSession {
+  id           String   @id @default(cuid())
+  projectId    String
+  pagesScanned Int      @default(0)
+  issuesFound  Int      @default(0)
+  status       CrawlStatus @default(RUNNING)
+  startedAt    DateTime @default(now())
+  finishedAt   DateTime?
+
+  project Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  issues  TechnicalIssue[]
+
+  @@index([projectId, startedAt])
+  @@map("crawl_sessions")
+}
+
+enum CrawlStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model TechnicalIssue {
+  id         String        @id @default(cuid())
+  pageId     String?
+  crawlId    String
+  category   String
+  severity   IssueSeverity
+  message    String
+  details    String?
+  createdAt  DateTime      @default(now())
+
+  page  Page?        @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  crawl CrawlSession @relation(fields: [crawlId], references: [id], onDelete: Cascade)
+
+  @@index([crawlId, severity])
+  @@map("technical_issues")
+}
+
+enum IssueSeverity {
+  CRITICAL
+  WARNING
+  NOTICE
+  INFO
+}
+
+// ============================================
+// RAKİP ANALİZİ
+// ============================================
+
+model Competitor {
+  id         String   @id @default(cuid())
+  projectId  String
+  name       String
+  domain     String
+  seoScore   Float?
+  geoScore   Float?
+  traffic    Int?
+  citations  Int?
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, domain])
+  @@map("competitors")
+}
+
+// ============================================
+// İÇERİK ANALİZİ
+// ============================================
+
+model ContentCheck {
+  id          String   @id @default(cuid())
+  pageId      String
+  checkType   String
+  status      CheckStatus
+  impact      String
+  message     String?
+  checkedAt   DateTime @default(now())
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, checkedAt])
+  @@map("content_checks")
+}
+
+enum CheckStatus {
+  PASS
+  WARNING
+  FAIL
+}
+
+// ============================================
+// RAPORLAR & BİLDİRİMLER
+// ============================================
+
+model Report {
+  id         String     @id @default(cuid())
+  projectId  String
+  userId     String
+  name       String
+  type       ReportType
+  format     String     @default("pdf")
+  fileUrl    String?
+  fileSize   String?
+  status     ReportStatus @default(PENDING)
+  createdAt  DateTime   @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+  @@map("reports")
+}
+
+enum ReportType {
+  FULL
+  GEO
+  SEO
+  TECHNICAL
+  COMPETITOR
+  WEEKLY_SUMMARY
+}
+
+enum ReportStatus {
+  PENDING
+  GENERATING
+  READY
+  FAILED
+}
+
+model Alert {
+  id        String    @id @default(cuid())
+  projectId String
+  userId    String
+  type      AlertType
+  message   String
+  read      Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read, createdAt])
+  @@map("alerts")
+}
+
+enum AlertType {
+  SUCCESS
+  WARNING
+  INFO
+  ERROR
+}
+
+// ============================================
+// HARİCİ ENTEGRASYONLAR
+// ============================================
+
+model Integration {
+  id           String          @id @default(cuid())
+  projectId    String
+  provider     IntegrationProvider
+  accessToken  String?         @db.Text
+  refreshToken String?         @db.Text
+  expiresAt    DateTime?
+  propertyUrl  String?         // Search Console site URL veya GA4 property ID
+  metadata     String?         @db.Text // JSON ek bilgi
+  connected    Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, provider])
+  @@map("integrations")
+}
+
+enum IntegrationProvider {
+  GOOGLE_SEARCH_CONSOLE
+  GOOGLE_ANALYTICS
+  DATAFORSEO
+}
+
+// ============================================
+// BACKLINK TAKİBİ
+// ============================================
+
+model BacklinkSnapshot {
+  id               String   @id @default(cuid())
+  projectId        String
+  totalBacklinks   Int      @default(0)
+  referringDomains Int      @default(0)
+  domainRank       Int      @default(0)
+  brokenBacklinks  Int      @default(0)
+  newBacklinks     Int      @default(0)
+  lostBacklinks    Int      @default(0)
+  measuredAt       DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, measuredAt])
+  @@map("backlink_snapshots")
+}
+
+// ============================================
+// İNTERNAL LİNK HARİTASI
+// ============================================
+
+model InternalLink {
+  id           String @id @default(cuid())
+  projectId    String
+  sourceUrl    String
+  targetUrl    String
+  anchorText   String?
+  statusCode   Int?
+  crawlId      String?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, sourceUrl, targetUrl])
+  @@index([projectId, targetUrl])
+  @@map("internal_links")
+}
+
+// ============================================
+// BİLDİRİM KURALLARI & WEBHOOK
+// ============================================
+
+model AlertRule {
+  id          String    @id @default(cuid())
+  projectId   String
+  userId      String
+  name        String
+  condition   String    // JSON: {"metric":"keyword_position","operator":"gt","value":10}
+  channel     String    @default("app") // app | email | webhook
+  webhookUrl  String?
+  enabled     Boolean   @default(true)
+  lastTriggered DateTime?
+  createdAt   DateTime  @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, enabled])
+  @@map("alert_rules")
+}
+
+// ============================================
+// ZAMANLANMIŞ RAPORLAR
+// ============================================
+
+model ScheduledReport {
+  id          String   @id @default(cuid())
+  projectId   String
+  userId      String
+  name        String
+  type        ReportType
+  schedule    String   // cron expression: "0 9 * * 1" (her pazartesi 09:00)
+  recipients  String   // JSON array of emails
+  enabled     Boolean  @default(true)
+  lastRun     DateTime?
+  nextRun     DateTime?
+  createdAt   DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, enabled])
+  @@map("scheduled_reports")
+}
+
+// ============================================
+// AKTİVİTE LOGU
+// ============================================
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  action    String   // crawl_started, keyword_added, report_generated, settings_changed
+  details   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+  @@map("activity_logs")
+}
+
+// ============================================
+// YAPILACAKLAR (AI Action Items)
+// ============================================
+
+model ActionItem {
+  id          String         @id @default(cuid())
+  projectId   String
+  title       String
+  description String         @db.Text  // Nasıl yapılacağı hakkında detaylı bilgi
+  category    ActionCategory
+  priority    ActionPriority
+  impact      String?        // Tahmini etki: "SEO +5 puan", "Trafik +%20"
+  completed   Boolean        @default(false)
+  completedAt DateTime?
+  createdAt   DateTime       @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, completed, priority])
+  @@map("action_items")
+}
+
+enum ActionCategory {
+  TECHNICAL_SEO
+  CONTENT
+  GEO
+  SPEED
+  BACKLINK
+  KEYWORD
+  STRUCTURE
+}
+
+enum ActionPriority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+// ============================================
+// NOTLAR
+// ============================================
+
+model Note {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  targetType String  // page | keyword | project
+  targetId  String?  // related entity id
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, targetType, targetId])
+  @@map("notes")
+}
