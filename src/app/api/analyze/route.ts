@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { getActiveProject } from "@/lib/get-project";
 import { db } from "@/lib/db";
 
@@ -11,9 +12,36 @@ const STOPWORDS = new Set([
   "untitled", "başlıksız", "hoşgeldiniz", "welcome", "index", "default",
 ]);
 
-export async function POST() {
+export async function POST(req: Request) {
   try {
-    const ctx = await getActiveProject();
+    const body = (await req.json().catch(() => null)) as { projectId?: string } | null;
+
+    let ctx: Awaited<ReturnType<typeof getActiveProject>>;
+
+    if (body?.projectId) {
+      const session = await auth();
+      if (!session?.user?.id) return NextResponse.json({ error: "Yetkisiz" }, { status: 401 });
+
+      const project = await db.project.findFirst({
+        where: { id: body.projectId, userId: session.user.id },
+        select: { id: true, name: true, domain: true },
+      });
+
+      if (!project) {
+        return NextResponse.json({ error: "Proje bulunamadi" }, { status: 404 });
+      }
+
+      ctx = {
+        auth: true,
+        noProject: false,
+        userId: session.user.id,
+        projectId: project.id,
+        project,
+      };
+    } else {
+      ctx = await getActiveProject();
+    }
+
     if (!ctx.auth) return NextResponse.json({ error: "Yetkisiz" }, { status: 401 });
     if (ctx.noProject) return NextResponse.json({ error: "Proje bulunamadı" }, { status: 400 });
 
@@ -144,8 +172,13 @@ export async function POST() {
       if (wordCount < 300) issues.push({ category: "İçerik", severity: "WARNING", message: `Ana sayfa içeriği az (${wordCount} kelime)` });
       if (fetchResponseTime > 3000) issues.push({ category: "Sayfa Hızı", severity: "WARNING", message: `Yavaş yanıt süresi (${(fetchResponseTime / 1000).toFixed(1)}s)` });
 
+      // Sayfayı bul ve issue'ları page ile ilişkilendir
+      const analyzedPage = await db.page.findFirst({
+        where: { projectId: ctx.projectId, url: "/" },
+        select: { id: true },
+      });
       for (const issue of issues) {
-        await db.technicalIssue.create({ data: { crawlId: crawlSession.id, ...issue } });
+        await db.technicalIssue.create({ data: { crawlId: crawlSession.id, pageId: analyzedPage?.id ?? null, ...issue } });
       }
 
       await db.page.upsert({

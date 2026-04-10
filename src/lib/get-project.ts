@@ -1,5 +1,6 @@
 import "server-only";
 import { auth } from "@/lib/auth";
+import { getActiveProjectIdFromCookies, pickActiveProject } from "@/lib/active-project";
 import { db } from "@/lib/db";
 
 export type ProjectContext = {
@@ -23,11 +24,14 @@ export async function getActiveProject(): Promise<
   if (!session?.user?.id) return { auth: false };
 
   const userId = session.user.id;
+  const activeProjectId = await getActiveProjectIdFromCookies();
 
-  const project = await db.project.findFirst({
+  const projects = await db.project.findMany({
     where: { userId },
     orderBy: { createdAt: "asc" },
   });
+
+  const project = pickActiveProject(projects, activeProjectId);
 
   if (!project) return { auth: true, noProject: true, userId };
 

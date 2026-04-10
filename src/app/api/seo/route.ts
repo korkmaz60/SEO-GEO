@@ -51,7 +51,11 @@ export async function GET() {
         _avg: { position: true, ctr: true },
       }),
       db.crawlSession.findFirst({ where: { projectId }, orderBy: { startedAt: "desc" } }),
-      db.technicalIssue.findMany({ where: { crawl: { projectId } }, orderBy: { severity: "asc" } }),
+      db.technicalIssue.findMany({
+        where: { crawl: { projectId } },
+        orderBy: { severity: "asc" },
+        include: { page: { select: { url: true, title: true } } },
+      }),
       db.seoScore.findMany({ where: { projectId }, orderBy: { measuredAt: "asc" }, take: 12 }),
       db.page.count({ where: { projectId, status: "ACTIVE" } }),
       db.page.count({ where: { projectId, status: "ACTIVE", indexed: true } }),
@@ -96,13 +100,19 @@ export async function GET() {
     const issuesByCategory = technicalIssues.reduce(
       (acc, issue) => {
         if (!acc[issue.category]) {
-          acc[issue.category] = { count: 0, severity: issue.severity, messages: [] };
+          acc[issue.category] = { count: 0, severity: issue.severity, messages: [], items: [] };
         }
         acc[issue.category].count++;
         acc[issue.category].messages.push(issue.message);
+        acc[issue.category].items.push({
+          message: issue.message,
+          details: issue.details,
+          pageUrl: issue.page?.url ?? null,
+          pageTitle: issue.page?.title ?? null,
+        });
         return acc;
       },
-      {} as Record<string, { count: number; severity: string; messages: string[] }>
+      {} as Record<string, { count: number; severity: string; messages: string[]; items: { message: string; details: string | null; pageUrl: string | null; pageTitle: string | null }[] }>
     );
 
     const issueSummary = {
@@ -194,6 +204,7 @@ export async function GET() {
         count: data.count,
         severity: data.severity.toLowerCase(),
         message: data.messages[0],
+        items: data.items,
       })),
       trend: seoTrend.map((s, i) => ({
         week: `Hft ${i + 1}`,

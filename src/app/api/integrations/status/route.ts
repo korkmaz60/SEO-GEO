@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getActiveProject } from "@/lib/get-project";
+import { parseGoogleMetadata } from "@/lib/google-integrations";
 
 export async function GET() {
   try {
@@ -12,15 +13,18 @@ export async function GET() {
       where: { projectId: ctx.projectId },
     });
 
-    const status: Record<string, { connected: boolean; propertyUrl?: string | null }> = {
+    const status: Record<string, { connected: boolean; propertyUrl?: string | null; selectionLabel?: string | null; availableCount?: number }> = {
       GOOGLE_SEARCH_CONSOLE: { connected: false },
       GOOGLE_ANALYTICS: { connected: false },
     };
 
     for (const i of integrations) {
+      const metadata = parseGoogleMetadata(i.metadata);
       status[i.provider] = {
         connected: i.connected && !!i.refreshToken,
         propertyUrl: i.propertyUrl,
+        selectionLabel: metadata?.selectedLabel ?? null,
+        availableCount: metadata?.availableCount,
       };
     }
 

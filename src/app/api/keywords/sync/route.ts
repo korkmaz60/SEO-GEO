@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getActiveProject } from "@/lib/get-project";
 import { getAuthenticatedClient } from "@/lib/google-auth";
+import {
+  listSearchConsoleSites,
+  pickSearchConsoleSite,
+  stringifyGoogleMetadata,
+} from "@/lib/google-integrations";
 import { google } from "googleapis";
 
 export async function POST() {
@@ -22,6 +27,29 @@ export async function POST() {
     if (gscIntegration?.refreshToken) {
       try {
         const client = getAuthenticatedClient(gscIntegration.accessToken, gscIntegration.refreshToken);
+        const sites = await listSearchConsoleSites(client);
+        const selectedSite =
+          pickSearchConsoleSite(sites, ctx.project.domain, gscIntegration.propertyUrl) ??
+          null;
+
+        if (!selectedSite) {
+          throw new Error("Search Console site secilmemis");
+        }
+
+        if (selectedSite.siteUrl !== gscIntegration.propertyUrl || !gscIntegration.metadata) {
+          await db.integration.update({
+            where: { id: gscIntegration.id },
+            data: {
+              propertyUrl: selectedSite.siteUrl,
+              metadata: stringifyGoogleMetadata({
+                selectedId: selectedSite.siteUrl,
+                selectedLabel: selectedSite.label,
+                availableCount: sites.length,
+              }),
+            },
+          });
+        }
+
         const searchconsole = google.searchconsole({ version: "v1", auth: client });
 
         const endDate = new Date();
@@ -30,7 +58,7 @@ export async function POST() {
         const fmt = (d: Date) => d.toISOString().split("T")[0];
 
         const res = await searchconsole.searchanalytics.query({
-          siteUrl: `sc-domain:${ctx.project.domain}`,
+          siteUrl: selectedSite.siteUrl,
           requestBody: {
             startDate: fmt(startDate),
             endDate: fmt(endDate),

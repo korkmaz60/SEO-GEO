@@ -1,7 +1,136 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { getGoogleOAuthClient, getAuthenticatedClient } from "@/lib/google-auth";
 import { google } from "googleapis";
+
+import { db } from "@/lib/db";
+import { getAuthenticatedClient, getGoogleOAuthClient } from "@/lib/google-auth";
+import {
+  listAnalyticsProperties,
+  listSearchConsoleSites,
+  pickAnalyticsProperty,
+  pickSearchConsoleSite,
+  stringifyGoogleMetadata,
+} from "@/lib/google-integrations";
+
+function formatDate(date: Date) {
+  return date.toISOString().split("T")[0];
+}
+
+async function syncInitialSearchConsoleData({
+  authClient,
+  projectId,
+  projectDomain,
+  siteUrl,
+  userId,
+}: {
+  authClient: ReturnType<typeof getAuthenticatedClient>;
+  projectId: string;
+  projectDomain: string;
+  siteUrl: string;
+  userId: string;
+}) {
+  const searchconsole = google.searchconsole({ version: "v1", auth: authClient });
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(endDate.getDate() - 28);
+
+  const [queriesRes, overviewRes, pagesRes] = await Promise.all([
+    searchconsole.searchanalytics.query({
+      siteUrl,
+      requestBody: {
+        startDate: formatDate(startDate),
+        endDate: formatDate(endDate),
+        dimensions: ["query"],
+        rowLimit: 50,
+      },
+    }),
+    searchconsole.searchanalytics.query({
+      siteUrl,
+      requestBody: {
+        startDate: formatDate(startDate),
+        endDate: formatDate(endDate),
+        dimensions: ["date"],
+        rowLimit: 28,
+      },
+    }),
+    searchconsole.searchanalytics.query({
+      siteUrl,
+      requestBody: {
+        startDate: formatDate(startDate),
+        endDate: formatDate(endDate),
+        dimensions: ["page"],
+        rowLimit: 20,
+      },
+    }),
+  ]);
+
+  const queryRows = queriesRes.data.rows ?? [];
+  for (const row of queryRows) {
+    const keyword = row.keys?.[0];
+    if (!keyword) continue;
+
+    await db.keyword.upsert({
+      where: { projectId_keyword: { projectId, keyword } },
+      update: {
+        position: Math.round(row.position ?? 0),
+        impressions: Math.round(row.impressions ?? 0),
+        clicks: Math.round(row.clicks ?? 0),
+        ctr: row.ctr ? Number((row.ctr * 100).toFixed(2)) : null,
+        source: "GOOGLE_SEARCH_CONSOLE",
+      },
+      create: {
+        projectId,
+        keyword,
+        position: Math.round(row.position ?? 0),
+        impressions: Math.round(row.impressions ?? 0),
+        clicks: Math.round(row.clicks ?? 0),
+        ctr: row.ctr ? Number((row.ctr * 100).toFixed(2)) : null,
+        source: "GOOGLE_SEARCH_CONSOLE",
+        trend: "STABLE",
+      },
+    });
+  }
+
+  for (const row of pagesRes.data.rows ?? []) {
+    const pageUrl = row.keys?.[0];
+    if (!pageUrl) continue;
+
+    try {
+      const url = new URL(pageUrl);
+      const host = url.hostname.replace(/^www\./, "");
+      const projectHost = projectDomain.replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "");
+      if (host !== projectHost && !host.endsWith(`.${projectHost}`)) continue;
+
+      const path = `${url.pathname}${url.search}` || "/";
+      await db.page.upsert({
+        where: { projectId_url: { projectId, url: path } },
+        update: { status: "ACTIVE", indexed: true, source: "SEARCH_CONSOLE" },
+        create: {
+          projectId,
+          url: path,
+          title: path,
+          status: "ACTIVE",
+          indexed: true,
+          source: "SEARCH_CONSOLE",
+        },
+      });
+    } catch {
+      continue;
+    }
+  }
+
+  const overviewRows = overviewRes.data.rows ?? [];
+  const totalClicks = overviewRows.reduce((sum, row) => sum + (row.clicks ?? 0), 0);
+  const totalImpressions = overviewRows.reduce((sum, row) => sum + (row.impressions ?? 0), 0);
+
+  await db.alert.create({
+    data: {
+      projectId,
+      userId,
+      type: "SUCCESS",
+      message: `Google Search Console baglandi - ${queryRows.length} anahtar kelime, ${totalClicks} tiklama, ${totalImpressions} gosterim aktarıldı`,
+    },
+  });
+}
 
 export async function GET(req: Request) {
   try {
@@ -13,143 +142,152 @@ export async function GET(req: Request) {
       return NextResponse.redirect(new URL("/settings?error=missing_params", req.url));
     }
 
-    // State = userId:projectId (multi-user güvenlik)
     const [userId, projectId] = state.split(":");
     if (!userId || !projectId) {
       return NextResponse.redirect(new URL("/settings?error=invalid_state", req.url));
     }
 
-    // Proje bu kullanıcıya ait mi?
     const project = await db.project.findFirst({
       where: { id: projectId, userId },
     });
+
     if (!project) {
       return NextResponse.redirect(new URL("/settings?error=unauthorized", req.url));
     }
 
-    // Token al
+    const existingIntegrations = await db.integration.findMany({
+      where: {
+        projectId,
+        provider: {
+          in: ["GOOGLE_SEARCH_CONSOLE", "GOOGLE_ANALYTICS"],
+        },
+      },
+    });
+
+    const integrationMap = new Map(
+      existingIntegrations.map((integration) => [integration.provider, integration]),
+    );
+
     const oauthClient = getGoogleOAuthClient();
     const { tokens } = await oauthClient.getToken(code);
-
-    // Entegrasyonları kaydet
-    for (const provider of ["GOOGLE_SEARCH_CONSOLE", "GOOGLE_ANALYTICS"] as const) {
-      await db.integration.upsert({
-        where: { projectId_provider: { projectId, provider } },
-        update: {
-          accessToken: tokens.access_token ?? null,
-          refreshToken: tokens.refresh_token ?? null,
-          expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
-          connected: true,
-        },
-        create: {
-          projectId,
-          provider,
-          accessToken: tokens.access_token ?? null,
-          refreshToken: tokens.refresh_token ?? null,
-          expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
-          connected: true,
-        },
-      });
-    }
-
-    // ========== OTOMATİK VERİ ÇEKME ==========
     const authClient = getAuthenticatedClient(tokens.access_token ?? null, tokens.refresh_token ?? null);
 
-    // 1. Search Console verileri
-    try {
-      const searchconsole = google.searchconsole({ version: "v1", auth: authClient });
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(endDate.getDate() - 28);
-      const fmt = (d: Date) => d.toISOString().split("T")[0];
+    const [sitesResult, propertiesResult] = await Promise.allSettled([
+      listSearchConsoleSites(authClient),
+      listAnalyticsProperties(authClient),
+    ]);
 
-      // Top sorgular -> keyword olarak kaydet
-      const queriesRes = await searchconsole.searchanalytics.query({
-        siteUrl: `sc-domain:${project.domain}`,
-        requestBody: {
-          startDate: fmt(startDate),
-          endDate: fmt(endDate),
-          dimensions: ["query"],
-          rowLimit: 50,
-        },
-      });
+    const sites = sitesResult.status === "fulfilled" ? sitesResult.value : [];
+    const properties = propertiesResult.status === "fulfilled" ? propertiesResult.value : [];
 
-      const rows = queriesRes.data.rows || [];
-      for (const row of rows) {
-        const keyword = row.keys?.[0];
-        if (!keyword) continue;
+    const selectedSite = pickSearchConsoleSite(
+      sites,
+      project.domain,
+      integrationMap.get("GOOGLE_SEARCH_CONSOLE")?.propertyUrl,
+    );
+    const selectedProperty = pickAnalyticsProperty(
+      properties,
+      integrationMap.get("GOOGLE_ANALYTICS")?.propertyUrl,
+    );
 
-        await db.keyword.upsert({
-          where: { projectId_keyword: { projectId, keyword } },
-          update: {
-            position: Math.round(row.position ?? 0),
-            volume: Math.round(row.impressions ?? 0),
-            trend: "STABLE",
-          },
-          create: {
+    await db.integration.upsert({
+      where: { projectId_provider: { projectId, provider: "GOOGLE_SEARCH_CONSOLE" } },
+      update: {
+        accessToken: tokens.access_token ?? null,
+        refreshToken: tokens.refresh_token ?? integrationMap.get("GOOGLE_SEARCH_CONSOLE")?.refreshToken ?? null,
+        expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+        propertyUrl: selectedSite?.siteUrl ?? null,
+        metadata: stringifyGoogleMetadata({
+          selectedLabel: selectedSite?.label ?? null,
+          selectedId: selectedSite?.siteUrl ?? null,
+          availableCount: sites.length,
+        }),
+        connected: true,
+      },
+      create: {
+        projectId,
+        provider: "GOOGLE_SEARCH_CONSOLE",
+        accessToken: tokens.access_token ?? null,
+        refreshToken: tokens.refresh_token ?? null,
+        expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+        propertyUrl: selectedSite?.siteUrl ?? null,
+        metadata: stringifyGoogleMetadata({
+          selectedLabel: selectedSite?.label ?? null,
+          selectedId: selectedSite?.siteUrl ?? null,
+          availableCount: sites.length,
+        }),
+        connected: true,
+      },
+    });
+
+    await db.integration.upsert({
+      where: { projectId_provider: { projectId, provider: "GOOGLE_ANALYTICS" } },
+      update: {
+        accessToken: tokens.access_token ?? null,
+        refreshToken: tokens.refresh_token ?? integrationMap.get("GOOGLE_ANALYTICS")?.refreshToken ?? null,
+        expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+        propertyUrl: selectedProperty?.id ?? null,
+        metadata: stringifyGoogleMetadata({
+          selectedLabel: selectedProperty?.label ?? null,
+          selectedId: selectedProperty?.id ?? null,
+          availableCount: properties.length,
+        }),
+        connected: true,
+      },
+      create: {
+        projectId,
+        provider: "GOOGLE_ANALYTICS",
+        accessToken: tokens.access_token ?? null,
+        refreshToken: tokens.refresh_token ?? null,
+        expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+        propertyUrl: selectedProperty?.id ?? null,
+        metadata: stringifyGoogleMetadata({
+          selectedLabel: selectedProperty?.label ?? null,
+          selectedId: selectedProperty?.id ?? null,
+          availableCount: properties.length,
+        }),
+        connected: true,
+      },
+    });
+
+    if (selectedSite) {
+      try {
+        await syncInitialSearchConsoleData({
+          authClient,
+          projectId,
+          projectDomain: project.domain,
+          siteUrl: selectedSite.siteUrl,
+          userId,
+        });
+      } catch (error) {
+        console.error("Initial Search Console sync error:", error);
+        await db.alert.create({
+          data: {
             projectId,
-            keyword,
-            position: Math.round(row.position ?? 0),
-            volume: Math.round(row.impressions ?? 0),
-            trend: "STABLE",
+            userId,
+            type: "WARNING",
+            message: "Google Search Console baglandi ama ilk veri senkronu tamamlanamadi",
           },
         });
       }
-
-      // Genel performans (günlük)
-      const overviewRes = await searchconsole.searchanalytics.query({
-        siteUrl: `sc-domain:${project.domain}`,
-        requestBody: {
-          startDate: fmt(startDate),
-          endDate: fmt(endDate),
-          dimensions: ["date"],
-          rowLimit: 28,
-        },
-      });
-
-      const dailyRows = overviewRes.data.rows || [];
-      const totalClicks = dailyRows.reduce((sum, r) => sum + (r.clicks ?? 0), 0);
-      const totalImpressions = dailyRows.reduce((sum, r) => sum + (r.impressions ?? 0), 0);
-
-      // Bildirim oluştur
+    } else {
       await db.alert.create({
         data: {
           projectId,
           userId,
-          type: "SUCCESS",
-          message: `Google Search Console bağlandı — ${rows.length} anahtar kelime, ${totalClicks} tıklama, ${totalImpressions} gösterim aktarıldı`,
+          type: "WARNING",
+          message: "Google Search Console baglandi fakat uygun bir site secilemedi. Settings ekranindan secim yapin.",
         },
       });
+    }
 
-      // Top sayfalar -> page olarak kaydet
-      const pagesRes = await searchconsole.searchanalytics.query({
-        siteUrl: `sc-domain:${project.domain}`,
-        requestBody: {
-          startDate: fmt(startDate),
-          endDate: fmt(endDate),
-          dimensions: ["page"],
-          rowLimit: 20,
-        },
-      });
-
-      for (const row of pagesRes.data.rows || []) {
-        const pageUrl = row.keys?.[0];
-        if (!pageUrl) continue;
-        try {
-          const path = new URL(pageUrl).pathname;
-          await db.page.upsert({
-            where: { projectId_url: { projectId, url: path } },
-            update: { status: "ACTIVE", indexed: true, source: "SEARCH_CONSOLE" },
-            create: { projectId, url: path, title: path, status: "ACTIVE", indexed: true, source: "SEARCH_CONSOLE" },
-          });
-        } catch { /* invalid URL */ }
-      }
-    } catch (e) {
-      console.error("Search Console auto-fetch error:", e);
+    if (!selectedProperty && properties.length > 1) {
       await db.alert.create({
         data: {
-          projectId, userId, type: "WARNING",
-          message: "Google Search Console bağlandı ama veri çekilemedi — domain doğrulandığından emin olun",
+          projectId,
+          userId,
+          type: "INFO",
+          message: "Google Analytics baglandi. Birden fazla property bulundu, Settings ekranindan dogru property'yi secin.",
         },
       });
     }

@@ -29,6 +29,7 @@ export default function OnboardingPage() {
     // 1. Proje oluştur
     setAnalyzeStatus("Proje oluşturuluyor...");
     setAnalyzeProgress(10);
+    let createdProjectId: string | null = null;
 
     try {
       const res = await fetch("/api/projects", {
@@ -38,6 +39,7 @@ export default function OnboardingPage() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error); setLoading(false); return; }
+      createdProjectId = data.activeProjectId ?? null;
     } catch {
       setError("Proje oluşturulamadı");
       setLoading(false);
@@ -55,7 +57,11 @@ export default function OnboardingPage() {
       setAnalyzeStatus("Teknik SEO analizi yapılıyor...");
       setAnalyzeProgress(50);
 
-      const analyzeRes = await fetch("/api/analyze", { method: "POST" });
+      const analyzeRes = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId: createdProjectId ?? undefined }),
+      });
       const analyzeData = await analyzeRes.json();
 
       setAnalyzeProgress(80);

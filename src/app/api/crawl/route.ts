@@ -238,11 +238,16 @@ export async function POST(req: Request) {
       },
     });
 
-    // Sorunları DB'ye kaydet
+    // Sorunları DB'ye kaydet — sayfa ile ilişkilendir
+    const crawledPage = await db.page.findFirst({
+      where: { projectId: ctx.projectId, url: new URL(targetUrl).pathname || "/" },
+      select: { id: true },
+    });
     for (const issue of issues) {
       await db.technicalIssue.create({
         data: {
           crawlId: session.id,
+          pageId: crawledPage?.id ?? null,
           category: issue.category,
           severity: issue.severity,
           message: issue.message,
