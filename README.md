@@ -7,6 +7,7 @@
   <img src="https://img.shields.io/badge/Tailwind-4-38BDF8?logo=tailwindcss" alt="Tailwind" />
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License" />
 </p>
+<img width="1915" height="915" alt="image" src="https://github.com/user-attachments/assets/40a0e3a5-6edd-495d-857d-e3e4e53ca2c1" />
 
 # SEO-GEO
 
