@@ -1,0 +1,348 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "0.0714 sec.",
+  "cost": 0,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "09241012-1535-0066-0000-5d1b0c1f2a3e",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "time": "0.0402 sec.",
+      "cost": 0,
+      "result_count": 1,
+      "path": [
+        "v3",
+        "serp",
+        "google",
+        "organic",
+        "task_get",
+        "advanced",
+        "09241012-1535-0066-0000-5d1b0c1f2a3e"
+      ],
+      "data": {
+        "api": "serp",
+        "function": "task_get",
+        "se": "google",
+        "se_type": "organic",
+        "keyword": "kahve makinesi",
+        "location_code": 2792,
+        "language_code": "tr",
+        "device": "desktop",
+        "os": "windows",
+        "depth": 30,
+        "load_async_ai_overview": true,
+        "tag": "01926f3e-7a3b-7c11-9d2e-3f4a5b6c7d8e"
+      },
+      "result": [
+        {
+          "keyword": "kahve makinesi",
+          "type": "organic",
+          "se_domain": "google.com.tr",
+          "location_code": 2792,
+          "language_code": "tr",
+          "check_url": "https://www.google.com.tr/search?q=kahve%20makinesi&hl=tr&gl=TR&uule=w+CAIQIFISCQ",
+          "datetime": "2026-09-24 06:12:31 +00:00",
+          "spell": null,
+          "refinement_chips": null,
+          "item_types": [
+            "ai_overview",
+            "paid",
+            "featured_snippet",
+            "organic",
+            "people_also_ask",
+            "local_pack",
+            "video",
+            "related_searches"
+          ],
+          "se_results_count": 48200000,
+          "pages_count": 3,
+          "items_count": 12,
+          "items": [
+            {
+              "type": "ai_overview",
+              "rank_group": 1,
+              "rank_absolute": 1,
+              "page": 1,
+              "position": "left",
+              "xpath": "/html[1]/body[1]/div[3]/div[1]/div[13]/div[1]/div[2]",
+              "asynchronous_ai_overview": true,
+              "markdown": "Kahve makinesi seçerken **demleme yöntemi**, kapasite ve bakım kolaylığı öne çıkar.",
+              "items": [
+                {
+                  "type": "ai_overview_element",
+                  "position": "left",
+                  "title": "Kahve makinesi türleri",
+                  "text": "Filtre, espresso ve kapsüllü makineler en yaygın türlerdir.",
+                  "markdown": "Filtre, espresso ve kapsüllü makineler en yaygın türlerdir.",
+                  "images": null,
+                  "references": [
+                    {
+                      "type": "ai_overview_reference",
+                      "source": "Example Kahve",
+                      "domain": "www.example.com",
+                      "url": "https://www.example.com/rehber/kahve-makinesi-secimi",
+                      "title": "Kahve makinesi nasıl seçilir?",
+                      "text": "Demleme yöntemine göre kahve makinesi seçimi."
+                    }
+                  ]
+                }
+              ],
+              "references": [
+                {
+                  "type": "ai_overview_reference",
+                  "source": "Vikipedi",
+                  "domain": "tr.wikipedia.org",
+                  "url": "https://tr.wikipedia.org/wiki/Kahve_makinesi",
+                  "title": "Kahve makinesi - Vikipedi",
+                  "text": null
+                },
+                {
+                  "type": "ai_overview_reference",
+                  "source": "Example Kahve",
+                  "domain": "www.example.com",
+                  "url": "https://www.example.com/rehber/kahve-makinesi-secimi",
+                  "title": "Kahve makinesi nasıl seçilir?",
+                  "text": null
+                },
+                {
+                  "type": "ai_overview_reference",
+                  "source": "Example Market",
+                  "domain": "www.example.org",
+                  "url": "https://www.example.org/kahve-makinesi",
+                  "title": "Kahve Makinesi Modelleri ve Fiyatları",
+                  "text": null
+                }
+              ],
+              "rectangle": null
+            },
+            {
+              "type": "paid",
+              "rank_group": 1,
+              "rank_absolute": 2,
+              "page": 1,
+              "position": "left",
+              "xpath": "/html[1]/body[1]/div[3]/div[1]/div[10]/div[1]/div[1]",
+              "title": "Kahve Makinesi Kampanyası",
+              "domain": "shop.example.net",
+              "description": "Tüm kahve makinelerinde ücretsiz kargo.",
+              "breadcrumb": "https://shop.example.net › kahve",
+              "url": "https://shop.example.net/kahve-makinesi",
+              "highlighted": ["kahve makinesi"],
+              "extra": null,
+              "description_rows": null,
+              "links": null,
+              "price": null,
+              "rectangle": null
+            },
+            {
+              "type": "featured_snippet",
+              "rank_group": 1,
+              "rank_absolute": 3,
+              "page": 1,
+              "position": "left",
+              "xpath": "/html[1]/body[1]/div[3]/div[1]/div[13]/div[1]/div[3]",
+              "domain": "www.example.org",
+              "title": "Kahve Makinesi Modelleri ve Fiyatları",
+              "featured_title": "En iyi kahve makinesi hangisi?",
+              "description": "Evde kullanım için filtre kahve makineleri pratiktir.",
+              "timestamp": null,
+              "url": "https://www.example.org/kahve-makinesi",
+              "images": null,
+              "table": null,
+              "rectangle": null
+            },
+            {
+              "type": "organic",
+              "rank_group": 1,
+              "rank_absolute": 4,
+              "page": 1,
+              "position": "left",
+              "xpath": "/html[1]/body[1]/div[3]/div[1]/div[13]/div[1]/div[4]",
+              "domain": "www.example.org",
+              "title": "Kahve Makinesi Modelleri ve Fiyatları",
+              "url": "https://www.example.org/kahve-makinesi",
+              "cache_url": null,
+              "related_search_url": null,
+              "breadcrumb": "https://www.example.org › kahve-makinesi",
+              "website_name": "Example Market",
+              "is_image": false,
+              "is_video": false,
+              "is_featured_snippet": true,
+              "is_malicious": false,
+              "is_web_story": false,
+              "description": "Filtre, espresso ve Türk kahvesi makinelerini karşılaştırın.",
+              "pre_snippet": null,
+              "extended_snippet": null,
+              "images": null,
+              "amp_version": false,
+              "rating": null,
+              "price": null,
+              "highlighted": ["Kahve Makinesi"],
+              "links": null,
+              "faq": null,
+              "extended_people_also_search": null,
+              "about_this_result": null,
+              "related_result": null,
+              "timestamp": null,
+              "rectangle": null
+            },
+            {
+              "type": "people_also_ask",
+              "rank_group": 1,
+              "rank_absolute": 5,
+              "page": 1,
+              "position": "left",
+              "xpath": "/html[1]/body[1]/div[3]/div[1]/div[13]/div[1]/div[5]",
+              "items": [
+                {
+                  "type": "people_also_ask_element",
+                  "title": "Hangi kahve makinesi daha iyi?",
+                  "seed_question": null,
+                  "xpath": "/html[1]/body[1]/div[3]/div[1]/div[13]/div[1]/div[5]/div[1]",
+                  "expanded_element": [
+                    {
+                      "type": "people_also_ask_expanded_element",
+                      "featured_title": null,
+                      "url": "https://blog.example.com/en-iyi-kahve-makinesi",
+                      "domain": "blog.example.com",
+                      "title": "En iyi kahve makinesi 2026",
+                      "description": "Kullanım amacına göre en iyi kahve makineleri.",
+                      "timestamp": null,
+                      "images": null,
+                      "table": null
+                    }
+                  ]
+                }
+              ],
+              "rectangle": null
+            },
+            {
+              "type": "organic",
+              "rank_group": 2,
+              "rank_absolute": 6,
+              "page": 1,
+              "position": "left",
+              "xpath": "/html[1]/body[1]/div[3]/div[1]/div[13]/div[1]/div[6]",
+              "domain": "tr.wikipedia.org",
+              "title": "Kahve makinesi - Vikipedi",
+              "url": "https://tr.wikipedia.org/wiki/Kahve_makinesi",
+              "breadcrumb": "https://tr.wikipedia.org › wiki › Kahve_makinesi",
+              "website_name": "Vikipedi",
+              "is_featured_snippet": false,
+              "description": "Kahve makinesi, kahve demlemek için kullanılan bir cihazdır.",
+              "links": null,
+              "rectangle": null
+            },
+            {
+              "type": "organic",
+              "rank_group": 3,
+              "rank_absolute": 7,
+              "page": 1,
+              "position": "left",
+              "xpath": "/html[1]/body[1]/div[3]/div[1]/div[13]/div[1]/div[7]",
+              "domain": "www.example.com",
+              "title": "Kahve Makineleri | Example Kahve",
+              "url": "https://www.example.com/kahve-makineleri",
+              "breadcrumb": "https://www.example.com › kahve-makineleri",
+              "website_name": "Example Kahve",
+              "is_featured_snippet": false,
+              "description": "Filtre kahve ve espresso makinelerinde yeni sezon.",
+              "links": [
+                {
+                  "type": "link_element",
+                  "title": "Filtre Kahve Makinesi",
+                  "description": null,
+                  "url": "https://www.example.com/filtre-kahve-makinesi"
+                }
+              ],
+              "rectangle": null
+            },
+            {
+              "type": "local_pack",
+              "rank_group": 1,
+              "rank_absolute": 8,
+              "page": 1,
+              "position": "left",
+              "xpath": "/html[1]/body[1]/div[3]/div[1]/div[13]/div[1]/div[8]",
+              "title": "Example Mağaza Kadıköy",
+              "description": "Elektronik mağazası",
+              "domain": "www.example.net",
+              "phone": null,
+              "url": "https://www.example.net/magazalar/kadikoy",
+              "is_paid": false,
+              "rating": null,
+              "cid": "1234567890123456789",
+              "rectangle": null
+            },
+            {
+              "type": "video",
+              "rank_group": 1,
+              "rank_absolute": 9,
+              "page": 1,
+              "position": "left",
+              "xpath": "/html[1]/body[1]/div[3]/div[1]/div[13]/div[1]/div[9]",
+              "items": [
+                {
+                  "type": "video_element",
+                  "source": "YouTube",
+                  "title": "Kahve makinesi nasıl temizlenir?",
+                  "timestamp": null,
+                  "url": "https://www.youtube.com/watch?v=abc123"
+                }
+              ],
+              "rectangle": null
+            },
+            {
+              "type": "organic",
+              "rank_group": 4,
+              "rank_absolute": 10,
+              "page": 1,
+              "position": "left",
+              "xpath": "/html[1]/body[1]/div[3]/div[1]/div[13]/div[1]/div[10]",
+              "domain": "blog.example.com",
+              "title": "En iyi kahve makinesi 2026",
+              "url": "https://blog.example.com/en-iyi-kahve-makinesi",
+              "breadcrumb": "https://blog.example.com › en-iyi-kahve-makinesi",
+              "website_name": "Example Kahve Blog",
+              "is_featured_snippet": false,
+              "description": "Kullanım amacına göre en iyi kahve makineleri.",
+              "links": null,
+              "rectangle": null
+            },
+            {
+              "type": "organic",
+              "rank_group": 5,
+              "rank_absolute": 11,
+              "page": 2,
+              "position": "left",
+              "xpath": "/html[1]/body[1]/div[3]/div[1]/div[13]/div[1]/div[11]",
+              "domain": "www.example.net",
+              "title": "Kahve Makinesi Fiyatları",
+              "url": "https://www.example.net/kahve-makinesi",
+              "breadcrumb": "https://www.example.net › kahve-makinesi",
+              "website_name": "Example Mağaza",
+              "is_featured_snippet": false,
+              "description": "Kahve makinesi fiyatları ve taksit seçenekleri.",
+              "links": null,
+              "rectangle": null
+            },
+            {
+              "type": "related_searches",
+              "rank_group": 1,
+              "rank_absolute": 12,
+              "page": 2,
+              "position": "left",
+              "xpath": "/html[1]/body[1]/div[3]/div[1]/div[13]/div[1]/div[12]",
+              "items": ["filtre kahve makinesi", "espresso makinesi", "türk kahvesi makinesi"],
+              "rectangle": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

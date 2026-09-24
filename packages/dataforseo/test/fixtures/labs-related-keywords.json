@@ -1,0 +1,108 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "0.8123 sec.",
+  "cost": 0.01224,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "09241101-1535-0369-0000-1a2b3c4d5e6f",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "time": "0.7810 sec.",
+      "cost": 0.01224,
+      "result_count": 1,
+      "path": ["v3", "dataforseo_labs", "google", "related_keywords", "live"],
+      "data": {
+        "api": "dataforseo_labs",
+        "function": "related_keywords",
+        "se_type": "google",
+        "keyword": "kahve makinesi",
+        "location_code": 2792,
+        "language_code": "tr",
+        "depth": 1,
+        "limit": 2
+      },
+      "result": [
+        {
+          "se_type": "google",
+          "seed_keyword": "kahve makinesi",
+          "seed_keyword_data": null,
+          "location_code": 2792,
+          "language_code": "tr",
+          "total_count": 8,
+          "items_count": 2,
+          "items": [
+            {
+              "se_type": "google",
+              "keyword_data": {
+                "se_type": "google",
+                "keyword": "espresso makinesi",
+                "location_code": 2792,
+                "language_code": "tr",
+                "keyword_info": {
+                  "se_type": "google",
+                  "last_updated_time": "2026-09-20 03:41:12 +00:00",
+                  "competition": 1,
+                  "competition_level": "HIGH",
+                  "cpc": 0.35,
+                  "search_volume": 60500,
+                  "monthly_searches": [],
+                  "search_volume_trend": { "monthly": 0, "quarterly": 22, "yearly": 49 }
+                },
+                "keyword_properties": {
+                  "se_type": "google",
+                  "core_keyword": null,
+                  "keyword_difficulty": 47,
+                  "words_count": 2
+                },
+                "serp_info": null,
+                "avg_backlinks_info": null,
+                "search_intent_info": {
+                  "se_type": "google",
+                  "main_intent": "commercial",
+                  "foreign_intent": null,
+                  "last_updated_time": "2026-09-01 10:00:00 +00:00"
+                }
+              },
+              "depth": 1,
+              "related_keywords": ["espresso makinesi fiyat", "ev tipi espresso makinesi"]
+            },
+            {
+              "se_type": "google",
+              "keyword_data": {
+                "se_type": "google",
+                "keyword": "türk kahvesi makinesi",
+                "location_code": 2792,
+                "language_code": "tr",
+                "keyword_info": {
+                  "se_type": "google",
+                  "last_updated_time": "2026-09-20 03:41:12 +00:00",
+                  "competition": 1,
+                  "competition_level": "HIGH",
+                  "cpc": 0.21,
+                  "search_volume": 74000,
+                  "monthly_searches": null,
+                  "search_volume_trend": null
+                },
+                "keyword_properties": {
+                  "se_type": "google",
+                  "core_keyword": null,
+                  "keyword_difficulty": 41,
+                  "words_count": 3
+                },
+                "serp_info": null,
+                "avg_backlinks_info": null,
+                "search_intent_info": null
+              },
+              "depth": 1,
+              "related_keywords": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

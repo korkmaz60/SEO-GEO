@@ -1,0 +1,56 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "0.0921 sec.",
+  "cost": 0.0021,
+  "tasks_count": 2,
+  "tasks_error": 1,
+  "tasks": [
+    {
+      "id": "09241012-1535-0066-0000-5d1b0c1f2a3e",
+      "status_code": 20100,
+      "status_message": "Task Created.",
+      "time": "0.0063 sec.",
+      "cost": 0.0021,
+      "result_count": 0,
+      "path": ["v3", "serp", "google", "organic", "task_post"],
+      "data": {
+        "api": "serp",
+        "function": "task_post",
+        "se": "google",
+        "se_type": "organic",
+        "keyword": "kahve makinesi",
+        "location_code": 2792,
+        "language_code": "tr",
+        "device": "desktop",
+        "os": "windows",
+        "depth": 30,
+        "load_async_ai_overview": true,
+        "tag": "01926f3e-7a3b-7c11-9d2e-3f4a5b6c7d8e"
+      },
+      "result": null
+    },
+    {
+      "id": "09241012-1535-0066-0000-7e9a0b2c3d4f",
+      "status_code": 40501,
+      "status_message": "Invalid Field: 'location_code'.",
+      "time": "0 sec.",
+      "cost": 0,
+      "result_count": 0,
+      "path": ["v3", "serp", "google", "organic", "task_post"],
+      "data": {
+        "api": "serp",
+        "function": "task_post",
+        "se": "google",
+        "se_type": "organic",
+        "keyword": "espresso makinesi",
+        "location_code": 1,
+        "language_code": "tr",
+        "depth": 30,
+        "tag": "01926f3e-7a3b-7c11-9d2e-3f4a5b6c7d8f"
+      },
+      "result": null
+    }
+  ]
+}

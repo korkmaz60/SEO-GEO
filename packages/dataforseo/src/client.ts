@@ -47,6 +47,7 @@ export type TaskOutcome<TResult> =
       statusCode: number;
       cost: number;
       error: DataForSeoError;
+      data: Record<string, unknown>;
     };
 
 export interface DataForSeoResponse<TResult> {
@@ -246,6 +247,7 @@ function toOutcome<TResult>(task: TaskEnvelope, path: string): TaskOutcome<TResu
     id: task.id,
     statusCode: task.status_code,
     cost,
+    data: task.data ?? {},
     error: new DataForSeoError({
       kind: "task",
       message: task.status_message,

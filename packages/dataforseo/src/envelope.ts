@@ -6,6 +6,12 @@ export const STATUS_OK = 20000;
 export const STATUS_TASK_CREATED = 20100;
 /** DataForSEO codes from this value upward are server-side errors and worth retrying. */
 export const FIRST_SERVER_ERROR_CODE = 50000;
+/** The search engine answered, but with no results for the query (billed like a result). */
+export const STATUS_NO_SEARCH_RESULTS = 40102;
+/** `task_get`: the task was handed to a crawler and has no result yet. */
+export const STATUS_TASK_HANDED = 40601;
+/** `task_get`: the task is still waiting in the queue. */
+export const STATUS_TASK_IN_QUEUE = 40602;
 
 export const TaskEnvelopeSchema = z.looseObject({
   id: z.string(),

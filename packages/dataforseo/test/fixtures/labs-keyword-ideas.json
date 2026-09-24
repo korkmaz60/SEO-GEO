@@ -1,0 +1,103 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "2.0144 sec.",
+  "cost": 0.01224,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "09241103-1535-0371-0000-3a4b5c6d7e8f",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "time": "1.9820 sec.",
+      "cost": 0.01224,
+      "result_count": 1,
+      "path": ["v3", "dataforseo_labs", "google", "keyword_ideas", "live"],
+      "data": {
+        "api": "dataforseo_labs",
+        "function": "keyword_ideas",
+        "se_type": "google",
+        "keywords": ["kahve makinesi"],
+        "location_code": 2792,
+        "language_code": "tr",
+        "limit": 2
+      },
+      "result": [
+        {
+          "se_type": "google",
+          "seed_keywords": ["kahve makinesi"],
+          "location_code": 2792,
+          "language_code": "tr",
+          "total_count": 5231,
+          "items_count": 2,
+          "offset": 0,
+          "offset_token": "eyJDdXJyZW50T2Zmc2V0IjoyfQ==",
+          "items": [
+            {
+              "se_type": "google",
+              "keyword": "kahve değirmeni",
+              "location_code": 2792,
+              "language_code": "tr",
+              "keyword_info": {
+                "se_type": "google",
+                "last_updated_time": "2026-09-20 03:41:12 +00:00",
+                "competition": 1,
+                "competition_level": "HIGH",
+                "cpc": 0.24,
+                "search_volume": 33100,
+                "monthly_searches": null,
+                "search_volume_trend": null
+              },
+              "keyword_properties": {
+                "se_type": "google",
+                "core_keyword": null,
+                "keyword_difficulty": 29,
+                "words_count": 2
+              },
+              "serp_info": null,
+              "avg_backlinks_info": null,
+              "search_intent_info": {
+                "se_type": "google",
+                "main_intent": "commercial",
+                "foreign_intent": null,
+                "last_updated_time": "2026-09-01 10:00:00 +00:00"
+              }
+            },
+            {
+              "se_type": "google",
+              "keyword": "french press",
+              "location_code": 2792,
+              "language_code": "tr",
+              "keyword_info": {
+                "se_type": "google",
+                "last_updated_time": "2026-09-20 03:41:12 +00:00",
+                "competition": 1,
+                "competition_level": "HIGH",
+                "cpc": 0.19,
+                "search_volume": 40500,
+                "monthly_searches": null,
+                "search_volume_trend": null
+              },
+              "keyword_properties": {
+                "se_type": "google",
+                "core_keyword": null,
+                "keyword_difficulty": 33,
+                "words_count": 2
+              },
+              "serp_info": null,
+              "avg_backlinks_info": null,
+              "search_intent_info": {
+                "se_type": "google",
+                "main_intent": "transactional",
+                "foreign_intent": ["commercial"],
+                "last_updated_time": "2026-09-01 10:00:00 +00:00"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

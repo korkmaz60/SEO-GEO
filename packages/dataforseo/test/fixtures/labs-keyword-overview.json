@@ -1,0 +1,131 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "0.3312 sec.",
+  "cost": 0.01224,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "09241102-1535-0370-0000-2a3b4c5d6e7f",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "time": "0.3001 sec.",
+      "cost": 0.01224,
+      "result_count": 1,
+      "path": ["v3", "dataforseo_labs", "google", "keyword_overview", "live"],
+      "data": {
+        "api": "dataforseo_labs",
+        "function": "keyword_overview",
+        "se_type": "google",
+        "keywords": ["kahve makinesi", "espresso makinesi", "olmayan bir anahtar kelime"],
+        "location_code": 2792,
+        "language_code": "tr",
+        "include_serp_info": true
+      },
+      "result": [
+        {
+          "se_type": "google",
+          "location_code": 2792,
+          "language_code": "tr",
+          "items_count": 2,
+          "items": [
+            {
+              "se_type": "google",
+              "keyword": "kahve makinesi",
+              "location_code": 2792,
+              "language_code": "tr",
+              "search_partners": false,
+              "keyword_info": {
+                "se_type": "google",
+                "last_updated_time": "2026-09-20 03:41:12 +00:00",
+                "competition": 1,
+                "competition_level": "HIGH",
+                "cpc": 0.38,
+                "search_volume": 110000,
+                "monthly_searches": [
+                  { "year": 2026, "month": 8, "search_volume": 90500 },
+                  { "year": 2026, "month": 7, "search_volume": 110000 }
+                ],
+                "search_volume_trend": { "monthly": -18, "quarterly": -18, "yearly": 22 }
+              },
+              "clickstream_keyword_info": null,
+              "keyword_properties": {
+                "se_type": "google",
+                "core_keyword": null,
+                "synonym_clustering_algorithm": "text_processing",
+                "keyword_difficulty": 54,
+                "detected_language": "tr",
+                "is_another_language": false,
+                "words_count": 2
+              },
+              "serp_info": {
+                "se_type": "google",
+                "check_url": "https://www.google.com.tr/search?q=kahve%20makinesi&hl=tr&gl=TR",
+                "serp_item_types": [
+                  "ai_overview",
+                  "paid",
+                  "organic",
+                  "people_also_ask",
+                  "local_pack"
+                ],
+                "se_results_count": 48200000,
+                "last_updated_time": "2026-09-18 11:20:04 +00:00",
+                "previous_updated_time": "2026-08-18 09:02:51 +00:00"
+              },
+              "avg_backlinks_info": {
+                "se_type": "google",
+                "backlinks": 1520.4,
+                "dofollow": 1103.7,
+                "referring_pages": 1204.1,
+                "referring_domains": 188.2,
+                "referring_main_domains": 170.9,
+                "rank": 212.5,
+                "main_domain_rank": 598.3,
+                "last_updated_time": "2026-09-18 11:20:04 +00:00"
+              },
+              "search_intent_info": {
+                "se_type": "google",
+                "main_intent": "commercial",
+                "foreign_intent": ["transactional"],
+                "last_updated_time": "2026-09-01 10:00:00 +00:00"
+              }
+            },
+            {
+              "se_type": "google",
+              "keyword": "espresso makinesi",
+              "location_code": 2792,
+              "language_code": "tr",
+              "search_partners": false,
+              "keyword_info": {
+                "se_type": "google",
+                "last_updated_time": "2026-09-20 03:41:12 +00:00",
+                "competition": 1,
+                "competition_level": "HIGH",
+                "cpc": 0.35,
+                "search_volume": 60500,
+                "monthly_searches": null,
+                "search_volume_trend": null
+              },
+              "keyword_properties": {
+                "se_type": "google",
+                "core_keyword": null,
+                "keyword_difficulty": 47,
+                "words_count": 2
+              },
+              "serp_info": null,
+              "avg_backlinks_info": null,
+              "search_intent_info": {
+                "se_type": "google",
+                "main_intent": "commercial",
+                "foreign_intent": null,
+                "last_updated_time": "2026-09-01 10:00:00 +00:00"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
