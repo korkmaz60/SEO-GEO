@@ -126,6 +126,12 @@ model Organization {
   tasks               Task[]
   auditLogs           AuditLog[]
   notifications       Notification[]
+  trackedKeywords     TrackedKeyword[]
+  rankChecks          RankCheck[]
+  keywordLists        KeywordList[]
+  googleConnections   GoogleConnection[]
+  projectIntegrations ProjectIntegration[]
+  auditRuns           AuditRun[]
 
   @@map("organization")
 }
@@ -222,10 +228,17 @@ model Project {
   createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  workspace     Organization  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  brandEntities BrandEntity[]
-  usageEntries  UsageEntry[]
-  tasks         Task[]
+  workspace       Organization         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  brandEntities   BrandEntity[]
+  usageEntries    UsageEntry[]
+  tasks           Task[]
+  trackedKeywords TrackedKeyword[]
+  rankChecks      RankCheck[]
+  integrations    ProjectIntegration[]
+  gscQueryDaily   GscQueryDaily[]
+  gscPageDaily    GscPageDaily[]
+  ga4PageDaily    Ga4PageDaily[]
+  auditRuns       AuditRun[]
 
   @@unique([workspaceId, slug])
   @@index([workspaceId, createdAt])
@@ -431,4 +444,459 @@ model Notification {
   @@index([userId, readAt])
   @@index([workspaceId, createdAt])
   @@map("notification")
+}
+
+// ── Provider cache ──────────────────────────────────────────────────────────────────
+
+/// Provider responses keyed by operation and normalized parameters. Shared market data only
+/// (keyword research, SERPs); tenant-private data such as Search Console is never cached here.
+model ProviderCache {
+  /// SHA-256 of the operation and its normalized parameters.
+  key       String   @id
+  provider  Provider
+  /// Versioned operation name, e.g. `labs.keyword_suggestions@1`.
+  operation String
+  params    Json
+  /// The normalized result, as returned by the service that cached it.
+  response  Json
+  /// What the provider charged for the original request.
+  costUsd   Decimal  @map("cost_usd") @db.Decimal(12, 6)
+  fetchedAt DateTime @map("fetched_at") @db.Timestamptz(3)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(3)
+
+  @@index([expiresAt])
+  @@map("provider_cache")
+}
+
+// ── Keywords and rank tracking ──────────────────────────────────────────────────────
+
+enum SearchEngine {
+  GOOGLE
+
+  @@map("search_engine")
+}
+
+enum RankFrequency {
+  DAILY
+  WEEKLY
+
+  @@map("rank_frequency")
+}
+
+/// Keyword metrics per market (shared market data), refreshed when older than 30 days.
+/// A row with empty metrics records that the provider has no data for the keyword.
+model KeywordMetric {
+  /// Normalized: trimmed, single spaces, lower case.
+  keyword           String
+  locationCode      Int      @map("location_code")
+  languageCode      String   @map("language_code")
+  searchVolume      Int?     @map("search_volume")
+  /// Average cost per click in USD.
+  cpc               Float?
+  /// Paid competition, 0–1.
+  competition       Float?
+  competitionLevel  String?  @map("competition_level")
+  /// 0–100.
+  keywordDifficulty Int?     @map("keyword_difficulty")
+  intent            String?
+  secondaryIntents  String[] @default([]) @map("secondary_intents")
+  /// `[{ year, month, searchVolume }]`, oldest first.
+  monthlySearches   Json     @default("[]") @map("monthly_searches")
+  source            String   @default("dataforseo_labs")
+  fetchedAt         DateTime @map("fetched_at") @db.Timestamptz(3)
+
+  @@id([keyword, locationCode, languageCode])
+  @@map("keyword_metric")
+}
+
+/// A keyword whose Google position the project checks on a schedule.
+model TrackedKeyword {
+  id           String        @id @default(uuid(7)) @db.Uuid
+  workspaceId  String        @map("workspace_id") @db.Uuid
+  projectId    String        @map("project_id") @db.Uuid
+  /// Normalized: trimmed, single spaces, lower case.
+  keyword      String
+  locationCode Int           @map("location_code")
+  languageCode String        @map("language_code")
+  device       Device
+  searchEngine SearchEngine  @default(GOOGLE) @map("search_engine")
+  tags         String[]      @default([])
+  /// The page that should rank; another URL ranking instead is flagged.
+  targetUrl    String?       @map("target_url")
+  frequency    RankFrequency @default(DAILY)
+  createdBy    String?       @map("created_by") @db.Uuid
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Organization @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  checks    RankCheck[]
+
+  @@unique([projectId, keyword, locationCode, languageCode, device, searchEngine])
+  @@index([workspaceId, projectId])
+  @@map("tracked_keyword")
+}
+
+enum RankCheckStatus {
+  PENDING
+  COMPLETED
+  FAILED
+
+  @@map("rank_check_status")
+}
+
+/// One SERP check of a tracked keyword per day. Created as PENDING when the SERP is
+/// requested and completed when the result is collected.
+model RankCheck {
+  id                String          @id @default(uuid(7)) @db.Uuid
+  workspaceId       String          @map("workspace_id") @db.Uuid
+  projectId         String          @map("project_id") @db.Uuid
+  trackedKeywordId  String          @map("tracked_keyword_id") @db.Uuid
+  /// Day of the check in the project's time zone.
+  checkedOn         DateTime        @map("checked_on") @db.Date
+  status            RankCheckStatus @default(PENDING)
+  /// DataForSEO task ID while the SERP is being collected.
+  providerTaskId    String?         @map("provider_task_id")
+  postedAt          DateTime?       @map("posted_at") @db.Timestamptz(3)
+  /// When the SERP was fetched.
+  checkedAt         DateTime?       @map("checked_at") @db.Timestamptz(3)
+  /// Number of results checked; no position means "not in the top `depth`".
+  depth             Int
+  /// Best organic position (rank_group) of the project's own domains.
+  position          Int?
+  rankAbsolute      Int?            @map("rank_absolute")
+  url               String?
+  serpFeatures      String[]        @default([]) @map("serp_features")
+  /// SERP features that link to the project's own domains, e.g. `featured_snippet`.
+  ownedFeatures     String[]        @default([]) @map("owned_features")
+  aiOverviewPresent Boolean         @default(false) @map("ai_overview_present")
+  aiOverviewCited   Boolean         @default(false) @map("ai_overview_cited")
+  /// Best positions of competitors: `{ [brandEntityId]: { position, url } }`.
+  competitorRanks   Json            @default("{}") @map("competitor_ranks")
+  serpSnapshotId    String?         @map("serp_snapshot_id") @db.Uuid
+  /// Provider cost of this check; 0 when an existing snapshot was reused.
+  costUsd           Decimal         @default(0) @map("cost_usd") @db.Decimal(12, 6)
+  error             String?
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace      Organization   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project        Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  trackedKeyword TrackedKeyword @relation(fields: [trackedKeywordId], references: [id], onDelete: Cascade)
+  serpSnapshot   SerpSnapshot?  @relation(fields: [serpSnapshotId], references: [id], onDelete: SetNull)
+
+  @@unique([trackedKeywordId, checkedOn])
+  @@index([projectId, checkedOn])
+  @@index([status, postedAt])
+  @@index([providerTaskId])
+  @@map("rank_check")
+}
+
+/// A compact copy of a SERP (shared market data). Checks of the same query on the same day
+/// reuse it; kept for 90 days.
+model SerpSnapshot {
+  id           String       @id @default(uuid(7)) @db.Uuid
+  searchEngine SearchEngine @default(GOOGLE) @map("search_engine")
+  keyword      String
+  locationCode Int          @map("location_code")
+  languageCode String       @map("language_code")
+  device       Device
+  /// UTC day of the fetch.
+  fetchedOn    DateTime     @map("fetched_on") @db.Date
+  fetchedAt    DateTime     @map("fetched_at") @db.Timestamptz(3)
+  depth        Int
+  itemTypes    String[]     @map("item_types")
+  resultsCount BigInt?      @map("results_count")
+  /// `[{ position, rankAbsolute, domain, url, title }]`
+  organic      Json
+  /// `[{ type, rankAbsolute, links: [{ domain, url }] }]`
+  features     Json
+  /// `{ rankAbsolute, references: [{ domain, url, title, source }] }`
+  aiOverview   Json?        @map("ai_overview")
+  checkUrl     String?      @map("check_url")
+
+  rankChecks RankCheck[]
+
+  @@unique([searchEngine, keyword, locationCode, languageCode, device, fetchedOn])
+  @@index([fetchedAt])
+  @@map("serp_snapshot")
+}
+
+/// Saved keyword research.
+model KeywordList {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  name        String
+  createdBy   String?  @map("created_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Organization      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  items     KeywordListItem[]
+
+  @@index([workspaceId, createdAt])
+  @@map("keyword_list")
+}
+
+model KeywordListItem {
+  listId       String   @map("list_id") @db.Uuid
+  keyword      String
+  locationCode Int      @map("location_code")
+  languageCode String   @map("language_code")
+  note         String?
+  addedAt      DateTime @default(now()) @map("added_at") @db.Timestamptz(3)
+
+  list KeywordList @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@id([listId, keyword, locationCode, languageCode])
+  @@map("keyword_list_item")
+}
+
+// ── Google Search Console and Analytics ─────────────────────────────────────────────
+
+enum GoogleConnectionStatus {
+  ACTIVE
+  /// Google refused the refresh token (access revoked or expired); reconnect needed.
+  REVOKED
+
+  @@map("google_connection_status")
+}
+
+/// A Google account connected for Search Console and Analytics. Tokens are AES-256-GCM
+/// encrypted and never returned by the API.
+model GoogleConnection {
+  id              String                 @id @default(uuid(7)) @db.Uuid
+  workspaceId     String                 @map("workspace_id") @db.Uuid
+  /// Google account ID (`sub`).
+  googleUserId    String                 @map("google_user_id")
+  email           String
+  scopes          String[]
+  /// Encrypted JSON: `{ refreshToken, accessToken, expiresAt }`.
+  encryptedTokens Bytes                  @map("encrypted_tokens")
+  keyVersion      Int                    @map("key_version")
+  status          GoogleConnectionStatus @default(ACTIVE)
+  lastError       String?                @map("last_error")
+  connectedBy     String?                @map("connected_by") @db.Uuid
+  createdAt       DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime               @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace    Organization         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  integrations ProjectIntegration[]
+
+  @@unique([workspaceId, googleUserId])
+  @@map("google_connection")
+}
+
+enum IntegrationType {
+  GSC
+  GA4
+
+  @@map("integration_type")
+}
+
+/// The Search Console property or GA4 property a project reads from.
+model ProjectIntegration {
+  id            String          @id @default(uuid(7)) @db.Uuid
+  workspaceId   String          @map("workspace_id") @db.Uuid
+  projectId     String          @map("project_id") @db.Uuid
+  type          IntegrationType
+  connectionId  String          @map("connection_id") @db.Uuid
+  /// Search Console site (`sc-domain:example.com`, `https://www.example.com/`) or GA4
+  /// property (`properties/123456`).
+  externalId    String          @map("external_id")
+  displayName   String?         @map("display_name")
+  settings      Json            @default("{}")
+  lastSyncedAt  DateTime?       @map("last_synced_at") @db.Timestamptz(3)
+  /// Last day whose data has been imported.
+  syncedThrough DateTime?       @map("synced_through") @db.Date
+  lastError     String?         @map("last_error")
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace  Organization     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project    Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  connection GoogleConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, type])
+  @@index([connectionId])
+  @@map("project_integration")
+}
+
+/// Search Console performance by query and day.
+model GscQueryDaily {
+  projectId   String   @map("project_id") @db.Uuid
+  date        DateTime @db.Date
+  query       String
+  clicks      Int
+  impressions Int
+  /// Average position, weighted by impressions.
+  position    Float
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, date, query])
+  @@map("gsc_query_daily")
+}
+
+/// Search Console performance by page and day.
+model GscPageDaily {
+  projectId   String   @map("project_id") @db.Uuid
+  date        DateTime @db.Date
+  page        String
+  clicks      Int
+  impressions Int
+  position    Float
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, date, page])
+  @@map("gsc_page_daily")
+}
+
+/// GA4 sessions by landing page, channel group and source per day.
+model Ga4PageDaily {
+  projectId       String   @map("project_id") @db.Uuid
+  date            DateTime @db.Date
+  /// Landing page path, e.g. `/blog/post`.
+  page            String
+  /// Default channel group, e.g. `Organic Search`, `Referral`.
+  channel         String
+  /// Session source, e.g. `google`, `chatgpt.com`.
+  source          String
+  sessions        Int
+  users           Int
+  engagedSessions Int      @map("engaged_sessions")
+  keyEvents       Float    @default(0) @map("key_events")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, date, page, channel, source])
+  @@map("ga4_page_daily")
+}
+
+// ── Site audit ──────────────────────────────────────────────────────────────────────
+
+enum AuditRunStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELED
+
+  @@map("audit_run_status")
+}
+
+enum IssueSeverity {
+  ERROR
+  WARNING
+  NOTICE
+
+  @@map("issue_severity")
+}
+
+/// One crawl of a project's site.
+model AuditRun {
+  id           String         @id @default(uuid(7)) @db.Uuid
+  workspaceId  String         @map("workspace_id") @db.Uuid
+  projectId    String         @map("project_id") @db.Uuid
+  status       AuditRunStatus @default(QUEUED)
+  /// `manual` or `schedule`.
+  trigger      String         @default("manual")
+  /// `{ startUrl, maxPages, maxDepth }`
+  config       Json
+  /// Counts by status class, severity and crawl outcome; see the audit service.
+  stats        Json           @default("{}")
+  pagesCrawled Int            @default(0) @map("pages_crawled")
+  healthScore  Int?           @map("health_score")
+  scoreVersion Int            @default(1) @map("score_version")
+  taskId       String?        @map("task_id") @db.Uuid
+  error        String?
+  createdBy    String?        @map("created_by") @db.Uuid
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  startedAt    DateTime?      @map("started_at") @db.Timestamptz(3)
+  finishedAt   DateTime?      @map("finished_at") @db.Timestamptz(3)
+  updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Organization @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  pages     AuditPage[]
+  links     AuditLink[]
+  issues    AuditIssue[]
+
+  @@index([projectId, createdAt])
+  @@map("audit_run")
+}
+
+/// A crawled URL.
+model AuditPage {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  runId           String   @map("run_id") @db.Uuid
+  /// Normalized URL.
+  url             String
+  depth           Int
+  /// HTTP status; null when the request failed (see `fetchError`).
+  statusCode      Int?     @map("status_code")
+  /// `timeout`, `network`, `too_large`, `blocked_by_robots`, …
+  fetchError      String?  @map("fetch_error")
+  contentType     String?  @map("content_type")
+  redirectTarget  String?  @map("redirect_target")
+  title           String?
+  metaDescription String?  @map("meta_description")
+  h1              String?
+  h1Count         Int      @default(0) @map("h1_count")
+  canonical       String?
+  robotsMeta      String?  @map("robots_meta")
+  indexable       Boolean  @default(false)
+  wordCount       Int?     @map("word_count")
+  contentHash     String?  @map("content_hash")
+  loadMs          Int?     @map("load_ms")
+  bytes           Int?
+  inlinks         Int      @default(0)
+  outlinks        Int      @default(0)
+  externalLinks   Int      @default(0) @map("external_links")
+  schemaTypes     String[] @default([]) @map("schema_types")
+  lang            String?
+  /// `[{ lang, href }]`
+  hreflang        Json     @default("[]")
+  inSitemap       Boolean  @default(false) @map("in_sitemap")
+
+  run    AuditRun     @relation(fields: [runId], references: [id], onDelete: Cascade)
+  issues AuditIssue[]
+
+  @@unique([runId, url])
+  @@map("audit_page")
+}
+
+/// An internal link between crawled pages.
+model AuditLink {
+  id         String  @id @default(uuid(7)) @db.Uuid
+  runId      String  @map("run_id") @db.Uuid
+  fromPageId String  @map("from_page_id") @db.Uuid
+  toUrl      String  @map("to_url")
+  anchor     String?
+  nofollow   Boolean @default(false)
+
+  run AuditRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId, toUrl])
+  @@index([fromPageId])
+  @@map("audit_link")
+}
+
+/// A problem found by an audit rule. `code` refers to the issue catalog in packages/core.
+model AuditIssue {
+  id       String        @id @default(uuid(7)) @db.Uuid
+  runId    String        @map("run_id") @db.Uuid
+  /// Null for site-wide issues, e.g. a missing sitemap.
+  pageId   String?       @map("page_id") @db.Uuid
+  code     String
+  severity IssueSeverity
+  data     Json          @default("{}")
+
+  run  AuditRun   @relation(fields: [runId], references: [id], onDelete: Cascade)
+  page AuditPage? @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([runId, code])
+  @@index([pageId])
+  @@map("audit_issue")
 }
