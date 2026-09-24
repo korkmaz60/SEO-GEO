@@ -5,7 +5,6 @@ import { useParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Fragment } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,12 +15,12 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { PREVIEW } from "@/lib/preview";
+import { useWorkspace } from "@/lib/workspace-context";
 
 import { CommandMenu } from "./command-menu";
-import { LocaleSwitcher } from "./locale-switcher";
 import { findActiveItem } from "./nav-config";
+import { NotificationsMenu } from "./notifications-menu";
+import { TaskIndicator } from "./task-indicator";
 import { ThemeToggle } from "./theme-toggle";
 import { useRouteContext } from "./use-route-context";
 
@@ -29,23 +28,21 @@ export function AppHeader() {
   const t = useTranslations();
   const pathname = usePathname();
   const params = useParams<{ project?: string }>();
+  const { workspace, projects } = useWorkspace();
   const ctx = useRouteContext();
   const active = findActiveItem(pathname, ctx);
-  const isPreview = ctx.workspace === PREVIEW.workspace.slug;
+  const project = projects.find((candidate) => candidate.slug === params.project);
 
   const crumbs: { label: string; href?: string }[] = [
-    { label: isPreview ? PREVIEW.workspace.name : ctx.workspace, href: `/${ctx.workspace}` },
+    { label: workspace.name, href: `/${workspace.slug}` },
   ];
-  if (params.project) {
-    crumbs.push({
-      label:
-        isPreview && params.project === PREVIEW.project.slug
-          ? PREVIEW.project.domain
-          : params.project,
-      href: `/${ctx.workspace}/${params.project}/overview`,
-    });
+  if (project) {
+    crumbs.push({ label: project.name, href: `/${workspace.slug}/${project.slug}/overview` });
   }
   if (active) crumbs.push({ label: t(`nav.items.${active.key}`) });
+  else if (pathname === `/${workspace.slug}/projects/new`) {
+    crumbs.push({ label: t("shell.newProject") });
+  }
 
   return (
     <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b bg-background/85 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/70">
@@ -74,16 +71,9 @@ export function AppHeader() {
       </Breadcrumb>
 
       <div className="ml-auto flex items-center gap-1.5">
-        {isPreview && (
-          <Tooltip>
-            <TooltipTrigger render={<Badge variant="outline" className="max-lg:hidden" />}>
-              {t("common.preview")}
-            </TooltipTrigger>
-            <TooltipContent className="max-w-xs">{t("common.previewHint")}</TooltipContent>
-          </Tooltip>
-        )}
         <CommandMenu />
-        <LocaleSwitcher />
+        <TaskIndicator />
+        <NotificationsMenu />
         <ThemeToggle />
       </div>
     </header>

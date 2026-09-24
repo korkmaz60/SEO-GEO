@@ -13,7 +13,10 @@
     "updated": "Güncellendi",
     "sampleData": "Örnek veri",
     "readRoadmap": "Yol haritasını gör",
-    "percentagePoints": "{value} puan"
+    "percentagePoints": "{value} puan",
+    "cancel": "Vazgeç",
+    "actionFailed": "İşlem tamamlanamadı. Lütfen tekrar deneyin.",
+    "typeToConfirm": "Onaylamak için <code>{text}</code> yazın"
   },
   "nav": {
     "groups": {
@@ -65,16 +68,52 @@
       "tr": "Türkçe",
       "en": "English"
     },
-    "api": {
-      "checking": "API kontrol ediliyor…",
-      "online": "API bağlı · v{version}",
-      "offline": "API'ye ulaşılamıyor"
-    },
     "usage": {
       "title": "Bu ay sağlayıcı harcaması",
-      "noBudget": "Bütçe tanımlı değil"
+      "noBudget": "Bütçe tanımlı değil",
+      "budgetUsed": "Bütçenin %{percent} kullanıldı"
     },
-    "newProject": "Yeni proje"
+    "newProject": "Yeni proje",
+    "noProject": "Proje yok",
+    "projects": "Projeler",
+    "noProjects": "Henüz proje yok",
+    "switchWorkspace": "Çalışma alanı değiştir",
+    "workspaces": "Çalışma alanları",
+    "newWorkspace": "Yeni çalışma alanı",
+    "account": "Hesap ayarları",
+    "signOut": "Çıkış yap",
+    "tasks": {
+      "running": "{count, plural, one {# iş çalışıyor} other {# iş çalışıyor}}",
+      "title": "Arka plan işleri",
+      "description": "Sırada bekleyen ve çalışan işler. Sayfadan ayrılsanız da devam ederler.",
+      "cancel": "İşi iptal et",
+      "cancelFailed": "İş iptal edilemedi.",
+      "progress": "İlerleme",
+      "status": {
+        "queued": "Sırada",
+        "running": "Çalışıyor",
+        "succeeded": "Tamamlandı",
+        "failed": "Başarısız",
+        "canceled": "İptal edildi"
+      }
+    },
+    "notifications": {
+      "label": "Bildirimler",
+      "labelUnread": "Bildirimler, {count} okunmamış",
+      "title": "Bildirimler",
+      "markAllRead": "Tümünü okundu say",
+      "empty": "Yeni bildirim yok.",
+      "types": {
+        "budgetThreshold": {
+          "title": "Aylık bütçenin %{percent} kadarı harcandı",
+          "body": "Bu ay {spent} / {limit} harcandı."
+        },
+        "credentialInvalid": {
+          "title": "DataForSEO anahtarı artık çalışmıyor",
+          "body": "Veri toplama duraklatıldı. Anahtarı sağlayıcı ayarlarından yenileyin."
+        }
+      }
+    }
   },
   "pages": {
     "overview": {
@@ -185,7 +224,9 @@
       "keywords": "Takip edilecek kelimeleri ve prompt'ları ekleyin",
       "audit": "İlk site denetimini başlatın",
       "gsc": "Search Console'u bağlayın"
-    }
+    },
+    "progress": "{done}/{total}",
+    "done": "Tamamlandı"
   },
   "design": {
     "title": "Tasarım Sistemi",
@@ -235,6 +276,532 @@
     "rankEmpty": "Kelimeler ilk 3, ilk 10 ve ilk 100 gruplarına göre burada dağılır.",
     "scoresTitle": "Skorlar",
     "aiScore": "AI görünürlük",
-    "siteHealth": "Site sağlığı"
+    "siteHealth": "Site sağlığı",
+    "brandsTitle": "Takip edilen markalar",
+    "brandsDescription": "Her marka tüm grafiklerde aynı rengi korur.",
+    "ownBrand": "Siz"
+  },
+  "auth": {
+    "email": "E-posta",
+    "password": "Şifre",
+    "name": "Ad soyad",
+    "newPassword": "Yeni şifre",
+    "passwordHint": "En az 10 karakter. Uzun bir parola cümlesi en güvenlisidir.",
+    "signIn": {
+      "title": "Giriş yap",
+      "description": "SEO-GEO hesabınıza giriş yapın.",
+      "submit": "Giriş yap",
+      "forgot": "Şifremi unuttum",
+      "noAccount": "Hesabınız yok mu?",
+      "signUpLink": "Kayıt olun",
+      "unverified": "E-posta adresiniz henüz doğrulanmadı. Size yeni bir doğrulama bağlantısı gönderdik."
+    },
+    "signUp": {
+      "title": "Hesap oluşturun",
+      "description": "SEO ve yapay zekâ görünürlüğünüzü tek yerden takip edin.",
+      "firstUserTitle": "Yönetici hesabını oluşturun",
+      "firstUserDescription": "Bu sunucudaki ilk hesap sizin olacak. Diğer kişileri daha sonra davet edebilirsiniz.",
+      "inviteOnly": "Bu sunucuda yalnızca davet edilen e-posta adresleri kayıt olabilir. Davet e-postanızdaki adresi kullanın.",
+      "submit": "Hesap oluştur",
+      "haveAccount": "Zaten hesabınız var mı?",
+      "signInLink": "Giriş yapın"
+    },
+    "verify": {
+      "title": "E-postanızı kontrol edin",
+      "description": "{email} adresine bir doğrulama bağlantısı gönderdik. Bağlantıya tıkladığınızda hesabınız etkinleşir ve oturumunuz açılır.",
+      "resend": "Bağlantıyı yeniden gönder",
+      "resent": "Yeni bir bağlantı gönderdik."
+    },
+    "forgot": {
+      "title": "Şifrenizi mi unuttunuz?",
+      "description": "E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.",
+      "submit": "Bağlantı gönder",
+      "sent": "Bu adrese kayıtlı bir hesap varsa sıfırlama bağlantısı gönderdik.",
+      "noEmail": "Bu sunucu e-posta gönderemiyor. Şifrenizi sıfırlamak için sunucu yöneticinize başvurun.",
+      "back": "Giriş sayfasına dön"
+    },
+    "reset": {
+      "title": "Yeni şifre belirleyin",
+      "submit": "Şifreyi değiştir",
+      "done": "Şifreniz değişti. Yeni şifrenizle giriş yapın.",
+      "invalid": "Bu bağlantı geçersiz veya süresi dolmuş.",
+      "requestNew": "Yeni bağlantı iste"
+    },
+    "twoFactor": {
+      "title": "İki adımlı doğrulama",
+      "description": "Doğrulama uygulamanızdaki 6 haneli kodu girin.",
+      "backupDescription": "Kaydettiğiniz yedek kodlardan birini girin. Her kod bir kez kullanılabilir.",
+      "code": "Doğrulama kodu",
+      "backupCode": "Yedek kod",
+      "useBackup": "Yedek kod kullan",
+      "useApp": "Uygulama kodu kullan",
+      "trustDevice": "Bu cihaza 30 gün güven",
+      "submit": "Doğrula"
+    },
+    "invite": {
+      "title": "Çalışma alanı daveti",
+      "signInFirst": "Daveti kabul etmek için davet edilen e-posta adresiyle giriş yapın veya hesap oluşturun.",
+      "createAccount": "Hesap oluştur",
+      "signIn": "Giriş yap",
+      "description": "{inviter} sizi {workspace} çalışma alanına {role} olarak davet etti.",
+      "accept": "Daveti kabul et",
+      "decline": "Reddet",
+      "invalid": "Bu davet bulunamadı, süresi dolmuş ya da {email} adresine gönderilmemiş."
+    }
+  },
+  "errors": {
+    "generic": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
+    "tooManyRequests": "Çok fazla deneme yapıldı. Biraz bekleyip tekrar deneyin.",
+    "auth": {
+      "INVALID_EMAIL_OR_PASSWORD": "E-posta veya şifre hatalı.",
+      "EMAIL_NOT_VERIFIED": "E-posta adresiniz henüz doğrulanmadı.",
+      "USER_ALREADY_EXISTS": "Bu e-posta adresiyle bir hesap zaten var.",
+      "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL": "Bu e-posta adresiyle bir hesap zaten var.",
+      "PASSWORD_TOO_SHORT": "Şifre en az 10 karakter olmalı.",
+      "PASSWORD_TOO_LONG": "Şifre en fazla 128 karakter olabilir.",
+      "INVALID_PASSWORD": "Şifre hatalı.",
+      "SIGN_UP_INVITE_ONLY": "Bu sunucuda yalnızca davet edilen adresler kayıt olabilir.",
+      "INVALID_TOKEN": "Bağlantı geçersiz veya süresi dolmuş. Giriş yaparak yenisini isteyebilirsiniz.",
+      "INVALID_CODE": "Kod hatalı veya süresi dolmuş.",
+      "INVALID_BACKUP_CODE": "Yedek kod hatalı veya daha önce kullanılmış.",
+      "INVALID_SLUG": "Bu adres kullanılamaz. Küçük harf, rakam ve tire kullanın.",
+      "ORGANIZATION_ALREADY_EXISTS": "Bu adres başka bir çalışma alanında kullanılıyor.",
+      "ORGANIZATION_SLUG_ALREADY_TAKEN": "Bu adres başka bir çalışma alanında kullanılıyor.",
+      "INVITATION_NOT_FOUND": "Davet bulunamadı veya süresi dolmuş.",
+      "YOU_ARE_NOT_THE_RECIPIENT_OF_THE_INVITATION": "Bu davet başka bir e-posta adresine gönderilmiş.",
+      "USER_IS_ALREADY_A_MEMBER_OF_THIS_ORGANIZATION": "Bu kişi zaten çalışma alanının üyesi.",
+      "TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE": "Çok fazla hatalı deneme. Yeni bir kod isteyin.",
+      "USER_IS_ALREADY_INVITED_TO_THIS_ORGANIZATION": "Bu adrese zaten bekleyen bir davet var.",
+      "YOU_ARE_NOT_ALLOWED_TO_INVITE_USER_WITH_THIS_ROLE": "Bu rolle davet etme yetkiniz yok.",
+      "YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_MEMBER": "Bu üyenin rolünü değiştirme yetkiniz yok.",
+      "YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_MEMBER": "Bu üyeyi çıkarma yetkiniz yok.",
+      "YOU_CANNOT_LEAVE_THE_ORGANIZATION_AS_THE_ONLY_OWNER": "Tek sahip olduğunuz için ayrılamazsınız. Önce başka birini sahip yapın.",
+      "YOU_CANNOT_LEAVE_THE_ORGANIZATION_WITHOUT_AN_OWNER": "Çalışma alanında en az bir sahip kalmalı.",
+      "ORGANIZATION_MEMBERSHIP_LIMIT_REACHED": "Çalışma alanı üye sınırına ulaştı.",
+      "INVITATION_LIMIT_REACHED": "Bekleyen davet sınırına ulaşıldı.",
+      "EMAIL_VERIFICATION_REQUIRED_BEFORE_ACCEPTING_OR_REJECTING_INVITATION": "Daveti yanıtlamadan önce e-posta adresinizi doğrulayın.",
+      "SESSION_EXPIRED": "Güvenlik için tekrar giriş yapmanız gerekiyor."
+    }
+  },
+  "roles": {
+    "owner": "Sahip",
+    "admin": "Yönetici",
+    "member": "Üye",
+    "viewer": "İzleyici"
+  },
+  "workspaceHome": {
+    "emptyTitle": "Bu çalışma alanında henüz proje yok",
+    "emptyBody": "Projeleri sahipler ve yöneticiler oluşturur. Bir proje eklendiğinde burada açılacak."
+  },
+  "setup": {
+    "welcome": "Hoş geldiniz, {name}",
+    "intro": "Üç adımda başlıyoruz: çalışma alanınız, ilk projeniz ve veri sağlayıcı bağlantısı.",
+    "progress": "Kurulum adımları",
+    "steps": {
+      "workspace": "Çalışma alanı",
+      "project": "Proje",
+      "provider": "Veri sağlayıcı"
+    },
+    "backToApp": "Uygulamaya dön",
+    "workspace": {
+      "title": "Çalışma alanınızı oluşturun",
+      "description": "Ekibiniz, projeleriniz, sağlayıcı anahtarlarınız ve bütçeniz çalışma alanında toplanır.",
+      "name": "Çalışma alanı adı",
+      "namePlaceholder": "Örn. Acme Pazarlama",
+      "nameHint": "Şirketinizin veya ajansınızın adı olabilir.",
+      "slug": "Adres",
+      "slugHint": "Bağlantılarda görünür: /{slug}",
+      "submit": "Çalışma alanını oluştur"
+    },
+    "project": {
+      "title": "İlk projenizi ekleyin",
+      "description": "Proje, {workspace} içinde takip ettiğiniz web sitesidir. Kelimeler, denetimler ve AI görünürlüğü projeye bağlıdır.",
+      "pageTitle": "Yeni proje",
+      "pageDescription": "Takip etmek istediğiniz web sitesini, pazarını ve rakiplerini tanımlayın.",
+      "domain": "Web sitesi",
+      "domainHint": "Alan adı veya adres, örn. ornek.com. Alt alan adları da dahil edilir.",
+      "invalidDomain": "Geçerli, herkese açık bir alan adı girin.",
+      "name": "Marka adı",
+      "namePlaceholder": "Örn. Ornek Mağaza",
+      "nameHint": "AI yanıtlarında markanızı bu adla ararız.",
+      "market": "Pazar",
+      "marketHint": "Sıralamalar ve arama hacimleri bu ülke ve dile göre ölçülür.",
+      "competitors": "Rakipler (isteğe bağlı)",
+      "competitorsHint": "Şimdi en fazla 3 rakip ekleyin; proje ayarlarından 7'ye kadar çıkarabilirsiniz.",
+      "competitorName": "Rakip adı",
+      "competitorDomain": "Rakip alan adı",
+      "addCompetitor": "Rakip ekle",
+      "removeCompetitor": "Rakibi kaldır",
+      "invalidCompetitor": "Rakip alan adlarından biri geçerli değil.",
+      "submit": "Projeyi oluştur",
+      "forbidden": "Bu çalışma alanında proje oluşturma yetkiniz yok. Bir sahip veya yöneticiden proje eklemesini isteyin.",
+      "newWorkspace": "Kendi çalışma alanımı oluştur"
+    },
+    "provider": {
+      "title": "DataForSEO'yu bağlayın",
+      "description": "Kelime, SERP, backlink ve AI yanıt verileri DataForSEO'dan gelir. Kendi hesabınızı bağlarsınız; maliyetler doğrudan hesabınıza yansır.",
+      "connected": "DataForSEO bağlandı",
+      "balance": "Bakiye: {amount}",
+      "done": "Projeye git",
+      "skip": "Şimdilik atla"
+    }
+  },
+  "providers": {
+    "cancel": "Vazgeç",
+    "status": {
+      "VALID": "Bağlı",
+      "INVALID": "Geçersiz",
+      "UNVERIFIED": "Doğrulanmadı"
+    },
+    "dataforseo": {
+      "description": "Kelime, SERP, backlink ve AI yanıt verilerinin kaynağı. Anahtar bu çalışma alanındaki tüm projelerde kullanılır.",
+      "login": "API kullanıcı adı",
+      "loginHint": "DataForSEO hesabınızın e-posta adresi.",
+      "password": "API şifresi",
+      "passwordHint": "Hesap şifreniz değil; DataForSEO panelindeki API Access bölümünde yazan şifre.",
+      "openDashboard": "Panelde göster",
+      "encrypted": "Bilgiler şifrelenerek saklanır ve bir daha gösterilmez. Kaydetmeden önce DataForSEO ile doğrulanır.",
+      "submit": "Bağlan ve bakiyeyi kontrol et",
+      "verifying": "Doğrulanıyor…",
+      "rejected": "DataForSEO bu bilgileri reddetti. Kullanıcı adını ve API şifresini kontrol edin.",
+      "unreachable": "DataForSEO'ya şu anda ulaşılamıyor; hiçbir şey kaydedilmedi. Biraz sonra tekrar deneyin.",
+      "forbidden": "Sağlayıcı anahtarlarını yalnızca sahipler ve yöneticiler değiştirebilir.",
+      "saved": "DataForSEO bağlandı.",
+      "verified": "Anahtar çalışıyor; bakiye güncellendi.",
+      "removed": "DataForSEO bağlantısı kaldırıldı.",
+      "disconnect": "Bağlantıyı kaldır",
+      "disconnectTitle": "DataForSEO bağlantısı kaldırılsın mı?",
+      "disconnectBody": "Kayıtlı anahtar silinir. Yeni bir anahtar bağlanana kadar veri toplayan işler çalışmaz; toplanmış veriler korunur.",
+      "replace": "Anahtarı değiştir",
+      "verify": "Tekrar doğrula",
+      "balanceLabel": "Bakiye",
+      "lastVerified": "Son doğrulama",
+      "invalidHint": "DataForSEO bu anahtarı artık kabul etmiyor. Veri toplama duraklatıldı; anahtarı değiştirin.",
+      "unreachableHint": "Son kontrolde DataForSEO'ya ulaşılamadı. Anahtar geçerli sayılmaya devam ediyor.",
+      "askAdmin": "DataForSEO henüz bağlanmadı. Bir sahip veya yöneticiden bağlamasını isteyin."
+    },
+    "upcomingTitle": "Diğer bağlantılar",
+    "upcomingDescription": "Yol haritasına göre eklenecek veri kaynakları.",
+    "upcoming": {
+      "searchConsole": {
+        "title": "Google Search Console",
+        "description": "Gerçek tıklama, gösterim ve sorgu verileri."
+      },
+      "aiPlatforms": {
+        "title": "AI platformları",
+        "description": "ChatGPT, Gemini, Claude ve Perplexity için kendi API anahtarlarınız."
+      }
+    }
+  },
+  "workspaceSettings": {
+    "title": "Çalışma alanı ayarları",
+    "description": "{workspace} için ekip, projeler, bağlantılar ve maliyetler.",
+    "nav": {
+      "general": "Genel",
+      "members": "Üyeler",
+      "projects": "Projeler",
+      "providers": "Sağlayıcılar",
+      "usage": "Kullanım ve bütçe",
+      "auditLog": "Denetim kaydı"
+    },
+    "general": {
+      "title": "Çalışma alanı",
+      "description": "Ad ve adres tüm üyeler için değişir.",
+      "name": "Ad",
+      "slug": "Adres",
+      "slugHint": "Adres değişirse eski bağlantılar çalışmaz.",
+      "save": "Kaydet",
+      "saved": "Çalışma alanı güncellendi.",
+      "dangerTitle": "Tehlikeli bölge",
+      "deleteDescription": "Çalışma alanını silmek tüm projeleri, anahtarları ve geçmiş verileri kalıcı olarak siler.",
+      "leaveDescription": "Çalışma alanından ayrılırsanız tekrar katılmak için yeni bir davet gerekir.",
+      "delete": "Çalışma alanını sil",
+      "deleteConfirmTitle": "{workspace} silinsin mi?",
+      "deleteConfirmBody": "Bu işlem geri alınamaz. Tüm projeler, markalar, sağlayıcı anahtarları, kullanım kayıtları ve üyelikler silinir.",
+      "leave": "Çalışma alanından ayrıl",
+      "leaveConfirmTitle": "{workspace} çalışma alanından ayrılınsın mı?",
+      "leaveConfirmBody": "Projelere erişiminiz hemen kapanır."
+    },
+    "members": {
+      "inviteTitle": "Üye davet et",
+      "inviteDescription": "Davet e-postayla gönderilir ve 7 gün geçerlidir.",
+      "inviteDescriptionNoEmail": "Bu sunucuda e-posta gönderimi kapalı; davet bağlantısı panonuza kopyalanır, siz paylaşırsınız. Bağlantı 7 gün geçerlidir.",
+      "email": "E-posta",
+      "role": "Rol",
+      "invite": "Davet et",
+      "invited": "{email} adresine davet gönderildi.",
+      "invitedNoEmail": "{email} için davet oluşturuldu; bağlantı panoya kopyalandı.",
+      "title": "Üyeler",
+      "description": "{count, plural, =0 {Henüz üye yok.} one {# üye} other {# üye}}",
+      "member": "Üye",
+      "joined": "Katılma",
+      "actions": "İşlemler",
+      "you": "(siz)",
+      "roleUpdated": "Rol güncellendi.",
+      "remove": "Çalışma alanından çıkar",
+      "removeTitle": "{name} çıkarılsın mı?",
+      "removeBody": "{workspace} çalışma alanına erişimi hemen kapanır.",
+      "removed": "Üye çıkarıldı.",
+      "pendingTitle": "Bekleyen davetler",
+      "pendingDescription": "Henüz kabul edilmemiş davetler. Bağlantıyı kopyalayıp kendiniz de paylaşabilirsiniz.",
+      "expires": "Son geçerlilik",
+      "copyLink": "Davet bağlantısını kopyala",
+      "linkCopied": "Davet bağlantısı kopyalandı.",
+      "cancelInvitation": "Daveti iptal et",
+      "roleDescriptions": {
+        "owner": "Her şey; çalışma alanını silme ve sahip atama dahil.",
+        "admin": "Üyeleri, projeleri, anahtarları ve bütçeyi yönetir.",
+        "member": "Projelerde çalışır; kelime, prompt ve rakip ekler.",
+        "viewer": "Yalnızca görüntüler ve raporları indirir."
+      }
+    },
+    "projects": {
+      "title": "Projeler",
+      "description": "Arşivlenen projelerin verileri korunur ve planlı işleri durur; istediğiniz zaman geri alabilirsiniz.",
+      "new": "Yeni proje",
+      "empty": "Henüz proje yok.",
+      "project": "Proje",
+      "market": "Pazar",
+      "created": "Oluşturma",
+      "actions": "İşlemler",
+      "archivedBadge": "Arşivde",
+      "archive": "Arşivle",
+      "restore": "Arşivden çıkar",
+      "archived": "{name} arşivlendi.",
+      "restored": "{name} arşivden çıkarıldı.",
+      "delete": "Projeyi sil",
+      "deleteTitle": "{name} silinsin mi?",
+      "deleteBody": "Projenin tüm verileri kalıcı olarak silinir. Bu işlem geri alınamaz.",
+      "deleted": "{name} silindi."
+    },
+    "usage": {
+      "title": "Kullanım",
+      "description": "Sağlayıcı maliyetleri, UTC takvim ayına göre.",
+      "month": "Ay",
+      "spent": "Harcanan",
+      "budget": "Aylık bütçe",
+      "noBudget": "Bütçe yok",
+      "used": "Bütçe kullanımı",
+      "empty": "Bu ay henüz ücretli bir işlem yapılmadı.",
+      "provider": "Sağlayıcı",
+      "operations": "İşlem",
+      "cost": "Maliyet",
+      "providers": {
+        "DATAFORSEO": "DataForSEO",
+        "OPENAI": "OpenAI",
+        "ANTHROPIC": "Anthropic",
+        "GOOGLE_AI": "Google AI",
+        "OPENROUTER": "OpenRouter",
+        "PERPLEXITY": "Perplexity"
+      },
+      "budgetTitle": "Aylık bütçe",
+      "budgetDescription": "Sağlayıcı harcamaları için üst sınır. Eşiklerde sahiplere ve yöneticilere bildirim gider.",
+      "limit": "Aylık sınır (USD)",
+      "limitHint": "Tüm sağlayıcıların toplam maliyeti.",
+      "hardStop": "Sınırda durdur",
+      "hardStopHint": "Açıkken sınırı aşacak ücretli işler başlamaz. Kapalıyken yalnızca bildirim gider.",
+      "alerts": "Bildirim eşikleri",
+      "alertsHint": "Harcama bu yüzdelere ulaştığında bildirim gönderilir.",
+      "saveBudget": "Bütçeyi kaydet",
+      "budgetSaved": "Bütçe kaydedildi.",
+      "invalidLimit": "Geçerli bir tutar ve en az bir eşik girin.",
+      "removeBudget": "Bütçeyi kaldır",
+      "removeBudgetTitle": "Bütçe kaldırılsın mı?",
+      "removeBudgetBody": "Harcama sınırı ve bildirimler kapanır.",
+      "budgetRemoved": "Bütçe kaldırıldı."
+    },
+    "auditLog": {
+      "title": "Denetim kaydı",
+      "description": "Güvenlikle ilgili işlemler, en yenisi üstte. Kayıtlar gizli bilgi içermez.",
+      "empty": "Henüz kayıt yok.",
+      "when": "Zaman",
+      "who": "Kim",
+      "what": "İşlem",
+      "ip": "IP",
+      "system": "Sistem",
+      "loadMore": "Daha fazla yükle",
+      "budgetDetail": "Aylık {amount}",
+      "actions": {
+        "workspaceCreated": "Çalışma alanını oluşturdu",
+        "workspaceUpdated": "Çalışma alanını güncelledi",
+        "invitationCreated": "Davet gönderdi",
+        "invitationCanceled": "Daveti iptal etti",
+        "memberJoined": "Çalışma alanına katıldı",
+        "memberRoleChanged": "Rolü değiştirdi",
+        "memberRemoved": "Üyeyi çıkardı",
+        "memberLeft": "Çalışma alanından ayrıldı",
+        "projectCreated": "Proje oluşturdu",
+        "projectArchived": "Projeyi arşivledi",
+        "projectRestored": "Projeyi arşivden çıkardı",
+        "projectDeleted": "Projeyi sildi",
+        "credentialSaved": "Sağlayıcı anahtarını kaydetti",
+        "credentialDeleted": "Sağlayıcı anahtarını sildi",
+        "budgetUpdated": "Bütçeyi güncelledi",
+        "budgetRemoved": "Bütçeyi kaldırdı"
+      }
+    }
+  },
+  "projectSettings": {
+    "devices": {
+      "DESKTOP": "Masaüstü",
+      "MOBILE": "Mobil"
+    },
+    "general": {
+      "title": "Proje",
+      "description": "Yeni ölçümler bu ayarlarla yapılır; geçmiş veriler değişmez.",
+      "save": "Kaydet",
+      "saved": "Proje güncellendi.",
+      "name": "Marka adı",
+      "slug": "Adres",
+      "slugTaken": "Bu adres bu çalışma alanında kullanılıyor.",
+      "domain": "Alan adı",
+      "domainHint": "Farklı bir site için yeni proje oluşturun.",
+      "market": "Pazar",
+      "device": "Cihaz",
+      "timezone": "Saat dilimi",
+      "timezoneHint": "Planlı işler ve raporlar bu saate göre çalışır.",
+      "invalidTimezone": "Listeden geçerli bir saat dilimi seçin.",
+      "subdomains": "Alt alan adlarını dahil et",
+      "subdomainsHint": "blog.{domain} gibi adresler de bu projenin sonucu sayılır."
+    },
+    "brands": {
+      "title": "Marka ve rakipler",
+      "description": "AI yanıtlarında ve SERP'te bu markaları ararız. En fazla {max} rakip ekleyebilirsiniz.",
+      "add": "Rakip ekle",
+      "addTitle": "Rakip ekle",
+      "edit": "Düzenle",
+      "editTitle": "{name} düzenle",
+      "own": "Sizin markanız",
+      "aliasesShort": "Diğer adlar",
+      "remove": "Rakibi kaldır",
+      "removeTitle": "{name} kaldırılsın mı?",
+      "removeBody": "Rakip bundan sonraki ölçümlerde takip edilmez; geçmiş veriler korunur.",
+      "added": "{name} eklendi.",
+      "updated": "{name} güncellendi.",
+      "removed": "{name} kaldırıldı.",
+      "dialogDescription": "Alan adları ve diğer adlar, markanın yanıtlarda ve kaynaklarda tanınmasını sağlar.",
+      "name": "Ad",
+      "domains": "Alan adları",
+      "domainsHint": "Virgülle ayırın. Alt alan adları otomatik olarak dahil edilir.",
+      "invalidDomain": "Alan adlarından biri geçerli değil.",
+      "aliases": "Diğer adlar",
+      "aliasesPlaceholder": "Örn. Ornek, ORNEK A.Ş.",
+      "aliasesHint": "Markanın yazıldığı diğer biçimler; virgülle ayırın.",
+      "save": "Kaydet",
+      "limitReached": "Bir projede en fazla 7 rakip olabilir."
+    },
+    "danger": {
+      "title": "Tehlikeli bölge",
+      "description": "Arşivleme geri alınabilir; silme geri alınamaz.",
+      "archive": "Projeyi arşivle",
+      "archiveHint": "Veriler korunur, planlı işler durur. Çalışma alanı ayarlarından geri alabilirsiniz.",
+      "archiveTitle": "{name} arşivlensin mi?",
+      "archiveBody": "Proje menülerden kalkar ve planlı ölçümler durur. Veriler silinmez.",
+      "archived": "{name} arşivlendi.",
+      "delete": "Projeyi sil",
+      "deleteHint": "Tüm kelimeler, denetimler ve geçmiş veriler kalıcı olarak silinir.",
+      "deleteTitle": "{name} silinsin mi?",
+      "deleteBody": "Bu işlem geri alınamaz.",
+      "deleted": "{name} silindi."
+    }
+  },
+  "account": {
+    "title": "Hesap",
+    "description": "Profiliniz, güvenlik ayarlarınız ve kişisel API anahtarlarınız.",
+    "backToApp": "Uygulamaya dön",
+    "profile": {
+      "title": "Profil",
+      "description": "Adınız ekip arkadaşlarınıza görünür; dil hem arayüzü hem e-postaları belirler.",
+      "name": "Ad soyad",
+      "email": "E-posta",
+      "language": "Dil",
+      "languageHint": "E-postalar da bu dilde gönderilir.",
+      "save": "Kaydet",
+      "saved": "Profil güncellendi."
+    },
+    "password": {
+      "title": "Şifre",
+      "description": "Şifre değişince diğer cihazlardaki oturumlar kapanır.",
+      "current": "Mevcut şifre",
+      "new": "Yeni şifre",
+      "confirm": "Yeni şifre (tekrar)",
+      "mismatch": "Şifreler aynı değil.",
+      "save": "Şifreyi değiştir",
+      "changed": "Şifre değiştirildi; diğer oturumlar kapatıldı."
+    },
+    "twoFactor": {
+      "title": "İki adımlı doğrulama",
+      "description": "Girişte şifrenin yanında doğrulama uygulamanızdaki kodu da isteriz.",
+      "on": "Açık",
+      "off": "Kapalı",
+      "enable": "Etkinleştir",
+      "enableTitle": "İki adımlı doğrulamayı etkinleştir",
+      "enableBody": "Devam etmek için şifrenizi girin.",
+      "continue": "Devam",
+      "enabled": "İki adımlı doğrulama açıldı.",
+      "disable": "Kapat",
+      "disableTitle": "İki adımlı doğrulama kapatılsın mı?",
+      "disableBody": "Hesabınız yalnızca şifreyle korunur. Onaylamak için şifrenizi girin.",
+      "disabled": "İki adımlı doğrulama kapatıldı.",
+      "regenerate": "Yedek kodları yenile",
+      "regenerateTitle": "Yeni yedek kodlar oluşturulsun mu?",
+      "regenerateBody": "Eski yedek kodlar geçersiz olur. Onaylamak için şifrenizi girin.",
+      "newCodes": "Yeni yedek kodlarınız. Eskiler artık çalışmaz; bunları güvenli bir yere kaydedin.",
+      "codesCopied": "Yedek kodlar kopyalandı.",
+      "copyCodes": "Kopyala",
+      "downloadCodes": "İndir",
+      "step1": "1. Doğrulama uygulamanızla (Google Authenticator, 1Password, Authy…) QR kodu okutun.",
+      "step2": "2. Yedek kodları kaydedin. Telefonunuza erişemezseniz her biri bir kez giriş sağlar.",
+      "step3": "3. Uygulamadaki 6 haneli kodu girerek kurulumu tamamlayın.",
+      "qrAlt": "Doğrulama uygulaması için QR kod",
+      "manualEntry": "QR kod okutamıyorsanız bu anahtarı elle girin:",
+      "code": "Doğrulama kodu",
+      "codeHint": "Kod her 30 saniyede bir yenilenir.",
+      "verify": "Doğrula ve etkinleştir"
+    },
+    "apiKeys": {
+      "title": "API anahtarları",
+      "description": "Betikler ve entegrasyonlar için kişisel anahtarlar. Anahtar sizin yetkilerinizle çalışır; Authorization: Bearer başlığıyla gönderin.",
+      "empty": "Henüz API anahtarınız yok.",
+      "unnamed": "Adsız anahtar",
+      "created": "{date} oluşturuldu",
+      "expires": "{date} tarihinde sona erer",
+      "neverExpires": "süresiz",
+      "lastUsed": "son kullanım {when}",
+      "delete": "Anahtarı sil",
+      "deleteTitle": "{name} silinsin mi?",
+      "deleteBody": "Bu anahtarı kullanan entegrasyonlar hemen çalışmaz hale gelir.",
+      "deleted": "Anahtar silindi.",
+      "create": "Anahtar oluştur",
+      "createTitle": "Yeni API anahtarı",
+      "createBody": "Anahtar yalnızca bir kez gösterilir.",
+      "name": "Ad",
+      "namePlaceholder": "Örn. Looker Studio",
+      "expiryLabel": "Geçerlilik",
+      "expiryHint": "Süresi dolan anahtarlar otomatik olarak geçersiz olur.",
+      "expiry": {
+        "days30": "30 gün",
+        "days90": "90 gün",
+        "days365": "1 yıl",
+        "never": "Süresiz"
+      },
+      "createdTitle": "Anahtarınız hazır",
+      "createdBody": "Bu anahtarı şimdi kopyalayıp güvenli bir yere kaydedin; bir daha gösterilmeyecek.",
+      "copy": "Kopyala",
+      "copied": "Anahtar kopyalandı.",
+      "done": "Tamam"
+    },
+    "sessions": {
+      "title": "Oturumlar",
+      "description": "Hesabınıza giriş yapılmış cihazlar.",
+      "revokeOthers": "Diğer oturumları kapat",
+      "revokeOthersTitle": "Diğer oturumlar kapatılsın mı?",
+      "revokeOthersBody": "{count, plural, one {# cihazdaki oturum} other {# cihazdaki oturumlar}} hemen kapanır.",
+      "revokedOthers": "Diğer oturumlar kapatıldı.",
+      "unknownDevice": "Bilinmeyen cihaz",
+      "current": "Bu cihaz",
+      "lastActive": "son etkinlik {when}",
+      "revoke": "Oturumu kapat"
+    }
   }
 }

@@ -59,6 +59,19 @@ export function computeDelta(
   return { amount: Math.abs(change), trend: change > 0 ? "up" : "down" };
 }
 
+export function formatDate(date: Date | string, locale: Locale): string {
+  return new Intl.DateTimeFormat(intlLocale(locale), { dateStyle: "medium" }).format(
+    new Date(date),
+  );
+}
+
+export function formatDateTime(date: Date | string, locale: Locale): string {
+  return new Intl.DateTimeFormat(intlLocale(locale), {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(date));
+}
+
 const RELATIVE_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
   ["year", 365 * 24 * 3600],
   ["month", 30 * 24 * 3600],

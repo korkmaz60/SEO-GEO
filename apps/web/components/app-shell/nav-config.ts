@@ -29,12 +29,15 @@ export type Milestone = "M1" | "M2" | "M3" | "M4" | "M5";
 
 export interface RouteContext {
   workspace: string;
-  project: string;
+  /** `null` while the workspace has no projects. */
+  project: string | null;
 }
 
 export interface NavItem {
   /** Key under `nav.items` and `pages` in the message catalogs. */
   key: PageKey;
+  /** Project pages need a project; without one they lead to project creation. */
+  scope: "project" | "workspace";
   href: (ctx: RouteContext) => string;
   icon: LucideIcon;
   milestone: Milestone;
@@ -46,28 +49,35 @@ export interface NavGroup {
   items: NavItem[];
 }
 
-const project = (path: string) => (ctx: RouteContext) => `/${ctx.workspace}/${ctx.project}/${path}`;
-const workspace = (path: string) => (ctx: RouteContext) => `/${ctx.workspace}/${path}`;
+const project = (path: string) => ({
+  scope: "project" as const,
+  href: (ctx: RouteContext) =>
+    ctx.project ? `/${ctx.workspace}/${ctx.project}/${path}` : `/${ctx.workspace}/projects/new`,
+});
+const workspace = (path: string) => ({
+  scope: "workspace" as const,
+  href: (ctx: RouteContext) => `/${ctx.workspace}/${path}`,
+});
 
 export const NAV_GROUPS: NavGroup[] = [
   {
     key: "general",
-    items: [{ key: "overview", href: project("overview"), icon: LayoutDashboard, milestone: "M2" }],
+    items: [{ key: "overview", ...project("overview"), icon: LayoutDashboard, milestone: "M2" }],
   },
   {
     key: "aiVisibility",
     items: [
-      { key: "aiSummary", href: project("ai-visibility"), icon: Sparkles, milestone: "M3" },
+      { key: "aiSummary", ...project("ai-visibility"), icon: Sparkles, milestone: "M3" },
       {
         key: "prompts",
-        href: project("ai-visibility/prompts"),
+        ...project("ai-visibility/prompts"),
         icon: MessageSquareText,
         milestone: "M3",
       },
-      { key: "sources", href: project("ai-visibility/sources"), icon: Quote, milestone: "M3" },
+      { key: "sources", ...project("ai-visibility/sources"), icon: Quote, milestone: "M3" },
       {
         key: "competitors",
-        href: project("ai-visibility/competitors"),
+        ...project("ai-visibility/competitors"),
         icon: Swords,
         milestone: "M3",
       },
@@ -76,40 +86,40 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     key: "seo",
     items: [
-      { key: "rankTracker", href: project("rank-tracker"), icon: TrendingUp, milestone: "M2" },
-      { key: "siteAudit", href: project("site-audit"), icon: ScanSearch, milestone: "M2" },
-      { key: "backlinks", href: project("backlinks"), icon: Link2, milestone: "M4" },
-      { key: "searchConsole", href: project("search-console"), icon: BarChart3, milestone: "M2" },
+      { key: "rankTracker", ...project("rank-tracker"), icon: TrendingUp, milestone: "M2" },
+      { key: "siteAudit", ...project("site-audit"), icon: ScanSearch, milestone: "M2" },
+      { key: "backlinks", ...project("backlinks"), icon: Link2, milestone: "M4" },
+      { key: "searchConsole", ...project("search-console"), icon: BarChart3, milestone: "M2" },
     ],
   },
   {
     key: "content",
-    items: [{ key: "optimizer", href: project("content"), icon: PenLine, milestone: "M5" }],
+    items: [{ key: "optimizer", ...project("content"), icon: PenLine, milestone: "M5" }],
   },
   {
     key: "research",
     items: [
       {
         key: "keywordExplorer",
-        href: workspace("research/keywords"),
+        ...workspace("research/keywords"),
         icon: Search,
         milestone: "M2",
       },
-      { key: "domainOverview", href: workspace("research/domains"), icon: Globe, milestone: "M4" },
+      { key: "domainOverview", ...workspace("research/domains"), icon: Globe, milestone: "M4" },
     ],
   },
   {
     key: "manage",
     items: [
-      { key: "reports", href: project("reports"), icon: FileText, milestone: "M4" },
-      { key: "projectSettings", href: project("settings"), icon: Settings, milestone: "M1" },
+      { key: "reports", ...project("reports"), icon: FileText, milestone: "M4" },
+      { key: "projectSettings", ...project("settings"), icon: Settings, milestone: "M1" },
     ],
   },
 ];
 
 export const WORKSPACE_SETTINGS: NavItem = {
   key: "workspaceSettings",
-  href: workspace("settings"),
+  ...workspace("settings"),
   icon: Settings,
   milestone: "M1",
 };
@@ -124,6 +134,7 @@ export function findActiveItem(pathname: string, ctx: RouteContext): NavItem | u
   let best: NavItem | undefined;
   let bestLength = -1;
   for (const item of ALL_NAV_ITEMS) {
+    if (item.scope === "project" && !ctx.project) continue;
     const href = item.href(ctx);
     const matches = pathname === href || pathname.startsWith(`${href}/`);
     if (matches && href.length > bestLength) {

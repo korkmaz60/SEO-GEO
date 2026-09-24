@@ -1,6 +1,6 @@
 "use client";
 
-import { Laptop, Moon, Palette, Search, Sun } from "lucide-react";
+import { FolderPlus, Laptop, Moon, Search, Sun, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
@@ -17,6 +17,9 @@ import {
   CommandList,
 } from "@/components/ui/command";
 
+import { initials } from "@/lib/initials";
+import { useCan, useWorkspace } from "@/lib/workspace-context";
+
 import { NAV_GROUPS, WORKSPACE_SETTINGS } from "./nav-config";
 import { useRouteContext } from "./use-route-context";
 
@@ -26,6 +29,8 @@ export function CommandMenu() {
   const t = useTranslations();
   const router = useRouter();
   const ctx = useRouteContext();
+  const { workspace, projects } = useWorkspace();
+  const canCreateProject = useCan("admin");
   const { setTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const isApple = useSyncExternalStore(
@@ -90,14 +95,44 @@ export function CommandMenu() {
                 ))}
               </CommandGroup>
             ))}
+            <CommandGroup heading={t("shell.projects")}>
+              {projects.map((project) => (
+                <CommandItem
+                  key={project.id}
+                  value={`${t("shell.projects")} ${project.name} ${project.domain}`}
+                  onSelect={() =>
+                    run(() => router.push(`/${workspace.slug}/${project.slug}/overview`))
+                  }
+                >
+                  <span
+                    aria-hidden
+                    className="flex size-4 items-center justify-center rounded-sm bg-primary text-[9px] font-semibold text-primary-foreground"
+                  >
+                    {initials(project.name)}
+                  </span>
+                  {project.name}
+                  <span className="ml-auto truncate text-xs text-muted-foreground">
+                    {project.domain}
+                  </span>
+                </CommandItem>
+              ))}
+              {canCreateProject && (
+                <CommandItem
+                  onSelect={() => run(() => router.push(`/${workspace.slug}/projects/new`))}
+                >
+                  <FolderPlus />
+                  {t("shell.newProject")}
+                </CommandItem>
+              )}
+            </CommandGroup>
             <CommandGroup heading={t("shell.commandPreferences")}>
               <CommandItem onSelect={() => run(() => router.push(WORKSPACE_SETTINGS.href(ctx)))}>
                 <WORKSPACE_SETTINGS.icon />
                 {t("nav.items.workspaceSettings")}
               </CommandItem>
-              <CommandItem onSelect={() => run(() => router.push("/design"))}>
-                <Palette />
-                {t("nav.items.designSystem")}
+              <CommandItem onSelect={() => run(() => router.push("/account"))}>
+                <UserRound />
+                {t("shell.account")}
               </CommandItem>
               <CommandItem onSelect={() => run(() => setTheme("light"))}>
                 <Sun />

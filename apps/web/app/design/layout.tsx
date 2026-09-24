@@ -6,14 +6,13 @@ import type { ReactNode } from "react";
 import { LocaleSwitcher } from "@/components/app-shell/locale-switcher";
 import { ThemeToggle } from "@/components/app-shell/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { PREVIEW_HOME } from "@/lib/preview";
 
 export default async function DesignLayout({ children }: { children: ReactNode }) {
   const t = await getTranslations("design");
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-background/85 px-4 backdrop-blur">
-        <Button variant="ghost" size="sm" render={<Link href={PREVIEW_HOME} />}>
+        <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/" />}>
           <ArrowLeft className="size-4" />
           {t("backToApp")}
         </Button>
