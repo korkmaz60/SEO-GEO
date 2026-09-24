@@ -89,13 +89,18 @@ Defined as OKLCH CSS variables in `app/globals.css` for light and dark themes:
 
 | Token | Meaning |
 |---|---|
+| `--primary` | brand blue (Tailwind blue-600): primary buttons, selected controls, the project mark; white text on it is 5:1 |
+| `--ring` | focus rings (blue-600 light, blue-500 dark) |
+| `--link` | link text: blue-600 on light (5.3:1), blue-400 on dark (7.5:1 on `#0a0a0a`) |
 | `--success`, `--warning`, `--serious`, `--critical` | status; always paired with an icon and a label |
 | `--positive-text`, `--negative-text` | deltas and trend text (WCAG AA as text) |
 | `--chart-1` … `--chart-8` | categorical chart palette (see below) |
 
-The UI chrome is neutral: surfaces use the shadcn/ui `neutral` base color (chroma 0) and
-there is no brand hue in navigation, icons, buttons or focus rings. Hue is reserved for data
-(the chart palette) and state (status colors), so a colored mark always means something.
+Surfaces use the shadcn/ui `neutral` base color (chroma 0). The only brand hue is blue, and
+it is kept to interactive emphasis (primary buttons, selected controls, focus rings, the
+project mark); navigation and icons stay neutral. Every other hue belongs to data (the chart
+palette) or state (status colors). The `link` variants of the shadcn button and badge use
+`--link` instead of `--primary` so link text stays readable on black.
 
 Dark theme is the default; light theme is fully supported and selected through the toggle
 or the system setting. Dark surfaces are near-black (`background` `#0a0a0a`, `card`
@@ -115,8 +120,9 @@ Charts follow the data-viz method: form first, color by job, palette validated.
   white, so charts always ship a legend, selective direct labels and a table view.
 - **Entities keep their color.** The project's own brand is slot 1; competitors take the
   next slots in creation order and store it (`brand_entity.color`). Filters never repaint.
-- **The interface carries no hue of its own**, so the own-brand blue in a chart never
-  competes with a blue button or icon next to it.
+- **Blue in the interface is limited to interactive emphasis**, never icons or navigation,
+  so chart colors keep their meaning. The own brand's chart color (slot 1) is also blue,
+  which keeps "your brand" and the product color in the same family.
 - **Status** (good / warning / serious / critical) uses its own fixed steps, never as a
   series color.
 - **Sequential** (magnitude, e.g. position heatmaps): one blue ramp, light → dark.

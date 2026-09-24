@@ -6,7 +6,7 @@ interface ScoreRingProps {
   label: string;
   size?: number;
   strokeWidth?: number;
-  /** CSS color for the progress arc; defaults to the neutral primary. */
+  /** CSS color for the progress arc; defaults to the brand primary. */
   color?: string;
   className?: string;
 }
