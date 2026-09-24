@@ -12,6 +12,7 @@ export default defineConfig([
     "**/.next/**",
     "**/.turbo/**",
     "legacy/**",
+    "**/src/generated/**",
     "apps/web/**",
   ]),
   js.configs.recommended,

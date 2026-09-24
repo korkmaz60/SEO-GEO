@@ -4,8 +4,10 @@ packages:
 
 # pnpm only runs install scripts of the packages listed here.
 onlyBuiltDependencies:
+  - "@prisma/engines"
   - "@swc/core"
   - esbuild
+  - prisma
   - sharp
   - unrs-resolver
 
