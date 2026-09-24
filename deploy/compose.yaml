@@ -56,7 +56,11 @@ services:
         condition: service_healthy
 
   worker:
+    # Same image as the api; the build section keeps Compose from trying to pull it.
     image: seo-geo-api:${SEO_GEO_TAG:-local}
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
     restart: unless-stopped
     command: ["node", "--enable-source-maps", "dist/worker.js"]
     environment:
