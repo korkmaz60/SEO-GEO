@@ -41,30 +41,36 @@ security model and frontend design system.
 
 ## Getting started
 
-Requirements: Node.js 22.12+ and pnpm 10 (`corepack enable` installs the pinned version).
+Requirements: Node.js 22.12+, pnpm 10 (`corepack enable` installs the pinned version) and
+PostgreSQL 16+ (`docker compose up -d` starts one).
 
 ```bash
 pnpm install
+docker compose up -d     # PostgreSQL on localhost:5432
+pnpm env:setup           # creates .env with fresh secrets
+pnpm db:migrate          # applies the database migrations
 pnpm dev
 ```
 
-- Web app: http://localhost:3000 (opens the interface preview)
-- API: http://localhost:4000/v1/health — API docs: http://localhost:4000/docs
+- Web app: http://localhost:3000
+- API: http://localhost:4000/api/v1/health — API docs: http://localhost:4000/api/docs
 - Style guide: http://localhost:3000/design
 
-Configuration is read from environment variables; see [`.env.example`](.env.example). The
-defaults are enough for M0. PostgreSQL (from M1) can be started with `docker compose up -d`.
+Configuration is read from environment variables; see [`.env.example`](.env.example).
+Without SMTP settings, sign-up works without email verification and emails are printed to
+the api console.
 
 ## Scripts
 
-| Command                             | What it does                                                                             |
-| ----------------------------------- | ---------------------------------------------------------------------------------------- |
-| `pnpm dev`                          | Runs packages in watch mode, the api (`nest start --watch`) and the web app (`next dev`) |
-| `pnpm build`                        | Builds every package and app                                                             |
-| `pnpm test`                         | Runs all Vitest suites                                                                   |
-| `pnpm lint` / `pnpm typecheck`      | ESLint and TypeScript checks                                                             |
-| `pnpm format` / `pnpm format:check` | Prettier                                                                                 |
-| `pnpm check`                        | Lint, typecheck, test and build — what CI runs                                           |
+| Command                              | What it does                                                                             |
+| ------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `pnpm dev`                           | Runs packages in watch mode, the api (`nest start --watch`) and the web app (`next dev`) |
+| `pnpm build`                         | Builds every package and app                                                             |
+| `pnpm test`                          | Runs all Vitest suites                                                                   |
+| `pnpm lint` / `pnpm typecheck`       | ESLint and TypeScript checks                                                             |
+| `pnpm format` / `pnpm format:check`  | Prettier                                                                                 |
+| `pnpm check`                         | Lint, typecheck, test and build — what CI runs                                           |
+| `pnpm db:migrate` / `db:migrate:dev` | Apply migrations / create one from schema changes                                        |
 
 ## Contributing
 

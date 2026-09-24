@@ -41,27 +41,34 @@ handlers call the same services, so logic is written once.
 
 | Topic | Convention |
 |---|---|
-| Base path | `/v1`, JSON, UTF-8 |
-| Paths | plural nouns, kebab-case: `/v1/projects/:projectId/tracked-keywords` |
+| Base path | `/api/v1`, JSON, UTF-8 (the same path on the api and, through the proxy, on the web origin) |
+| Paths | plural nouns, kebab-case, nested under the workspace: `/api/v1/workspaces/:workspaceId/projects/:projectId/tracked-keywords` |
 | IDs | UUID strings |
 | Lists | `?limit=50&cursor=…&sort=-createdAt` → `{ "data": [...], "nextCursor": "…" \| null }` |
 | Errors | RFC 9457 `application/problem+json`: `type`, `title`, `status`, `detail`, `code`, `errors[]` (field errors), `requestId` |
-| Async work | `202 Accepted` + `{ "task": {...} }`; progress at `GET /v1/tasks/:id` |
+| Async work | `202 Accepted` + `{ "task": {...} }`; progress at `GET /api/v1/workspaces/:workspaceId/tasks/:taskId` |
 | Idempotency | `Idempotency-Key` header on POSTs that create tasks; replays return the original task |
 | Rate limits | `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset` headers; `429` with problem+json |
-| Auth | session cookie (web) or `Authorization: Bearer <api key>` |
-| Docs | OpenAPI at `/v1/openapi.json`, generated from the Zod contracts; Swagger UI at `/docs` (can be disabled) |
+| Auth | session cookie (web) or `x-api-key: <api key>` |
+| Docs | OpenAPI at `/api/v1/openapi.json`, generated from the Zod contracts; Swagger UI at `/api/docs` (can be disabled) |
 
 The web app uses exactly the same API as third parties.
 
 ## Authentication and authorization
 
-- **Better Auth** is mounted under `/v1/auth/*`: email + password with verification,
-  password reset, optional Google/GitHub sign-in, TOTP 2FA, organizations (workspaces),
-  invitations and API keys.
-- **Guards**: `SessionOrApiKeyGuard` resolves the principal; `WorkspaceGuard` resolves the
-  workspace from the route (directly or through the project) and checks membership;
-  `@RequireRole()` / `@RequirePermission()` enforce the matrix below.
+- **Better Auth** is mounted under `/api/auth/*`, outside the versioned API: email +
+  password with verification, password reset, TOTP 2FA, organizations (workspaces),
+  invitations and API keys. Workspace creation, renaming, members and invitations use its
+  organization endpoints; its role statements mirror the matrix below.
+- **Email verification** is required when SMTP is configured. Without SMTP it is skipped,
+  and in development emails (links included) are printed to the api console.
+- **Self-hosted sign-up**: the first account can sign up freely; after that, sign-up needs
+  a pending invitation. The cloud edition has open sign-up. `GET /api/v1/instance` tells the
+  web app which applies.
+- **Guards**: a global `AuthGuard` requires a session or API key unless a route is
+  `@Public()`; `@WorkspaceScoped()` adds `WorkspaceGuard`, which resolves `:workspaceId`,
+  checks membership (non-members get 404, so IDs cannot be probed) and the minimum role set
+  with `@RequireRole()`.
 - API keys belong to a user inside one workspace and carry scopes: `read`, `write`,
   `run:paid`.
 

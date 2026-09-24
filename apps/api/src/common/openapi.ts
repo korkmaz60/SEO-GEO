@@ -13,8 +13,8 @@ export function toOpenApiSchema(schema: z.ZodType): SchemaObject {
   return rest as SchemaObject;
 }
 
-export const OPENAPI_JSON_PATH = "v1/openapi.json";
-export const SWAGGER_UI_PATH = "docs";
+export const OPENAPI_JSON_PATH = "api/v1/openapi.json";
+export const SWAGGER_UI_PATH = "api/docs";
 
 export function createOpenApiDocument(app: INestApplication, config: AppConfig): OpenAPIObject {
   const options = new DocumentBuilder()

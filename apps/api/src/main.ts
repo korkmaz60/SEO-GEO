@@ -7,12 +7,15 @@ import type { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "./app.module.js";
 import { API_PREFIX, configureApp } from "./app.setup.js";
 import { ConfigError, loadConfig } from "./config/env.js";
+import { loadDotEnv } from "./config/load-env.js";
 import { createLogger } from "./config/logger.js";
 
 async function bootstrap(): Promise<void> {
+  loadDotEnv();
   const config = loadConfig();
   const app = await NestFactory.create<NestExpressApplication>(AppModule.forRoot(config), {
     logger: createLogger(config),
+    bodyParser: false,
   });
   configureApp(app, config);
   app.enableShutdownHooks();

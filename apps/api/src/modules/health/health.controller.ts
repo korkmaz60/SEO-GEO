@@ -2,11 +2,13 @@ import { Controller, Get, Inject } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { HealthResponseSchema, type HealthResponse } from "@seo-geo/contracts";
 
+import { Public } from "../../auth/decorators.js";
 import { toOpenApiSchema } from "../../common/openapi.js";
 import { APP_CONFIG } from "../../config/config.module.js";
 import type { AppConfig } from "../../config/env.js";
 
 @ApiTags("health")
+@Public()
 @Controller("health")
 export class HealthController {
   constructor(@Inject(APP_CONFIG) private readonly config: AppConfig) {}

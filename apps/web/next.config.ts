@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   poweredByHeader: false,
   async rewrites() {
-    return [{ source: "/api/:path*", destination: `${apiUrl}/:path*` }];
+    return [{ source: "/api/:path*", destination: `${apiUrl}/api/:path*` }];
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

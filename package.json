@@ -14,7 +14,10 @@
     "test": "turbo run test",
     "check": "turbo run lint typecheck test build",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "env:setup": "node scripts/env-setup.mjs",
+    "db:migrate": "pnpm --filter @seo-geo/db migrate:deploy",
+    "db:migrate:dev": "pnpm --filter @seo-geo/db migrate:dev"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

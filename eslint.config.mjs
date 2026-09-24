@@ -29,4 +29,12 @@ export default defineConfig([
       "@typescript-eslint/consistent-type-imports": ["error", { fixStyle: "inline-type-imports" }],
     },
   },
+  {
+    // NestJS injects constructor parameters by their runtime class (decorator metadata), so
+    // those imports must stay value imports.
+    files: ["apps/api/**/*.ts"],
+    languageOptions: {
+      parserOptions: { emitDecoratorMetadata: true, experimentalDecorators: true },
+    },
+  },
 ]);

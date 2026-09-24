@@ -4,10 +4,12 @@ import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 
 import { ConfigError, loadConfig } from "./config/env.js";
+import { loadDotEnv } from "./config/load-env.js";
 import { createLogger } from "./config/logger.js";
 import { WorkerModule } from "./worker.module.js";
 
 async function bootstrap(): Promise<void> {
+  loadDotEnv();
   const config = loadConfig({ ...process.env, APP_MODE: "worker" });
   const app = await NestFactory.createApplicationContext(WorkerModule.forRoot(config), {
     logger: createLogger(config),

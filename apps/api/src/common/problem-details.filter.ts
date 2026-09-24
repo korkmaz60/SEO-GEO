@@ -36,7 +36,7 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     const request = http.getRequest<Request>();
     const response = http.getResponse<Response>();
 
-    // Full path including the /v1 prefix, without the query string (it may carry secrets).
+    // Full path including the /api/v1 prefix, without the query string (it may carry secrets).
     const path = (request.originalUrl || request.url).split("?")[0] ?? "/";
     const problem = this.toProblem(exception);
     if (
