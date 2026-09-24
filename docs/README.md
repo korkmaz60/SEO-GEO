@@ -45,3 +45,6 @@ change until the milestone that depends on it starts.
 | D11 | License: AGPL-3.0-only ([LICENSE](../LICENSE)); one license for the self-hosted and cloud editions | Accepted |
 | D12 | Cloud billing with Stripe Managed Payments (Stripe is the merchant of record and handles sales tax and VAT) on the owner's company outside Turkey; Paddle as fallback; loaded only in the cloud edition | Accepted |
 | D13 | Self-hosting with Docker: one image for api and worker, one for the web app, Docker Compose with PostgreSQL and optional Caddy for HTTPS; migrations run on api start | Accepted (M1) |
+| D14 | Rank checks through the DataForSEO Standard queue at depth 30, collected by polling `tasks_ready`; SERPs of the same query and market are shared across projects for 20 hours | Accepted (M2) |
+| D15 | Own site crawler in `packages/core` (safe fetcher, cheerio) instead of the On-Page API, so audits cost nothing and work without a provider key | Accepted (M2) |
+| D16 | Search Console and GA4 through each workspace's own Google OAuth consent (read-only scopes, sealed state + PKCE); imported rows are private to the project and never cached across workspaces | Accepted (M2) |

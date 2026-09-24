@@ -111,6 +111,18 @@
         "credentialInvalid": {
           "title": "DataForSEO anahtarı artık çalışmıyor",
           "body": "Veri toplama duraklatıldı. Anahtarı sağlayıcı ayarlarından yenileyin."
+        },
+        "rankBudgetBlocked": {
+          "title": "Sıralama kontrolleri duraklatıldı",
+          "body": "{project} projesinin günlük kontrolleri aylık bütçeyi ({limit}) aşacaktı. Devam etmek için bütçeyi artırın."
+        },
+        "dataforseoBlocked": {
+          "title": "DataForSEO istekleri reddetti",
+          "body": "Veri toplama durdu (DataForSEO kodu {code}). Hesap bakiyenizi ve API erişim izinlerinizi kontrol edin."
+        },
+        "googleRevoked": {
+          "title": "Google erişimi iptal edildi",
+          "body": "Search Console ve Analytics verilerinin güncel kalması için {email} hesabını yeniden bağlayın."
         }
       }
     }
@@ -166,7 +178,7 @@
     },
     "searchConsole": {
       "title": "Search Console",
-      "description": "Google Search Console'dan sorgu ve sayfa performansı.",
+      "description": "Search Console ve Google Analytics 4'ten gerçek tıklama, gösterim ve trafik verileri.",
       "emptyTitle": "Search Console bağlı değil",
       "emptyBody": "Google hesabınızı bağladığınızda tıklama, gösterim ve ortalama konum verileri her gün senkronize edilir."
     },
@@ -221,7 +233,7 @@
     "steps": {
       "provider": "DataForSEO anahtarınızı bağlayın",
       "brand": "Markanızı ve rakiplerinizi tanımlayın",
-      "keywords": "Takip edilecek kelimeleri ve prompt'ları ekleyin",
+      "keywords": "Takip edilecek kelimeleri ekleyin",
       "audit": "İlk site denetimini başlatın",
       "gsc": "Search Console'u bağlayın"
     },
@@ -273,13 +285,40 @@
     "aiTrendEmpty": "Prompt takibi başladığında platform bazında haftalık görünürlük burada çizilir.",
     "rankTitle": "Sıralama dağılımı",
     "rankEmptyTitle": "Takip edilen kelime yok",
-    "rankEmpty": "Kelimeler ilk 3, ilk 10 ve ilk 100 gruplarına göre burada dağılır.",
-    "scoresTitle": "Skorlar",
+    "rankEmpty": "Kelime eklediğinizde sıralamalar her gün kontrol edilir ve burada sıra aralıklarına göre dağılır.",
     "aiScore": "AI görünürlük",
     "siteHealth": "Site sağlığı",
     "brandsTitle": "Takip edilen markalar",
     "brandsDescription": "Her marka tüm grafiklerde aynı rengi korur.",
-    "ownBrand": "Siz"
+    "ownBrand": "Siz",
+    "open": "Aç",
+    "sources": {
+      "rankTracker": "Sıralama takibi"
+    },
+    "shareMethod": "CTR ağırlıklı görünürlüğünüzün, takip edilen tüm markaların toplam görünürlüğüne oranı.",
+    "rankDescription": "Görünürlük {visibility} · son kontrolde {improved} kelime yükseldi, {declined} kelime düştü",
+    "rankAction": "Kelime ekle",
+    "traffic": {
+      "title": "Organik trafik",
+      "description": "Search Console · {start} – {end}",
+      "source": "Google Search Console",
+      "clicks": "Tıklama",
+      "impressions": "Gösterim",
+      "position": "Ortalama konum",
+      "emptyTitle": "Search Console bağlı değil",
+      "emptyBody": "Gerçek tıklama ve gösterim verileri için projenin Search Console mülkünü bağlayın.",
+      "connect": "Search Console'u bağla",
+      "tableView": "Tablo olarak göster",
+      "date": "Tarih"
+    },
+    "audit": {
+      "score": "Sağlık skoru",
+      "noIssues": "Hata veya uyarı yok.",
+      "emptyTitle": "Henüz denetim yok",
+      "emptyBody": "İlk denetim teknik sorunları ve AI tarayıcı erişimini kontrol eder.",
+      "running": "İlk denetim sürüyor; tamamlandığında sonuçlar burada görünür.",
+      "action": "Site denetimine git"
+    }
   },
   "auth": {
     "email": "E-posta",
@@ -483,14 +522,24 @@
     "upcomingTitle": "Diğer bağlantılar",
     "upcomingDescription": "Yol haritasına göre eklenecek veri kaynakları.",
     "upcoming": {
-      "searchConsole": {
-        "title": "Google Search Console",
-        "description": "Gerçek tıklama, gösterim ve sorgu verileri."
-      },
       "aiPlatforms": {
         "title": "AI platformları",
         "description": "ChatGPT, Gemini, Claude ve Perplexity için kendi API anahtarlarınız."
       }
+    },
+    "google": {
+      "title": "Google (Search Console ve Analytics)",
+      "description": "Çalışma alanına bağlı Google hesapları. Her projenin Search Console ve GA4 mülkü, projenin Search Console sayfasından seçilir.",
+      "empty": "Henüz bağlı bir Google hesabı yok. Bir projenin Search Console sayfasından bağlayabilirsiniz.",
+      "notConfigured": "Bu sunucuda Google OAuth istemcisi yapılandırılmamış (GOOGLE_CLIENT_ID ve GOOGLE_CLIENT_SECRET). Kurulum adımları için kendi sunucunda barındırma belgesine bakın.",
+      "openSearchConsole": "Search Console sayfasına git",
+      "connectedAt": "{time} bağlandı",
+      "active": "Bağlı",
+      "revoked": "Erişim iptal edildi",
+      "disconnect": "Bağlantıyı kaldır",
+      "disconnectTitle": "{email} bağlantısı kaldırılsın mı?",
+      "disconnectBody": "Google'daki erişim izni geri alınır. Bu hesabı kullanan projelerin Search Console ve GA4 kaynakları ile içe aktarılmış verileri silinir.",
+      "removed": "Google hesabının bağlantısı kaldırıldı."
     }
   },
   "workspaceSettings": {
@@ -802,6 +851,814 @@
       "current": "Bu cihaz",
       "lastActive": "son etkinlik {when}",
       "revoke": "Oturumu kapat"
+    }
+  },
+  "serpFeatures": {
+    "owned": "sizin",
+    "aiCited": "alıntılandınız",
+    "aiNotCited": "alıntı yok",
+    "types": {
+      "ai_overview": "AI Overview",
+      "featured_snippet": "Öne çıkan snippet",
+      "local_pack": "Yerel paket",
+      "people_also_ask": "Kullanıcılar ayrıca soruyor",
+      "knowledge_graph": "Bilgi paneli",
+      "top_stories": "Öne çıkan haberler",
+      "video": "Videolar",
+      "short_videos": "Kısa videolar",
+      "images": "Görseller",
+      "shopping": "Alışveriş",
+      "popular_products": "Popüler ürünler",
+      "discussions_and_forums": "Tartışmalar ve forumlar",
+      "perspectives": "Perspektifler",
+      "twitter": "X (Twitter)",
+      "google_reviews": "Yorumlar",
+      "paid": "Reklamlar"
+    }
+  },
+  "keywordMetrics": {
+    "difficulty": {
+      "easy": "Kolay",
+      "medium": "Orta",
+      "hard": "Zor",
+      "veryHard": "Çok zor"
+    },
+    "intents": {
+      "informational": "Bilgi",
+      "navigational": "Yönlendirme",
+      "commercial": "Ticari",
+      "transactional": "İşlemsel"
+    }
+  },
+  "rankTracker": {
+    "addKeywords": "Kelime ekle",
+    "checkNow": "Şimdi kontrol et",
+    "checkQueued": "Kontrol sıraya alındı; sonuçlar birkaç dakika içinde gelir.",
+    "checkFailed": "Kontrol başlatılamadı.",
+    "providerMissing": {
+      "title": "DataForSEO bağlı değil",
+      "body": "Sıralamalar DataForSEO SERP API ile kontrol edilir. Anahtarınızı bağladığınızda kontroller başlar.",
+      "action": "Sağlayıcıyı bağla"
+    },
+    "pendingNotice": "{count, plural, one {# kelimenin SERP sonucu bekleniyor} other {# kelimenin SERP sonucu bekleniyor}}; sonuçlar genellikle birkaç dakika içinde gelir.",
+    "historyPending": "Trend, ikinci günlük kontrolden sonra görünür.",
+    "rangeLabel": "Zaman aralığı",
+    "range": {
+      "7": "7 gün",
+      "30": "30 gün",
+      "90": "90 gün"
+    },
+    "tableView": "Tablo olarak göster",
+    "date": "Tarih",
+    "kpi": {
+      "visibility": "Görünürlük",
+      "traffic": "Tahmini aylık tıklama",
+      "averagePosition": "Ortalama sıra",
+      "top3": "İlk 3 / ilk 10",
+      "aiOverview": "AI Overview alıntısı / görülen",
+      "keywords": "Takip edilen kelime"
+    },
+    "visibilityTitle": "Görünürlük trendi",
+    "visibilityDescription": "Arama hacmi ve tıklama oranı modeliyle ağırlıklandırılır; %100 her kelimede 1. sıra demektir.",
+    "distributionTitle": "Sıra dağılımı",
+    "distributionDescription": "Son kontrole göre kelimelerin sıra aralıkları.",
+    "buckets": {
+      "label": "Sıra aralıklarına göre kelime sayısı",
+      "top3": "1–3",
+      "top10": "4–10",
+      "top20": "11–20",
+      "top30": "21–30",
+      "none": "İlk 30'da yok"
+    },
+    "shareTitle": "Görünürlük payı",
+    "shareDescription": "Takip ettiğiniz kelimelerde sizin ve rakiplerinizin görünürlüğü.",
+    "rankingCount": "{count} kelime",
+    "positionFilter": {
+      "all": "Tüm sıralar",
+      "top3": "İlk 3",
+      "top10": "İlk 10",
+      "top30": "İlk 30",
+      "none": "Sıralanmayan"
+    },
+    "aiFilter": {
+      "label": "AI Overview",
+      "all": "AI Overview: tümü",
+      "present": "AI Overview var",
+      "cited": "AI Overview'da alıntı"
+    },
+    "notRanking": "İlk {depth}'da yok",
+    "pending": "Bekleniyor",
+    "failed": "Başarısız",
+    "new": "Yeni",
+    "lost": "Kayıp",
+    "movedUp": "yükseldi",
+    "movedDown": "düştü",
+    "unchanged": "değişmedi",
+    "mobile": "Mobil",
+    "trendLabel": "{keyword} sıralama trendi",
+    "wrongUrl": "Hedef URL yerine başka bir sayfa sıralanıyor (hedef: {url})",
+    "addedOn": "Takip başlangıcı: {date}",
+    "deleteTitle": "{count, plural, one {# kelimeyi sil} other {# kelimeyi sil}}",
+    "deleteDescription": "Kelimelerin takibi durur ve sıralama geçmişi silinir.",
+    "deleteConfirm": "Sil",
+    "deleted": "{count, plural, one {# kelime silindi} other {# kelime silindi}}",
+    "table": {
+      "keyword": "Kelime",
+      "position": "Sıra",
+      "change": "Değişim",
+      "week": "7 gün",
+      "month": "30 gün",
+      "trend": "Trend",
+      "features": "SERP özellikleri",
+      "volume": "Hacim",
+      "difficulty": "Zorluk",
+      "intent": "Niyet",
+      "url": "Sıralanan URL",
+      "tags": "Etiket",
+      "search": "Kelime ara",
+      "allTags": "Tüm etiketler",
+      "empty": "Filtrelere uyan kelime yok.",
+      "count": "{shown} / {total} kelime",
+      "deleteSelected": "{count} kelimeyi sil",
+      "selectPage": "Bu sayfadakileri seç",
+      "select": "{keyword} seç",
+      "page": "Sayfa {page} / {pages}",
+      "previous": "Önceki",
+      "next": "Sonraki"
+    },
+    "add": {
+      "title": "Takibe kelime ekle",
+      "description": "Kelimeler hemen kontrol edilir, sonra seçtiğiniz sıklıkla kontrol edilmeye devam eder.",
+      "keywords": "Kelimeler",
+      "placeholder": "kahve makinesi\nfiltre kahve makinesi\nespresso makinesi fiyatları",
+      "keywordsHint": "Her satıra bir kelime (virgülle de ayırabilirsiniz). En fazla 80 karakter ve 10 kelime.",
+      "device": "Cihaz",
+      "frequency": "Sıklık",
+      "frequencies": {
+        "DAILY": "Günlük",
+        "WEEKLY": "Haftalık"
+      },
+      "tags": "Etiketler",
+      "tagsPlaceholder": "ürün, kampanya",
+      "newKeywords": "Eklenecek",
+      "duplicates": "Zaten takipte",
+      "invalid": "Geçersiz",
+      "checkCost": "Bir kontrol (en fazla)",
+      "monthlyCost": "Aylık tahmini maliyet",
+      "metricsCost": "Hacim ve zorluk verisi (bir kez)",
+      "costNote": "Tahminler DataForSEO liste fiyatlarından hesaplanır; gerçek maliyet kullanım kaydına yazılır.",
+      "submit": "{count, plural, =0 {Kelime ekle} one {# kelime ekle} other {# kelime ekle}}",
+      "added": "{count, plural, =0 {Yeni kelime eklenmedi} one {# kelime eklendi} other {# kelime eklendi}}",
+      "budgetExceeded": "Bu işlem aylık bütçeyi aşar. Bütçeyi çalışma alanı ayarlarından artırabilirsiniz.",
+      "failed": "Kelimeler eklenemedi."
+    },
+    "detail": {
+      "position": "Sıra",
+      "volume": "Aylık hacim",
+      "difficulty": "Zorluk",
+      "cpc": "TBM",
+      "intent": "Niyet",
+      "historyTitle": "Sıralama geçmişi",
+      "historyEmpty": "Geçmiş, ikinci kontrolden sonra görünür.",
+      "historyTable": "Sıralama geçmişi tablosu",
+      "historyNote": "Boşluklar, o gün ilk {depth} sonuç içinde olunmadığını gösterir.",
+      "date": "Tarih",
+      "serpTitle": "Son arama sonuçları",
+      "serpFetched": "{date} tarihinde alındı",
+      "aiOverviewSources": "AI Overview kaynakları",
+      "aiOverviewNoSources": "AI Overview kaynak göstermedi.",
+      "openResult": "Sonucu yeni sekmede aç",
+      "settingsTitle": "Takip ayarları",
+      "targetUrl": "Hedef URL",
+      "save": "Kaydet",
+      "saved": "Kaydedildi.",
+      "saveFailed": "Kaydedilemedi."
+    }
+  },
+  "keywordExplorer": {
+    "tabs": {
+      "research": "Araştırma",
+      "lists": "Listelerim"
+    },
+    "seed": "Anahtar kelime",
+    "seedPlaceholder": "Bir kelime yazın, ör. kahve makinesi",
+    "market": "Pazar",
+    "limitLabel": "Sonuç sayısı",
+    "limit": "{count} sonuç",
+    "search": "Ara",
+    "modeLabel": "Araştırma türü",
+    "modes": {
+      "ideas": {
+        "label": "Fikirler",
+        "description": "Aynı ürün ve hizmet kategorisindeki kelimeler."
+      },
+      "suggestions": {
+        "label": "Öneriler",
+        "description": "Kelimenizi içeren uzun kuyruk aramalar."
+      },
+      "related": {
+        "label": "İlgili",
+        "description": "Google'ın \"ilgili aramalar\" ağından kelimeler."
+      }
+    },
+    "quote": "Tahmini maliyet: {cost}",
+    "quoteCached": "Önbellekte — ücretsiz",
+    "viewerNote": "Araştırma yapmak için en az üye rolü gerekir.",
+    "failed": "Araştırma tamamlanamadı.",
+    "emptyTitle": "Bir kelimeyle başlayın",
+    "emptyBody": "Arama hacmi, zorluk, TBM ve arama niyetiyle yeni kelimeler bulun; beğendiklerinizi takibe ekleyin veya listeye kaydedin.",
+    "filter": "Sonuçlarda ara",
+    "minVolume": "En az hacim",
+    "maxDifficulty": "En fazla zorluk",
+    "intent": "Niyet",
+    "allIntents": "Tüm niyetler",
+    "intents": {
+      "informational": "Bilgi",
+      "navigational": "Yönlendirme",
+      "commercial": "Ticari",
+      "transactional": "İşlemsel"
+    },
+    "resultCount": "{shown} gösteriliyor ({total} sonuç var)",
+    "fromCache": "önbellekten, {date}",
+    "cost": "maliyet {cost}",
+    "selected": "{count} kelime seçili",
+    "track": "Takibe ekle",
+    "trackIn": "Proje seçin",
+    "saveToList": "Listeye kaydet",
+    "clearSelection": "Seçimi temizle",
+    "noResults": "Filtrelere uyan kelime yok.",
+    "monthsLabel": "{keyword} için aylık arama hacmi",
+    "competition": {
+      "LOW": "Düşük",
+      "MEDIUM": "Orta",
+      "HIGH": "Yüksek"
+    },
+    "columns": {
+      "keyword": "Kelime",
+      "volume": "Hacim",
+      "months": "12 ay",
+      "trend": "Yıllık değişim",
+      "difficulty": "Zorluk",
+      "cpc": "TBM",
+      "competition": "Reklam rekabeti",
+      "intent": "Niyet"
+    },
+    "saveDialog": {
+      "title": "Listeye kaydet",
+      "description": "{count, plural, one {# kelime kaydedilecek.} other {# kelime kaydedilecek.}}",
+      "list": "Liste",
+      "newList": "Yeni liste",
+      "name": "Liste adı",
+      "save": "Kaydet",
+      "saved": "{count, plural, one {# kelime kaydedildi} other {# kelime kaydedildi}}",
+      "failed": "Kaydedilemedi."
+    },
+    "lists": {
+      "emptyTitle": "Kayıtlı liste yok",
+      "emptyBody": "Araştırma sonuçlarından kelimeleri seçip bir listeye kaydedin; listeler ekibinizle paylaşılır.",
+      "name": "Liste",
+      "keywords": "Kelime",
+      "updated": "Güncellendi",
+      "count": "{count, plural, one {# kelime} other {# kelime}}",
+      "market": "Pazar",
+      "delete": "Listeyi sil",
+      "deleteTitle": "\"{name}\" silinsin mi?",
+      "deleteDescription": "Liste ve içindeki kelimeler silinir. Takip edilen kelimeler etkilenmez.",
+      "deleted": "Liste silindi.",
+      "remove": "{keyword} kelimesini listeden çıkar"
+    }
+  },
+  "siteAudit": {
+    "lastFailed": "Son denetim tamamlanamadı: {error}",
+    "lastCanceled": "Son denetim iptal edildi. Aşağıda önceki tamamlanan denetim gösteriliyor.",
+    "tabs": {
+      "issues": "Sorunlar",
+      "pages": "Sayfalar",
+      "history": "Geçmiş"
+    },
+    "active": {
+      "queued": "Denetim sırada",
+      "running": "Site taranıyor",
+      "progress": "{max} sayfa sınırından {pages} sayfa tarandı · {url}",
+      "cancel": "Denetimi durdur",
+      "cancelTitle": "Denetim durdurulsun mu?",
+      "cancelDescription": "Tarama durur ve bu denetim sonuç üretmez. Önceki denetimin sonuçları olduğu gibi kalır.",
+      "canceled": "Denetim durduruldu"
+    },
+    "health": {
+      "title": "Site sağlığı",
+      "label": "Sağlık skoru",
+      "lastRun": "Son denetim: {date}",
+      "sincePrevious": "önceki denetimde {score}",
+      "formula": "Hatalı sayfalar skoru tam, yalnızca uyarısı olan sayfalar yarım ağırlıkla düşürür."
+    },
+    "kpi": {
+      "crawled": "Taranan sayfa",
+      "errors": "Hatalı sayfa",
+      "warnings": "Yalnızca uyarılı sayfa",
+      "indexable": "Dizine eklenebilir sayfa",
+      "changes": "Önceki denetime göre",
+      "changesValue": "{fixed} düzeldi · {new} yeni",
+      "firstRun": "İlk denetim, karşılaştırma yok"
+    },
+    "ai": {
+      "title": "AI arama hazırlığı",
+      "ok": "Uygun",
+      "attention": "İlgilenilmeli",
+      "searchAllowed": "AI arama botları siteye erişebiliyor",
+      "searchBlocked": "AI arama botları robots.txt ile engelli",
+      "llmsFound": "llms.txt yayında",
+      "llmsMissing": "llms.txt yok",
+      "schemaCoverage": "Yapılandırılmış veri kapsamı: {percent}",
+      "schemaUnknown": "Yapılandırılmış veri kapsamı hesaplanamadı"
+    },
+    "status": {
+      "title": "HTTP durum dağılımı",
+      "2xx": "2xx başarılı",
+      "3xx": "3xx yönlendirme",
+      "4xx": "4xx istemci hatası",
+      "5xx": "5xx sunucu hatası",
+      "failed": "Yanıt alınamadı",
+      "blocked": "robots.txt ile engellenen {count} sayfa taranmadı"
+    },
+    "category": "Kategori",
+    "allCategories": "Tüm kategoriler",
+    "showFixed": "Düzelen {count} sorunu göster",
+    "hideFixed": "Düzelen sorunları gizle",
+    "noIssues": "Bu kategoride sorun bulunmadı.",
+    "newCount": "{count} yeni",
+    "fixedCount": "{count} düzeldi",
+    "site": "Site",
+    "why": "Neden önemli?",
+    "howToFix": "Nasıl düzeltilir?",
+    "affected": "Etkilenen sayfalar ({count})",
+    "siteWide": "Site geneli",
+    "openPage": "Sayfayı yeni sekmede aç",
+    "showMore": "Daha fazla göster",
+    "detail": {
+      "status": "HTTP {value}",
+      "length": "{value} karakter",
+      "words": "{value} kelime",
+      "count": "{value} adet",
+      "images": "toplam {value} görsel",
+      "hops": "{value} yönlendirme adımı",
+      "depth": "ana sayfadan {value} tık",
+      "ms": "{value} ms",
+      "bytes": "{value}",
+      "reason": "Neden: {reason, select, timeout {zaman aşımı} network {ağ hatası} too_large {yanıt çok büyük} content_type {desteklenmeyen içerik türü} too_many_redirects {çok fazla yönlendirme} private_address {özel ağ adresi} unresolvable_host {alan adı çözümlenemedi} port_not_allowed {izin verilmeyen port} unsupported_protocol {desteklenmeyen protokol} invalid_url {geçersiz URL} other {{reason}}}",
+      "canonical": "Canonical: {url}",
+      "bots": "Engellenen: {bots}"
+    },
+    "severity": {
+      "ERROR": "Hata",
+      "WARNING": "Uyarı",
+      "NOTICE": "Bilgi"
+    },
+    "categories": {
+      "crawlability": "Taranabilirlik",
+      "indexability": "Dizine eklenebilirlik",
+      "content": "İçerik",
+      "links": "Bağlantılar",
+      "performance": "Performans",
+      "structured_data": "Yapılandırılmış veri",
+      "ai_search": "AI arama"
+    },
+    "start": {
+      "button": "Denetimi başlat",
+      "title": "Site denetimi başlat",
+      "description": "{domain} ana sayfadan başlayarak taranır; bağlantılar ve site haritaları takip edilir. robots.txt kurallarına ve tarama gecikmesine uyulur.",
+      "maxPages": "En fazla sayfa",
+      "maxDepth": "En fazla derinlik",
+      "pages": "{count, plural, other {# sayfa}}",
+      "depth": "{count, plural, other {# tık}}",
+      "politeness": "Tarayıcı sunucunuzu yormamak için istekleri sırayla ve aralıklı gönderir. Büyük siteler birkaç dakika sürebilir.",
+      "confirm": "Başlat",
+      "started": "Denetim sıraya alındı",
+      "failed": "Denetim başlatılamadı"
+    },
+    "pages": {
+      "filters": {
+        "all": "Tüm sayfalar",
+        "errors": "Hatalı sayfalar",
+        "warnings": "Uyarılı sayfalar",
+        "broken": "Bozuk (4xx/5xx)",
+        "redirects": "Yönlendirmeler",
+        "noindex": "Dizine eklenemeyenler"
+      },
+      "search": "URL veya başlık ara",
+      "filter": "Sayfa filtresi",
+      "count": "{count, plural, other {# sayfa}}",
+      "url": "Sayfa",
+      "status": "Durum",
+      "issues": "Sorunlar",
+      "depth": "Derinlik",
+      "inlinks": "Gelen iç bağlantı",
+      "words": "Kelime",
+      "responseTime": "Yanıt süresi",
+      "indexable": "Dizine eklenebilir",
+      "empty": "Bu filtreyle eşleşen sayfa yok.",
+      "blocked": "robots.txt engelledi",
+      "failedFetch": "Alınamadı ({reason})",
+      "errors": "Hata",
+      "warnings": "Uyarı",
+      "notices": "Bilgi",
+      "yes": "Evet",
+      "no": "Hayır",
+      "range": "{from}–{to} / {total}",
+      "previous": "Önceki",
+      "next": "Sonraki"
+    },
+    "history": {
+      "scoreTitle": "Sağlık skoru geçmişi",
+      "score": "Sağlık skoru",
+      "table": "Tablo olarak göster",
+      "date": "Tarih",
+      "status": "Durum",
+      "pages": "Sayfa",
+      "errors": "Hatalı sayfa",
+      "retention": "Son {count} denetimin sayfa ayrıntıları saklanır; daha eski denetimlerin yalnızca özeti tutulur.",
+      "statuses": {
+        "QUEUED": "Sırada",
+        "RUNNING": "Çalışıyor",
+        "COMPLETED": "Tamamlandı",
+        "FAILED": "Başarısız",
+        "CANCELED": "İptal edildi"
+      }
+    },
+    "issues": {
+      "page_4xx": {
+        "title": "Sayfa 4xx hatası veriyor",
+        "description": "Bu adresler 404 gibi istemci hatası döndürüyor. Ziyaretçiler boş sayfaya düşer, arama motorları bu sayfaları dizinden çıkarır ve bunlara verilen bağlantıların değeri boşa gider.",
+        "fix": "Sayfa taşındıysa yeni adrese 301 yönlendirme ekleyin; kaldırıldıysa ona verilen iç bağlantıları güncelleyin. Hâlâ gerekli bir sayfaysa içeriği geri yükleyin."
+      },
+      "page_5xx": {
+        "title": "Sayfa sunucu hatası (5xx) veriyor",
+        "description": "Sunucu bu sayfaları üretemedi. Hata sürerse Google tarama hızını düşürür ve sayfaları dizinden çıkarabilir.",
+        "fix": "Sunucu ve uygulama günlüklerinde bu adreslere ait hatayı bulun. Geçici bir yük sorunuysa kapasiteyi ve önbelleği gözden geçirin, ardından denetimi yeniden çalıştırın."
+      },
+      "fetch_failed": {
+        "title": "Sayfa alınamadı",
+        "description": "Tarayıcı bu adrese bağlanamadı ya da yanıt zamanında gelmedi. Arama motorları da aynı sorunu yaşıyorsa sayfa hiç dizine eklenmez.",
+        "fix": "Nedeni sayfanın altında gösterilir. Zaman aşımında sunucu yanıt süresini, alan adı hatasında DNS kayıtlarını, çok büyük yanıtta sayfanın boyutunu kontrol edin."
+      },
+      "redirect_loop": {
+        "title": "Yönlendirme döngüsü",
+        "description": "Yönlendirmeler sonunda başladıkları adrese geri dönüyor. Tarayıcılar ve arama motorları sayfaya hiçbir zaman ulaşamaz.",
+        "fix": "Zincirdeki adresleri izleyin ve her yönlendirmenin 200 döndüren son bir sayfaya çıkmasını sağlayın. Genellikle çakışan HTTP→HTTPS, www veya sondaki eğik çizgi kuralları döngüye yol açar."
+      },
+      "redirect_chain": {
+        "title": "Yönlendirme zinciri",
+        "description": "Sayfa, son adrese ulaşmadan önce birden fazla yönlendirmeden geçiyor. Her adım yüklemeyi yavaşlatır ve tarama bütçesini harcar.",
+        "fix": "İlk adresi doğrudan son hedefe tek bir 301 ile yönlendirin ve iç bağlantıları son adrese güncelleyin."
+      },
+      "blocked_by_robots": {
+        "title": "robots.txt ile engellenen sayfa",
+        "description": "Bu adresler robots.txt kurallarınız nedeniyle taranmadı. Engel bilinçliyse sorun yoktur; değilse sayfalar arama sonuçlarında içeriksiz görünebilir ya da hiç görünmez.",
+        "fix": "Engelin gerçekten istendiğini doğrulayın. Dizine eklenmesi gereken bir sayfaysa ilgili Disallow kuralını kaldırın ya da daraltın."
+      },
+      "no_https": {
+        "title": "Site HTTPS kullanmıyor",
+        "description": "Ana sayfa güvenli olmayan HTTP üzerinden açılıyor. Tarayıcılar siteyi \"güvenli değil\" olarak işaretler ve HTTPS, Google'ın sıralama sinyallerinden biridir.",
+        "fix": "Bir TLS sertifikası kurun (ör. Let's Encrypt), tüm HTTP adreslerini 301 ile HTTPS karşılıklarına yönlendirin ve canonical, site haritası ile iç bağlantıları HTTPS'e güncelleyin."
+      },
+      "robots_txt_unreachable": {
+        "title": "robots.txt okunamıyor",
+        "description": "robots.txt isteği sunucu hatası ya da bağlantı sorunuyla sonuçlandı. Google bu durumda siteyi taramayı geçici olarak durdurabilir.",
+        "fix": "/robots.txt adresinin 200 (dosya yoksa 404) döndürdüğünden emin olun. Güvenlik duvarı veya CDN kurallarının tarayıcıları engellemediğini kontrol edin."
+      },
+      "robots_txt_missing": {
+        "title": "robots.txt dosyası yok",
+        "description": "robots.txt bulunamadı. Bu durumda tüm site taranabilir kabul edilir; ancak dosya olmadan tarayıcılara site haritanızı ve istemediğiniz alanları bildiremezsiniz.",
+        "fix": "Kök dizine bir robots.txt ekleyin; en azından Sitemap satırını ve taranmasını istemediğiniz alanları belirtin."
+      },
+      "sitemap_missing": {
+        "title": "XML site haritası bulunamadı",
+        "description": "Ne robots.txt'de ne de /sitemap.xml adresinde okunabilir bir site haritası var. Site haritası, arama motorlarının yeni ve güncellenen sayfaları hızla bulmasını sağlar.",
+        "fix": "Dizine eklenebilir sayfalarınızı listeleyen bir XML site haritası oluşturun, robots.txt'ye Sitemap satırı olarak ekleyin ve Search Console'a gönderin."
+      },
+      "sitemap_non_200": {
+        "title": "Site haritasında 200 döndürmeyen adres",
+        "description": "Site haritası yönlendirme veya hata döndüren adresler içeriyor. Arama motorları site haritasına duyduğu güveni kaybeder ve tarama bütçesi boşa harcanır.",
+        "fix": "Site haritasında yalnızca 200 döndüren, canonical ve dizine eklenebilir adresleri tutun; yönlendirilen adresleri son hedefleriyle değiştirin."
+      },
+      "canonical_broken": {
+        "title": "Canonical bozuk bir sayfayı gösteriyor",
+        "description": "Canonical etiketi hata veren ya da yönlendirilen bir adrese işaret ediyor. Arama motorları etiketi yok sayar ve hangi sürümün dizine ekleneceğini kendisi seçer.",
+        "fix": "Canonical'ı 200 döndüren ve dizine eklenebilir son adrese güncelleyin. Çoğu zaman sayfanın kendisini göstermesi (self-canonical) doğru seçimdir."
+      },
+      "canonical_multiple": {
+        "title": "Birden fazla canonical etiketi",
+        "description": "Sayfada birden fazla canonical etiketi var. Etiketler çeliştiğinde arama motorları hepsini yok sayabilir.",
+        "fix": "Tek bir canonical etiketi bırakın. Tema, eklenti ve SEO modülleri çoğu zaman aynı etiketi ayrı ayrı ekler; yalnızca birinin eklemesini sağlayın."
+      },
+      "sitemap_noindex": {
+        "title": "Site haritasında noindex sayfa",
+        "description": "Site haritası dizine eklenmesini istemediğiniz sayfaları listeliyor. Bu, arama motorlarına çelişkili sinyal gönderir.",
+        "fix": "Sayfa dizine eklenmemeliyse site haritasından çıkarın; eklenmeliyse noindex etiketini kaldırın."
+      },
+      "noindex_page": {
+        "title": "Sayfa noindex ile dizin dışı",
+        "description": "Bu sayfalar meta robots veya X-Robots-Tag ile dizine eklenmeyi engelliyor. Bilinçli bir tercih olabilir, ancak yanlışlıkla önemli sayfaları arama sonuçlarından çıkarmak yaygın bir hatadır.",
+        "fix": "Listeyi gözden geçirin. Arama sonuçlarında görünmesi gereken sayfalardan noindex'i kaldırın."
+      },
+      "canonicalized": {
+        "title": "Sayfa başka bir adresi canonical gösteriyor",
+        "description": "Bu sayfaların canonical etiketi farklı bir adrese işaret ediyor; arama motorları büyük olasılıkla o adresi dizine ekler. Filtre ve parametreli sayfalarda bu normaldir.",
+        "fix": "Canonical hedefinin doğru olduğunu kontrol edin. Sayfanın kendi başına sıralanması gerekiyorsa canonical'ı sayfanın kendi adresine çevirin."
+      },
+      "canonical_missing": {
+        "title": "Canonical etiketi yok",
+        "description": "Sayfa canonical belirtmiyor. Parametreli, www'lu veya sonunda eğik çizgili kopyalar oluştuğunda arama motorları doğru sürümü tahmin etmek zorunda kalır.",
+        "fix": "Her dizine eklenebilir sayfaya kendi mutlak adresini gösteren bir canonical etiketi ekleyin."
+      },
+      "title_missing": {
+        "title": "Başlık etiketi yok",
+        "description": "Sayfanın başlık (title) etiketi yok ya da boş. Başlık, arama sonuçlarındaki tıklanabilir satırdır ve en güçlü sayfa içi sinyallerden biridir.",
+        "fix": "Sayfanın konusunu ve ana anahtar kelimesini içeren benzersiz, yaklaşık 50–60 karakterlik bir başlık yazın."
+      },
+      "title_duplicate": {
+        "title": "Yinelenen başlık",
+        "description": "Birden fazla sayfa aynı başlığı kullanıyor. Arama motorları sayfaları ayırt etmekte zorlanır ve sayfalar aynı sorgu için birbiriyle yarışabilir.",
+        "fix": "Her sayfaya içeriğini ayırt eden benzersiz bir başlık verin. Sayfalar gerçekten aynıysa birini canonical ile ana sürüme bağlayın."
+      },
+      "title_too_long": {
+        "title": "Başlık çok uzun",
+        "description": "Başlık 60 karakteri aşıyor ve arama sonuçlarında büyük olasılıkla kesilecek. Önemli kelimeler görünmeyebilir.",
+        "fix": "Başlığı 60 karakterin altına indirin; en önemli kelimeleri başa alın, marka adını sona taşıyın."
+      },
+      "title_too_short": {
+        "title": "Başlık çok kısa",
+        "description": "Başlık 15 karakterden kısa. Kısa başlıklar sayfanın konusunu yeterince anlatmaz ve sıralama fırsatını kaçırır.",
+        "fix": "Başlığı sayfanın konusunu ve ana anahtar kelimesini anlatacak şekilde genişletin."
+      },
+      "meta_description_missing": {
+        "title": "Meta açıklama yok",
+        "description": "Sayfanın meta açıklaması yok. Google bu durumda sayfadan rastgele bir parça gösterir; bu da arama sonuçlarındaki tıklama oranını düşürebilir.",
+        "fix": "Sayfanın ne sunduğunu özetleyen, tıklamaya davet eden 120–160 karakterlik benzersiz bir açıklama yazın."
+      },
+      "meta_description_duplicate": {
+        "title": "Yinelenen meta açıklama",
+        "description": "Birden fazla sayfa aynı meta açıklamayı kullanıyor. Arama sonuçlarında sayfalar birbirinden ayırt edilemez.",
+        "fix": "Her sayfaya kendi içeriğini anlatan benzersiz bir açıklama yazın."
+      },
+      "meta_description_too_long": {
+        "title": "Meta açıklama çok uzun",
+        "description": "Açıklama 160 karakteri aşıyor ve arama sonuçlarında büyük olasılıkla kesilecek.",
+        "fix": "Açıklamayı 160 karakterin altına indirin; ana mesajı ilk cümleye koyun."
+      },
+      "h1_missing": {
+        "title": "H1 başlığı yok",
+        "description": "Sayfada H1 başlığı yok. H1, ziyaretçilere ve arama motorlarına sayfanın ana konusunu söyler.",
+        "fix": "Sayfanın ana konusunu anlatan tek bir H1 ekleyin; genellikle başlık etiketiyle uyumlu olmalıdır."
+      },
+      "h1_multiple": {
+        "title": "Birden fazla H1",
+        "description": "Sayfada birden fazla H1 var. Bu bir hata sayılmaz, ancak sayfanın ana konusunu belirsizleştirebilir.",
+        "fix": "Ana başlığı H1 olarak bırakın, diğerlerini H2 veya H3 yapın."
+      },
+      "content_duplicate": {
+        "title": "Yinelenen içerik",
+        "description": "Bu sayfaların metin içeriği birebir aynı. Arama motorları yalnızca bir sürümü gösterir ve hangisini seçeceğine kendisi karar verir.",
+        "fix": "Kopyaları birleştirin ve 301 ile yönlendirin, ya da tüm sürümlerde ana sayfayı gösteren bir canonical kullanın."
+      },
+      "content_thin": {
+        "title": "Zayıf içerik",
+        "description": "Dizine eklenebilir sayfada 200'den az kelime var. Az içerikli sayfalar genellikle kötü sıralanır ve AI yanıtlarında kaynak olarak seçilmez.",
+        "fix": "Sayfayı kullanıcının sorusunu yanıtlayan özgün içerikle genişletin; değer katmıyorsa benzer bir sayfayla birleştirin veya noindex yapın."
+      },
+      "images_missing_alt": {
+        "title": "Alt metni olmayan görseller",
+        "description": "Bazı görsellerin alt metni yok. Ekran okuyucu kullananlar görseli anlayamaz; arama motorları da görselin neyi gösterdiğini bilemez.",
+        "fix": "Her anlamlı görsele içeriğini anlatan kısa bir alt metin ekleyin. Süs amaçlı görsellerde alt=\"\" kullanın."
+      },
+      "lang_missing": {
+        "title": "Sayfa dili belirtilmemiş",
+        "description": "html etiketinde lang niteliği yok. Ekran okuyucular ve çeviri araçları sayfanın dilini tahmin etmek zorunda kalır.",
+        "fix": "html etiketine sayfanın dilini belirten lang niteliğini ekleyin, ör. lang=\"tr\"."
+      },
+      "broken_internal_links": {
+        "title": "Bozuk iç bağlantılar",
+        "description": "Sayfa, hata döndüren iç adreslere bağlantı veriyor. Ziyaretçiler çıkmaza girer ve tarama bütçesi boşa gider.",
+        "fix": "Bağlantıları çalışan adreslere güncelleyin ya da kaldırın. Bozuk hedefler sayfanın altında listelenir."
+      },
+      "links_to_redirects": {
+        "title": "Yönlendirmeye giden iç bağlantılar",
+        "description": "Sayfa, yönlendirilen iç adreslere bağlantı veriyor. Her tıklamada fazladan bir istek yapılır ve bağlantı değerinin bir kısmı kaybolabilir.",
+        "fix": "İç bağlantıları doğrudan son hedef adrese güncelleyin."
+      },
+      "nofollow_internal_links": {
+        "title": "nofollow iç bağlantılar",
+        "description": "Sayfa, kendi sitenizdeki sayfalara nofollow ile bağlantı veriyor. Bu, iç bağlantı değerinin akışını engeller ve genellikle gereksizdir.",
+        "fix": "İç bağlantılardan nofollow'u kaldırın. Bir sayfanın dizine eklenmesini istemiyorsanız o sayfada noindex kullanın."
+      },
+      "orphan_page": {
+        "title": "Yetim sayfa",
+        "description": "Sayfa site haritasında var, ancak taranan hiçbir sayfa ona bağlantı vermiyor. Ziyaretçiler sayfayı bulamaz ve arama motorları onu önemsiz sayabilir.",
+        "fix": "Sayfaya ilgili kategori, menü veya içerik sayfalarından bağlantı verin; artık gerekmiyorsa site haritasından çıkarın."
+      },
+      "deep_page": {
+        "title": "Derindeki sayfa",
+        "description": "Sayfa ana sayfadan 3 tıktan daha uzakta. Derindeki sayfalar daha seyrek taranır ve genellikle daha az önemli kabul edilir.",
+        "fix": "Önemli sayfalara ana sayfa, menü veya kategori sayfalarından daha kısa bir bağlantı yolu oluşturun."
+      },
+      "slow_response": {
+        "title": "Yavaş sunucu yanıtı",
+        "description": "Sayfanın tamamen indirilmesi 2 saniyeden uzun sürdü. Yavaş yanıtlar kullanıcı deneyimini bozar ve arama motorlarının taradığı sayfa sayısını azaltır.",
+        "fix": "Sunucu tarafı önbellekleme, CDN ve veritabanı sorgu optimizasyonuyla yanıt süresini kısaltın; bu adreslerde yavaş çalışan uygulama kodunu inceleyin."
+      },
+      "page_too_large": {
+        "title": "Sayfa çok büyük",
+        "description": "HTML yanıtı 2 MB'ı aşıyor. Büyük sayfalar yavaş yüklenir ve arama motorları çok büyük sayfaların yalnızca bir kısmını işleyebilir.",
+        "fix": "Satır içi betikleri, stilleri ve gömülü verileri ayrı dosyalara taşıyın; uzun listeleri sayfalara bölün."
+      },
+      "viewport_missing": {
+        "title": "Mobil görüntü alanı (viewport) etiketi yok",
+        "description": "Sayfada viewport meta etiketi yok, bu nedenle mobil cihazlarda masaüstü genişliğinde küçültülmüş görünür. Google siteleri mobil sürümlerine göre dizine ekler.",
+        "fix": "Sayfanın head bölümüne content=\"width=device-width, initial-scale=1\" değerli bir viewport meta etiketi ekleyin ve tasarımın mobil uyumlu olduğundan emin olun."
+      },
+      "structured_data_invalid": {
+        "title": "Geçersiz yapılandırılmış veri",
+        "description": "Sayfadaki JSON-LD bloklarından bazıları ayrıştırılamıyor. Geçersiz işaretleme zengin sonuçlarda kullanılmaz ve AI sistemleri sayfayı daha zor yorumlar.",
+        "fix": "JSON-LD bloklarını Google'ın Zengin Sonuçlar Testi veya Schema.org doğrulayıcısıyla kontrol edin; eksik virgül, tırnak veya kaçış karakterlerini düzeltin."
+      },
+      "structured_data_missing": {
+        "title": "Yapılandırılmış veri yok",
+        "description": "Dizine eklenebilir sayfada JSON-LD yapılandırılmış veri yok. Schema.org işaretlemesi zengin sonuçlara uygunluk sağlar ve AI arama motorlarının içeriğinizi doğru anlamasına yardımcı olur.",
+        "fix": "Sayfa türüne uygun işaretleme ekleyin: Organization, Article, Product, FAQPage veya BreadcrumbList gibi."
+      },
+      "ai_search_crawlers_blocked": {
+        "title": "AI arama tarayıcıları engelli",
+        "description": "robots.txt, ChatGPT Search, Perplexity veya Claude gibi AI arama motorlarının sayfalarınızı getirmesini engelliyor. Bu motorlar yanıtlarında sitenizi kaynak olarak gösteremez.",
+        "fix": "AI yanıtlarında görünmek istiyorsanız engellenen botlar için Disallow kurallarını kaldırın. Arama botlarını (ör. OAI-SearchBot) eğitim botlarından (ör. GPTBot) ayrı yönetebilirsiniz."
+      },
+      "ai_training_crawlers_blocked": {
+        "title": "AI eğitim tarayıcıları engelli",
+        "description": "robots.txt, GPTBot veya Google-Extended gibi model eğitimi için veri toplayan botları engelliyor. Bu bir politika tercihidir ve AI arama görünürlüğünüzü doğrudan etkilemez.",
+        "fix": "Bilinçli bir tercihse işlem gerekmez. İçeriğinizin AI modellerinin eğitiminde kullanılmasını istiyorsanız bu botlara izin verin."
+      },
+      "llms_txt_missing": {
+        "title": "llms.txt dosyası yok",
+        "description": "Sitede /llms.txt yok. Bu, dil modellerine sitenizin en önemli sayfalarını özetleyen yeni ortaya çıkan bir öneridir; henüz yaygın olarak kullanılmıyor.",
+        "fix": "Sitenizi kısaca tanıtan ve en önemli sayfalarınıza bağlantılar içeren bir Markdown dosyasını /llms.txt adresinde yayınlayın."
+      }
+    }
+  },
+  "searchConsole": {
+    "rangeLabel": "Dönem",
+    "range": {
+      "7": "7 gün",
+      "28": "28 gün",
+      "90": "90 gün"
+    },
+    "syncNow": "Şimdi senkronize et",
+    "syncQueued": "Senkronizasyon sıraya alındı",
+    "syncFailed": "Senkronizasyon başlatılamadı",
+    "manage": "Kaynaklar",
+    "addGa4": {
+      "title": "AI asistanlarından gelen trafiği de görün",
+      "body": "Google Analytics 4 mülkünüzü eklediğinizde organik oturumları ve ChatGPT, Perplexity, Gemini gibi AI asistanlarından gelen ziyaretleri ayrı ayrı izleyebilirsiniz.",
+      "action": "GA4 ekle"
+    },
+    "provenance": {
+      "source": "Kaynak",
+      "method": "Yöntem",
+      "dataThrough": "Veriler şu tarihe kadar"
+    },
+    "oauth": {
+      "connected": "Google hesabı bağlandı. Şimdi projenin mülklerini seçin.",
+      "denied": "Google izni verilmedi; hiçbir şey bağlanmadı.",
+      "failed": "Google hesabı bağlanamadı. Lütfen tekrar deneyin.",
+      "forbidden": "Google hesaplarını yalnızca sahipler ve yöneticiler bağlayabilir."
+    },
+    "status": {
+      "type": {
+        "gsc": "Search Console",
+        "ga4": "Google Analytics 4"
+      },
+      "healthy": "çalışıyor",
+      "failing": "sorun var",
+      "domainProperty": "{domain} (alan adı mülkü)",
+      "lastSync": "Son senkronizasyon {time} · veriler {date} tarihine kadar",
+      "neverSynced": "İlk içe aktarma bekleniyor",
+      "error": "Son hata: {error}",
+      "revokedTitle": "Google erişimi iptal edildi",
+      "revokedBody": "Google hesabı bu uygulamanın erişimini kaldırmış ya da parolası değişmiş. Yeni veri gelmesi için hesabı yeniden bağlayın; mevcut veriler korunur.",
+      "revokedAskAdmin": "Google hesabının erişimi kalkmış. Yeni veri gelmesi için bir sahip veya yöneticiden hesabı yeniden bağlamasını isteyin.",
+      "reconnect": "Yeniden bağla",
+      "reconnectFailed": "Google bağlantısı başlatılamadı"
+    },
+    "pending": {
+      "source": {
+        "GSC": "Search Console",
+        "GA4": "Google Analytics 4"
+      },
+      "title": "{source} verileri içe aktarılıyor",
+      "body": "Son 90 günün verileri alınıyor. Bu birkaç dakika sürebilir; sayfa kendiliğinden güncellenir.",
+      "failedTitle": "{source} verileri alınamadı",
+      "failedBody": "Yukarıdaki hatayı kontrol edin. Sorun giderildiğinde \"Şimdi senkronize et\" ile tekrar deneyin."
+    },
+    "setup": {
+      "title": "Google Search Console'u bağlayın",
+      "body": "Gerçek tıklama, gösterim ve sorgu verileri için Google hesabınızı bağlayın ve bu projenin Search Console mülkünü seçin. İsterseniz organik ve AI kaynaklı trafik için GA4 mülkünü de ekleyin.",
+      "connect": "Google hesabını bağla",
+      "choose": "Mülkleri seç",
+      "askAdmin": "Google hesabını bir sahip veya yönetici bağlayabilir. Bağlandıktan sonra mülkleri siz de seçebilirsiniz.",
+      "privacy": "Yalnızca okuma izni istenir (Search Console ve Analytics salt okunur). Erişim anahtarları şifrelenerek saklanır; bağlantıyı istediğiniz zaman kaldırabilirsiniz.",
+      "connectFailed": "Google bağlantısı başlatılamadı",
+      "connectAnother": "Başka bir Google hesabı bağla"
+    },
+    "notConfigured": {
+      "title": "Google bağlantısı bu sunucuda yapılandırılmamış",
+      "body": "Search Console ve GA4 verileri için sunucunun bir Google OAuth istemcisine ihtiyacı var. Kurulumu yapan kişi aşağıdaki adımları bir kez uygular.",
+      "step1": "Google Cloud Console'da bir proje açın; Search Console API, Google Analytics Data API ve Google Analytics Admin API'yi etkinleştirin.",
+      "step2": "\"Web uygulaması\" türünde bir OAuth istemcisi oluşturun ve yetkili yönlendirme adresi olarak şunu ekleyin:",
+      "step3": "İstemci kimliğini ve gizli anahtarını api ve worker ortam değişkenlerine ekleyin:",
+      "step4": "Servisleri yeniden başlatın. Bu sayfada \"Google hesabını bağla\" düğmesi görünecek."
+    },
+    "sources": {
+      "title": "Veri kaynakları",
+      "description": "{domain} için kullanılacak Search Console ve GA4 mülklerini seçin.",
+      "noAccount": "Bu çalışma alanına bağlı bir Google hesabı yok.",
+      "askAdmin": "Bu çalışma alanına bağlı bir Google hesabı yok. Bir sahip veya yöneticiden bağlamasını isteyin.",
+      "connect": "Google hesabını bağla",
+      "connectAnother": "Başka bir Google hesabı bağla",
+      "connectFailed": "Google bağlantısı başlatılamadı",
+      "account": "Google hesabı",
+      "loadFailed": "Mülkler yüklenemedi",
+      "site": "Search Console mülkü",
+      "noSite": "Search Console kullanma",
+      "domainProperty": "{domain} (alan adı mülkü)",
+      "suggested": "önerilen",
+      "noSites": "Bu hesabın erişebildiği bir Search Console mülkü yok.",
+      "siteHint": "Proje alan adını kapsayan mülkler önce listelenir.",
+      "property": "Google Analytics 4 mülkü",
+      "noProperty": "GA4 kullanma",
+      "noProperties": "Bu hesabın erişebildiği bir GA4 mülkü yok.",
+      "propertyHint": "Organik ve AI asistanlarından gelen oturumları ayırmak için kullanılır.",
+      "readOnly": "Salt okunur erişim",
+      "save": "Kaydet ve içe aktar",
+      "saved": "Kaynaklar kaydedildi; veriler içe aktarılıyor.",
+      "saveFailed": "Kaynaklar kaydedilemedi"
+    },
+    "search": {
+      "title": "Google arama performansı",
+      "range": "{start} – {end}",
+      "clicks": "Tıklama",
+      "impressions": "Gösterim",
+      "ctr": "Tıklama oranı",
+      "position": "Ortalama konum",
+      "short": {
+        "clicks": "Tıklama",
+        "impressions": "Gösterim",
+        "ctr": "CTR",
+        "position": "Konum"
+      },
+      "metric": "Grafikte gösterilen metrik",
+      "chartTitle": "Günlük performans",
+      "chartDescription": "Search Console verileri 2–3 gün gecikmeli gelir.",
+      "tableView": "Tablo olarak göster",
+      "date": "Tarih",
+      "queries": "Sorgular",
+      "pages": "Sayfalar",
+      "query": "Sorgu",
+      "page": "Sayfa",
+      "filter": "Filtrele",
+      "change": "Değişim",
+      "new": "Yeni",
+      "openPage": "Sayfayı yeni sekmede aç",
+      "noMatches": "Eşleşen satır yok.",
+      "noRows": "Bu dönemde veri yok.",
+      "showAll": "{count} satırın tümünü göster",
+      "showFewer": "Daha az göster"
+    },
+    "analytics": {
+      "title": "Site trafiği (GA4)",
+      "range": "{start} – {end}",
+      "sessions": "Oturum",
+      "organicShare": "Organik arama · {share}",
+      "aiShare": "AI asistanları · {share}",
+      "keyEvents": "Önemli etkinlik",
+      "metric": "Grafikte gösterilen metrik",
+      "metrics": {
+        "sessions": "Tüm oturumlar",
+        "organicSessions": "Organik",
+        "aiSessions": "AI asistanları"
+      },
+      "chartTitle": "Günlük oturumlar",
+      "chartDescription": "GA4 kanal gruplaması ve yönlendiren kaynağa göre.",
+      "tableView": "Tablo olarak göster",
+      "date": "Tarih",
+      "aiTitle": "AI asistanlarından gelen trafik",
+      "aiDescription": "ChatGPT, Perplexity, Gemini gibi asistanlardaki bağlantılardan gelen oturumlar; önceki döneme göre değişimle.",
+      "aiEmpty": "Bu dönemde AI asistanlarından gelen oturum yok.",
+      "landingTitle": "Giriş sayfaları",
+      "landingDescription": "Ziyaretlerin başladığı sayfalar.",
+      "page": "Sayfa",
+      "engagementRate": "Etkileşim oranı",
+      "openPage": "Sayfayı yeni sekmede aç",
+      "noRows": "Bu dönemde veri yok.",
+      "showAll": "{count} satırın tümünü göster",
+      "showFewer": "Daha az göster"
     }
   }
 }

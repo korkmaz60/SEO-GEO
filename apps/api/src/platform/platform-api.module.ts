@@ -2,9 +2,20 @@ import { Module } from "@nestjs/common";
 
 import { AuditController } from "../audit/audit.controller.js";
 import { CredentialsController } from "../credentials/credentials.controller.js";
+import {
+  GoogleCallbackController,
+  GoogleConnectionsController,
+  ProjectIntegrationsController,
+} from "../google/google.controller.js";
+import {
+  KeywordListsController,
+  KeywordResearchController,
+} from "../keywords/keyword-research.controller.js";
 import { NotificationsController } from "../notifications/notifications.controller.js";
 import { ProjectsController } from "../projects/projects.controller.js";
 import { ProjectsService } from "../projects/projects.service.js";
+import { RankTrackerController } from "../rank-tracker/rank-tracker.controller.js";
+import { SiteAuditController } from "../site-audit/site-audit.controller.js";
 import { TasksController } from "../tasks/tasks.controller.js";
 import { UsageController } from "../usage/usage.controller.js";
 
@@ -17,6 +28,13 @@ import { UsageController } from "../usage/usage.controller.js";
     TasksController,
     NotificationsController,
     AuditController,
+    RankTrackerController,
+    KeywordResearchController,
+    KeywordListsController,
+    SiteAuditController,
+    GoogleCallbackController,
+    GoogleConnectionsController,
+    ProjectIntegrationsController,
   ],
   providers: [ProjectsService],
   exports: [ProjectsService],

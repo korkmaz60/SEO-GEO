@@ -54,9 +54,9 @@ using DataForSEO, SEO-GEO competes on the product layer:
 | Platform | Workspaces, projects, members and roles, provider credentials (encrypted), usage ledger and budgets, background tasks, notifications, audit log | M1 |
 | Project overview | Unified SEO + AI visibility KPIs with trends and provenance | M2–M3 |
 | Rank tracker | Keywords × location × language × device; daily or weekly checks; SERP features; AI Overview presence and citation; competitor positions | M2 |
-| Keyword explorer | Ideas, suggestions, related keywords, volume, CPC, keyword difficulty, intent; save to projects | M2 |
-| Site audit | Own crawler with robots.txt respect; issue catalog with severities; run history and diffs; optional DataForSEO On-Page provider | M2 |
-| Search Console & GA4 | OAuth connection, property selection, query/page performance sync | M2 |
+| Keyword explorer | Ideas, suggestions, related keywords, volume, CPC, keyword difficulty, intent; saved lists; add to the rank tracker | M2 |
+| Site audit | Own crawler with robots.txt respect; issue catalog with severities, explanations and fixes; AI crawler access and `llms.txt`; run history and diffs; DataForSEO On-Page as an optional provider later | M2 |
+| Search Console & GA4 | OAuth connection, property selection, daily query/page sync, organic and AI assistant traffic from GA4 | M2 |
 | AI visibility (GEO/AEO) | Prompt library, scheduled runs per AI platform, mentions, citations, share of voice, sentiment, cited sources, AI Overview / AI Mode, citability score | M3 |
 | Public API & MCP | Workspace-scoped API keys, OpenAPI, MCP tools over the same services | M3 |
 | Reports & alerts | Server-rendered PDF (white-label), schedules and email delivery, alert rules (email, Slack, webhook) | M4 |

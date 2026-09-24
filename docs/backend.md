@@ -26,12 +26,18 @@ src/
   usage/                  usage ledger, monthly summary, budgets and thresholds
   tasks/                  task rows, pg-boss queue, task registry, worker runner
   projects/               projects and brand entities (own brand + competitors)
-  credentials/            encrypted provider keys, DataForSEO verification, daily re-check
+  credentials/            encrypted provider keys, DataForSEO verification, daily re-check,
+                          the workspace's DataForSEO client (dataforseo.gateway.ts)
+  providers/              shared provider cache (provider_cache), provider error mapping
+  keywords/               keyword metrics (Labs keyword overview), research (ideas,
+                          suggestions, related keywords), keyword lists
+  rank-tracker/           tracked keywords, SERP checks (post and collect), read model
+  site-audit/             audit runs; crawl and analysis run in the worker
+  google/                 Google OAuth connections, Search Console and GA4 sources, sync
   modules/
     health/               liveness
     account/              GET /instance (sign-up mode), GET /me
     workspaces/           GET /workspaces/:id (membership and role)
-  rank-tracker/ keywords/ site-audit/ integrations/                           (M2)
   ai-visibility/ mcp/ llm/                                                    (M3)
   reports/ alerts/ backlinks/ domains/                                        (M4)
   billing/                cloud edition only                                  (M5)
@@ -95,20 +101,19 @@ The web app uses exactly the same API as third parties.
 
 ## Background jobs (pg-boss)
 
-| Queue | Trigger | Idempotency key | Paid |
+| Queue | Trigger | Concurrency and idempotency | Paid |
 |---|---|---|:-:|
-| `rank.dispatch` | hourly schedule; selects projects that are due | per hour | |
-| `rank.check` | per project batch → DataForSEO SERP task_post (Standard queue) | `rank:{projectId}:{date}` | ✓ |
-| `rank.collect` | DataForSEO pingback, or polling `tasks_ready` when no public URL | provider task ID | |
-| `audit.crawl` | manual or schedule | one active run per project | |
-| `ai.dispatch` | daily schedule | per day | |
-| `ai.run` | prompt × platform × sample | `ai:{promptId}:{platform}:{date}:{sample}` | ✓ |
-| `ai.rollup` | after runs, nightly | `ai-rollup:{projectId}:{date}` | |
-| `keywords.enrich` | keywords added, monthly refresh | batch hash | ✓ |
-| `gsc.sync`, `ga4.sync` | daily | `{source}:{projectId}:{date}` | |
-| `reports.render`, `reports.deliver` | schedule or manual | report run ID | |
-| `alerts.evaluate` | after data updates | rule + window | |
-| `maintenance.*` | partitions, retention, usage rollups | per period | |
+| `rank.dispatch` | hourly at :07 | queues `rank.check` for projects with keywords due today in the project's time zone | |
+| `rank.check` | dispatch, new keywords, "check now" | one job per project (`stately`, singleton key); one check per keyword and day | ✓ |
+| `rank.collect` | every minute | polls `tasks_ready`; tasks not listed after 20 minutes are fetched directly; one run at a time | |
+| `rank.cleanup` | daily 04:40 UTC | gives up checks pending for 24 hours, deletes SERP snapshots older than 90 days | |
+| `keywords.enrich` | keywords added; a due rank check whose metrics are older than 30 days | batches of stale keywords per market | ✓ |
+| `audit.crawl` | "start audit" | a task row per run; one active run per project; no retries; expires after 3 hours | |
+| `google.sync.dispatch` | daily 05:40 UTC | queues `google.sync` for every source | |
+| `google.sync` | dispatch, new source, "sync now" | one job per source (`stately`) | |
+| `credentials.reverify` | daily 03:15 UTC | re-checks DataForSEO keys | |
+| `maintenance.provider-cache` | daily 04:25 UTC | deletes expired cache entries | |
+| `ai.*`, `reports.*`, `alerts.*` | M3–M4 | | |
 
 Rules for every handler: idempotent writes (upserts keyed by natural keys), bounded retries
 with exponential backoff, progress reported on the `task` row, provider cost written to
@@ -125,18 +130,19 @@ with exponential backoff, progress reported on the `task` row, provider cost wri
   so both levels are always checked.
 - Returns the `cost` reported by the response for the usage ledger.
 
-`modules/providers/dataforseo` adds what needs the application: resolving the workspace
-credential (or the platform credential in the cloud edition), the response cache, the
-usage ledger, budget checks and concurrency limits per credential.
+The api adds what needs the application: `credentials/dataforseo.gateway.ts` builds the
+client from the workspace credential (the platform credential in the cloud edition, later),
+`providers/` holds the shared response cache, and each feature service records costs in the
+usage ledger and checks the budget before paid work.
 
 | Feature | DataForSEO API | Mode |
 |---|---|---|
 | Connection test, balance | Appendix `user_data` | free |
 | Locations and languages | SERP / Labs locations and languages | cached 30 days |
-| Rank tracking | SERP API Google organic `task_post` → `tasks_ready` → `task_get` (advanced) | Standard queue |
+| Rank tracking *(M2)* | SERP API Google organic `task_post` → `tasks_ready` → `task_get` (advanced) | Standard queue |
 | On-demand SERP | SERP API Google organic live (advanced) | Live |
 | AI Overview / AI Mode | SERP API AI Overview items; Google AI Mode SERP | Standard / Live |
-| Keyword explorer | Labs keyword ideas, suggestions, related keywords, keyword overview, bulk keyword difficulty, search intent | Live, cached |
+| Keyword explorer *(M2)* | Labs keyword ideas, keyword suggestions, related keywords; keyword overview for the metrics of tracked keywords | Live, cached |
 | Search volume (bulk) | Keywords Data Google Ads search volume | Standard |
 | Domain overview | Labs domain rank overview, ranked keywords, historical rank overview, competitors, domain intersection | Live, cached |
 | Backlinks | Backlinks summary, referring domains, anchors, backlinks, new/lost time series, spam score | Live, cached |
@@ -147,20 +153,64 @@ Exact paths and response fields are verified against the DataForSEO v3 documenta
 each integration is built, and pinned with recorded (sanitized) fixtures and Zod schemas.
 
 **Modes.** Live requests serve interactive research. Scheduled bulk work uses the Standard
-queue, which is several times cheaper. SERP depth defaults to what the feature needs (e.g.
-top 30 for rank tracking) because every extra page of 10 results is billed.
+queue, which is several times cheaper. SERP depth defaults to what the feature needs (top 30
+for rank tracking) because every extra page of 10 results is billed.
 
-**Cache.** `provider_cache` keeps responses keyed by `(operation, normalized params)` with
-TTLs per operation: keyword metrics 30 days, ideas and suggestions 7 days, domain and
-backlink summaries 1–7 days, live SERPs 24 hours. Shared market data is reused across
-workspaces; the ledger records whether a result came from cache (cost 0).
+**Prices.** `DATAFORSEO_PRICES` in `packages/dataforseo` holds the list prices used for
+estimates (checked 2026-09-24):
 
-**Cost control.** A price table gives pre-flight estimates shown in the UI before a paid
-action starts. Budgets are checked before enqueueing; a hard-stop budget rejects the action
-with problem code `budget_exceeded`. Actual costs come from the responses.
+| Item | Price (USD) |
+|---|---|
+| Google organic SERP, first page of 10 results | 0.0006 Standard · 0.0012 priority · 0.002 Live |
+| Each further page of 10 results | 75% of the first page |
+| `load_async_ai_overview` | +0.0006, refunded when the SERP has no asynchronous AI Overview |
+| Labs (ideas, suggestions, related keywords, keyword overview) | 0.012 per request + 0.00012 per returned keyword |
 
-**Postback.** In the cloud edition Standard tasks use a signed `pingback_url`; self-hosted
-installs without a public URL poll `tasks_ready`.
+A daily rank check at depth 30 with AI Overview loading costs at most
+`0.0006 × (1 + 0.75 × 2) + 0.0006 = 0.0021` per keyword, about 6.30 per month for 100
+keywords. Estimates only size previews and budget checks and err on the high side; what an
+action cost always comes from the `cost` field of the responses.
+
+**Cache.** Public market data is shared by all workspaces:
+
+| Data | Where | Fresh for |
+|---|---|---|
+| Keyword metrics (volume, CPC, difficulty, intent, monthly searches) | `keyword_metric` | 30 days |
+| Keyword ideas, suggestions and related keywords | `provider_cache`, keyed by a versioned operation and normalized parameters | 7 days |
+| Google organic SERPs of tracked keywords | `serp_snapshot`; a SERP of the same query and market fetched in the last 20 hours is reused instead of paying again | kept 90 days |
+
+Cache hits are free: they are not written to the usage ledger, and responses say
+`cached: true` with a cost of 0. Only data that is the same for everyone is cached; nothing
+workspace-specific goes into these tables.
+
+**Cost control.** Paid actions show an estimate first (e.g. the quote when adding keywords
+to the rank tracker). Budgets are checked before posting; a hard-stop budget rejects the
+action with problem code `budget_exceeded`, and scheduled rank checks pause with a
+`rank.budget_blocked` notification to owners and admins. DataForSEO account errors (no
+balance, blocked access) stop posting for the workspace and notify owners and admins with
+`dataforseo.account_blocked`.
+
+**Postback.** M2 polls `tasks_ready` every minute in both editions. A signed `pingback_url`
+for the cloud edition can replace polling later.
+
+## Rank tracking
+
+- A tracked keyword is a keyword in the project's market (location, language, device), with
+  tags, an optional target URL and a daily or weekly frequency. Up to 5,000 keywords per
+  project and 1,000 per request.
+- Checks run once per keyword and period in the project's time zone, through the Standard
+  queue at depth 30 with asynchronous AI Overviews loaded.
+- A check stores the own position (the best result on one of the own brand's domains), the
+  ranking URL, competitor positions (their brand domains), SERP features, the features the
+  own site holds, and whether an AI Overview appeared and cited the site.
+- Visibility and estimated traffic use CTR model v1 in `packages/core` (positions 1–10 on a
+  typical desktop curve from 28% to 2%, 11–20 at 1%, deeper results 0), weighted by search
+  volume. Share of voice compares the visibility of the own brand and competitors over the
+  same keywords. These are models, not measurements, and the UI says so.
+- Metrics (volume, difficulty, CPC, intent) come from Labs keyword overview when keywords
+  are added; metrics older than 30 days are fetched again when the keyword is next checked.
+- Weekly keywords carry their last position forward for up to 7 days in daily series;
+  changes compare with the check 7 and 30 days earlier, within a tolerance of 7 days.
 
 ## LLM providers
 
@@ -172,19 +222,60 @@ are configuration, not code.
 
 ## Site audit crawler
 
-- All requests go through the **safe fetcher** (see [security.md](security.md)).
-- Identifies itself as `SEO-GEO-Bot/<version> (+<project url>)` and honors `robots.txt`.
-- Discovery: start URL, sitemaps (from `robots.txt`, `/sitemap.xml`, sitemap indexes) and
-  internal links. Breadth-first with depth and page limits, per-host concurrency and delay.
-- URL normalization: lowercase host, no fragment, default ports removed, configurable
-  tracking-parameter stripping.
-- Parsing with a real HTML parser (htmlparser2/cheerio): titles, meta, headings, canonical,
-  robots, hreflang, JSON-LD types, links, word count, content hash.
-- JavaScript rendering is optional (Playwright pool in the worker), off by default.
-- Rules come from the issue catalog in `packages/core`: page rules (missing title, long
-  title, noindex, …) and site rules (duplicates, orphans, redirect chains, broken links).
-- Health score v1: `round(100 × (1 − (pages_with_errors + 0.5 × pages_with_only_warnings) / crawled_pages))`.
-- Each run is diffed with the previous one: new, fixed and persisting issues.
+- All requests go through the **safe fetcher** (see [security.md](security.md)) with
+  redirects handled one hop at a time, so every hop is checked.
+- Identifies itself as `SEO-GEO-Bot/<version> (+https://github.com/korkmaz60/SEO-GEO)` and
+  honors `robots.txt` (`robots-parser`). A crawl delay (capped at 10 seconds) means one
+  request at a time with that pause; otherwise 3 requests run in parallel.
+- Discovery: the start URL (after its redirects), sitemaps from `robots.txt` and
+  `/sitemap.xml` (sitemap indexes and `.xml.gz` included; at most 25 sitemaps and 50,000
+  URLs) and internal links, breadth-first. Up to 5,000 pages per run (500 by default) and a
+  click depth of 1–20 (10 by default).
+- URL normalization: no fragment or credentials, lower-case host without a trailing dot, no
+  default port, tracking parameters (`utm_*`, `gclid`, `fbclid`, `msclkid`, …) removed and
+  the remaining parameters sorted.
+- Parsing with cheerio (parse5): title, meta description, robots directives, canonical,
+  headings, hreflang, `lang`, viewport, JSON-LD types (and invalid blocks), images without
+  alt text, links with anchors and `nofollow`, word count and a content hash.
+- JavaScript rendering is not part of M2.
+- The issue catalog lives in `packages/contracts` (43 issues with severity, category and
+  scope); the rules that find them are in `packages/core/src/audit`. Titles, explanations
+  and fixes are translated in the web app, and a test fails when an issue has no texts.
+- AI search readiness is checked with the rest: AI search crawlers (OAI-SearchBot,
+  ChatGPT-User, PerplexityBot, Perplexity-User, Claude-SearchBot, Claude-User) and training
+  crawlers (GPTBot, ClaudeBot, Google-Extended, Applebot-Extended, CCBot) against
+  `robots.txt`, and `/llms.txt`.
+- Health score v1: `round(100 × (1 − (pages_with_errors + 0.5 × pages_with_only_warnings) / crawled_pages))`,
+  over pages that were requested (not blocked by `robots.txt`).
+- Each run is compared with the previous completed run: new and fixed occurrences per
+  issue, matched by issue code and URL.
+- One active run per project; runs can be canceled. Pages, links and issues are kept for
+  the last 10 runs of a project; older runs keep their summary and score.
+
+## Google Search Console and GA4
+
+- **OAuth.** Authorization code flow with PKCE (S256), `access_type=offline` and
+  `prompt=consent`. The `state` parameter is sealed with the secret box and carries the
+  workspace, project, user, PKCE verifier and a 10-minute expiry; the callback checks that
+  the same signed-in user returns and that they are an owner or admin. Scopes: `openid`,
+  `email`, `webmasters.readonly`, `analytics.readonly`.
+- **Tokens** are sealed (AES-256-GCM, bound to the workspace and Google account) and never
+  returned by the API. Access tokens are refreshed on demand; when Google answers
+  `invalid_grant`, the connection is marked revoked and owners and admins get a
+  `google.revoked` notification. Disconnecting revokes the token at Google and deletes the
+  connection, the project sources that used it and the data they imported.
+- **Sources.** A project has at most one Search Console property and one GA4 property.
+  Choosing a different property deletes the data of the previous one.
+- **Sync.** The first import covers 90 days; after that the last 4 days are imported again
+  every day, because Search Console data settles over a few days. Search Console:
+  `searchAnalytics` by date, date + query and date + page, `dataState=all`, 25,000 rows per
+  page. GA4: `runReport` by date, landing page, default channel group and session source,
+  with sessions, total users, engaged sessions and key events.
+- **AI referrals.** GA4 session sources are matched against the assistant hosts in
+  `packages/core` (chatgpt.com, perplexity.ai, gemini.google.com, copilot.microsoft.com,
+  claude.ai, …) to show traffic from AI assistants next to organic search.
+- **Configuration.** `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`; without them the
+  Search Console page explains the setup (see [self-hosting.md](self-hosting.md)).
 
 ## Public API and MCP
 

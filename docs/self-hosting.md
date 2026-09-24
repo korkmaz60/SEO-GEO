@@ -53,10 +53,35 @@ After a change, apply it with `docker compose -f deploy/compose.yaml up -d`.
 | `AUTH_SECRET` | generated | Signs sessions. Changing it signs everyone out. |
 | `ENCRYPTION_KEY` | generated | Encrypts provider credentials. **Back it up**: without it, stored keys cannot be read and must be entered again. |
 | `SMTP_*` | unset | Email for verification, password resets and invitations. Without SMTP, sign-up needs no verification and invitation links are copied from *Workspace settings → Members*. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | unset | Google OAuth client for Search Console and GA4; see [below](#google-search-console-and-ga4). Set both or neither. |
 | `OUTBOUND_ALLOWED_PORTS` | `80,443` | Ports the crawler may use on audited sites. Internal and private addresses are always refused. |
 | `TRUST_PROXY` | `loopback, linklocal, uniquelocal` | Which hops may set `X-Forwarded-For` for the api. The default trusts the web container on the Docker network. |
 | `API_DOCS` | `false` | Serves the OpenAPI documentation at `/api/docs` on the api container. |
 | `LOG_LEVEL` | `log` | `fatal`, `error`, `warn`, `log`, `debug` or `verbose`. Logs are JSON lines. |
+
+### Google Search Console and GA4
+
+Search Console and GA4 data are read with the user's consent through an OAuth client that
+you create once in Google Cloud:
+
+1. In the [Google Cloud console](https://console.cloud.google.com/), create a project (or
+   use an existing one) and enable the **Google Search Console API**, the **Google Analytics
+   Data API** and the **Google Analytics Admin API**.
+2. Configure the OAuth consent screen (*Google Auth Platform → Branding and Audience*).
+   SEO-GEO asks for `openid`, `email`, `webmasters.readonly` and `analytics.readonly`.
+   While the app is in *Testing*, only the test users you add can connect, and Google
+   expires their access after 7 days; publish the app (and complete verification if Google
+   asks for it), or choose *Internal* in a Google Workspace organization.
+3. Create an OAuth client ID of type **Web application** with this authorized redirect URI
+   (the origin of `WEB_URL` followed by the callback path):
+   `https://seo.example.com/api/v1/integrations/google/callback`.
+4. Put the client ID and secret in `deploy/.env` as `GOOGLE_CLIENT_ID` and
+   `GOOGLE_CLIENT_SECRET` and apply them with `docker compose -f deploy/compose.yaml up -d`.
+
+Then an owner or admin opens a project's **Search Console** page, connects a Google account
+and chooses the Search Console property (and optionally a GA4 property). The last 90 days
+are imported right away and new days every morning (05:40 UTC). Connected accounts are
+listed, and can be disconnected, in *Workspace settings → Providers*.
 
 ### HTTPS
 
@@ -119,3 +144,6 @@ while the api and worker are stopped.
 | Sign-in fails with "invalid origin" | `WEB_URL` does not match the address in the browser (scheme, host and port must match). |
 | DataForSEO "could not be reached" | The server has no outbound HTTPS access to `api.dataforseo.com`. |
 | Invitation emails do not arrive | Configure `SMTP_*`, or copy the link from *Members → Pending invitations*. |
+| Google shows `redirect_uri_mismatch` | The OAuth client's redirect URI must be exactly `<origin of WEB_URL>/api/v1/integrations/google/callback`. |
+| Search Console stops updating after a week | The OAuth consent screen is in *Testing*; publish it and reconnect the account. |
+| A site audit finds only a few pages | The site blocks `SEO-GEO-Bot` in `robots.txt`, or its pages are only linked through JavaScript (not rendered in this version). |

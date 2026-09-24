@@ -41,4 +41,23 @@ export class NotificationsService {
       })),
     });
   }
+
+  /**
+   * Like {@link notifyRoles}, but only when the workspace has had no notification of this
+   * type since `since`; for problems that recur on every run (e.g. once a day).
+   */
+  async notifyRolesOnce(
+    workspaceId: string,
+    roles: WorkspaceRole[],
+    notification: NotificationInput,
+    since: Date,
+  ): Promise<boolean> {
+    const existing = await this.prisma.notification.findFirst({
+      where: { workspaceId, type: notification.type, createdAt: { gte: since } },
+      select: { id: true },
+    });
+    if (existing) return false;
+    await this.notifyRoles(workspaceId, roles, notification);
+    return true;
+  }
 }

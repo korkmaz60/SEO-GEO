@@ -20,6 +20,7 @@ import { formatRelativeTime, formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useCan, useWorkspace } from "@/lib/workspace-context";
 
+import { GoogleConnections } from "./google-connections";
 import { SettingsSection } from "./settings-section";
 
 const STATUS_ICON = {
@@ -28,10 +29,7 @@ const STATUS_ICON = {
   UNVERIFIED: CircleHelp,
 } as const;
 
-const UPCOMING = [
-  { key: "searchConsole", milestone: "M2" },
-  { key: "aiPlatforms", milestone: "M3" },
-] as const;
+const UPCOMING = [{ key: "aiPlatforms", milestone: "M3" }] as const;
 
 export function credentialsQueryKey(workspaceId: string) {
   return ["credentials", workspaceId] as const;
@@ -197,6 +195,8 @@ export function ProvidersSettings() {
           <p className="text-sm text-muted-foreground">{t("dataforseo.askAdmin")}</p>
         )}
       </SettingsSection>
+
+      <GoogleConnections />
 
       <SettingsSection title={t("upcomingTitle")} description={t("upcomingDescription")}>
         <ul className="flex flex-col divide-y">

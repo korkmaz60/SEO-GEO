@@ -47,6 +47,27 @@ function describe(notification: Notification, t: Translate, locale: Locale, work
         body: t("types.credentialInvalid.body"),
         href: `/${workspaceSlug}/settings/providers`,
       };
+    case "rank.budget_blocked":
+      return {
+        title: t("types.rankBudgetBlocked.title"),
+        body: t("types.rankBudgetBlocked.body", {
+          project: String(data.project ?? ""),
+          limit: formatUsd(Number(data.limitUsd ?? 0), locale),
+        }),
+        href: `/${workspaceSlug}/settings/usage`,
+      };
+    case "dataforseo.account_blocked":
+      return {
+        title: t("types.dataforseoBlocked.title"),
+        body: t("types.dataforseoBlocked.body", { code: String(data.code ?? "") }),
+        href: `/${workspaceSlug}/settings/providers`,
+      };
+    case "google.revoked":
+      return {
+        title: t("types.googleRevoked.title"),
+        body: t("types.googleRevoked.body", { email: String(data.email ?? "") }),
+        href: `/${workspaceSlug}/settings/providers`,
+      };
     default:
       return { title: notification.title, body: notification.body, href: notification.link };
   }

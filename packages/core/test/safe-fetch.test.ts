@@ -225,6 +225,33 @@ describe("createSafeFetcher", () => {
   });
 });
 
+describe("redirect and body options", () => {
+  it("returns redirects unfollowed in manual mode", async () => {
+    const client = fetcher();
+    const response = await client.fetch(at("site.test", "/redirect?to=/page"), {
+      redirect: "manual",
+    });
+    expect(response).toMatchObject({ status: 301, redirects: [] });
+    expect(response.headers.location).toBe("/page");
+    expect(response.body).toHaveLength(0);
+    await client.close();
+  });
+
+  it("skips bodies the caller does not want, whatever their size", async () => {
+    const client = fetcher();
+    const html = (type: string | null) => type === "text/html";
+    const skipped = await client.fetch(at("site.test", "/big"), {
+      maxBytes: 1024,
+      readBodyIf: html,
+    });
+    expect(skipped).toMatchObject({ status: 200, contentType: "text/plain" });
+    expect(skipped.body).toHaveLength(0);
+    const read = await client.fetch(at("site.test", "/page"), { readBodyIf: html });
+    expect(read.text()).toBe("<h1>Merhaba dünya</h1>");
+    await client.close();
+  });
+});
+
 describe("acceptsMediaType", () => {
   it("matches exact types and whole families", () => {
     expect(acceptsMediaType(["text/html"], "text/html")).toBe(true);

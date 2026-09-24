@@ -38,18 +38,26 @@ runs against the api health endpoint.
 **Exit:** a new user can install with Docker, sign up, create a workspace and project,
 connect DataForSEO and see the balance; tenant isolation tests pass.
 
-## M2 — SEO core
+## M2 — SEO core *(done)*
 
-- Rank tracker: keywords × location × language × device, Standard-queue checks, SERP
-  features, AI Overview presence and citation, competitor positions, history charts.
-- Keyword explorer: ideas, suggestions, related keywords, keyword difficulty, intent, save to
-  lists or to the rank tracker, with cost preview and caching.
-- Site audit: crawler, issue catalog (TR/EN), health score, run diffs.
-- Search Console and GA4: OAuth (session-bound state + PKCE), property selection, daily sync.
-- Project overview with real data.
+- [x] Rank tracker: keywords × location × language × device, daily or weekly checks through
+  the Standard queue, SERP features, AI Overview presence and citation, competitor
+  positions, visibility and share of voice, history charts, cost quote before adding.
+- [x] Keyword explorer: ideas, suggestions and related keywords with volume, difficulty,
+  intent, CPC and trend; saved lists; adding to the rank tracker; cost preview and a
+  7-day cache shared across workspaces.
+- [x] Site audit: own crawler on the safe fetcher (robots.txt, sitemaps, internal links),
+  43 issues with TR/EN explanations and fixes, AI crawler access and `llms.txt` checks,
+  health score v1, new and fixed issues between runs.
+- [x] Search Console and GA4: OAuth (sealed state + PKCE), property selection, 90-day
+  import and daily sync, top queries and pages, organic and AI assistant traffic.
+- [x] Project overview with real data; localized notifications for paused rank checks,
+  refused DataForSEO requests and revoked Google access.
 
 **Exit:** a project shows daily rankings, a completed audit and GSC data with provenance and
-recorded costs.
+recorded costs. Verified end to end against recorded DataForSEO responses and a fake Google
+API in the integration tests; the first run against live DataForSEO and Google accounts is
+still to be done by the project owner.
 
 ## M3 — GEO/AEO and agents
 

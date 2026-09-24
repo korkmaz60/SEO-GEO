@@ -1,0 +1,168 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "1.2341 sec.",
+  "cost": 0.01236,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "09241100-1535-0368-0000-0a1b2c3d4e5f",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "time": "1.1904 sec.",
+      "cost": 0.01236,
+      "result_count": 1,
+      "path": ["v3", "dataforseo_labs", "google", "keyword_suggestions", "live"],
+      "data": {
+        "api": "dataforseo_labs",
+        "function": "keyword_suggestions",
+        "se_type": "google",
+        "keyword": "kahve makinesi",
+        "location_code": 2792,
+        "language_code": "tr",
+        "limit": 3,
+        "include_seed_keyword": true
+      },
+      "result": [
+        {
+          "se_type": "google",
+          "seed_keyword": "kahve makinesi",
+          "seed_keyword_data": {
+            "se_type": "google",
+            "keyword": "kahve makinesi",
+            "location_code": 2792,
+            "language_code": "tr",
+            "keyword_info": {
+              "se_type": "google",
+              "last_updated_time": "2026-09-20 03:41:12 +00:00",
+              "competition": 1,
+              "competition_level": "HIGH",
+              "cpc": 0.38,
+              "search_volume": 110000,
+              "low_top_of_page_bid": 0.09,
+              "high_top_of_page_bid": 0.41,
+              "categories": [10021, 10178],
+              "monthly_searches": [
+                { "year": 2026, "month": 8, "search_volume": 90500 },
+                { "year": 2026, "month": 7, "search_volume": 110000 },
+                { "year": 2025, "month": 12, "search_volume": 165000 }
+              ],
+              "search_volume_trend": { "monthly": -18, "quarterly": -18, "yearly": 22 }
+            },
+            "clickstream_keyword_info": null,
+            "keyword_properties": {
+              "se_type": "google",
+              "core_keyword": null,
+              "synonym_clustering_algorithm": "text_processing",
+              "keyword_difficulty": 54,
+              "detected_language": "tr",
+              "is_another_language": false,
+              "words_count": 2
+            },
+            "serp_info": null,
+            "avg_backlinks_info": null,
+            "search_intent_info": {
+              "se_type": "google",
+              "main_intent": "commercial",
+              "foreign_intent": ["transactional"],
+              "last_updated_time": "2026-09-01 10:00:00 +00:00"
+            }
+          },
+          "location_code": 2792,
+          "language_code": "tr",
+          "total_count": 1873,
+          "items_count": 3,
+          "offset": 0,
+          "offset_token": "eyJDdXJyZW50T2Zmc2V0IjozfQ==",
+          "items": [
+            {
+              "se_type": "google",
+              "keyword": "filtre kahve makinesi",
+              "location_code": 2792,
+              "language_code": "tr",
+              "keyword_info": {
+                "se_type": "google",
+                "last_updated_time": "2026-09-20 03:41:12 +00:00",
+                "competition": 1,
+                "competition_level": "HIGH",
+                "cpc": 0.29,
+                "search_volume": 49500,
+                "monthly_searches": [
+                  { "year": 2026, "month": 8, "search_volume": 40500 },
+                  { "year": 2026, "month": 7, "search_volume": 49500 }
+                ],
+                "search_volume_trend": { "monthly": -18, "quarterly": 0, "yearly": 22 }
+              },
+              "keyword_properties": {
+                "se_type": "google",
+                "core_keyword": null,
+                "keyword_difficulty": 38,
+                "words_count": 3
+              },
+              "serp_info": null,
+              "avg_backlinks_info": null,
+              "search_intent_info": {
+                "se_type": "google",
+                "main_intent": "commercial",
+                "foreign_intent": null,
+                "last_updated_time": "2026-09-01 10:00:00 +00:00"
+              }
+            },
+            {
+              "se_type": "google",
+              "keyword": "kahve makinesi tavsiye",
+              "location_code": 2792,
+              "language_code": "tr",
+              "keyword_info": {
+                "se_type": "google",
+                "last_updated_time": "2026-09-20 03:41:12 +00:00",
+                "competition": 0.12,
+                "competition_level": "LOW",
+                "cpc": 0.11,
+                "search_volume": 2900,
+                "monthly_searches": null,
+                "search_volume_trend": null
+              },
+              "keyword_properties": {
+                "se_type": "google",
+                "core_keyword": "kahve makinesi önerisi",
+                "keyword_difficulty": 12,
+                "words_count": 3
+              },
+              "serp_info": null,
+              "avg_backlinks_info": null,
+              "search_intent_info": {
+                "se_type": "google",
+                "main_intent": "informational",
+                "foreign_intent": ["commercial", "unknown_intent"],
+                "last_updated_time": "2026-09-01 10:00:00 +00:00"
+              }
+            },
+            {
+              "se_type": "google",
+              "keyword": "kahve makinesi yedek parça",
+              "location_code": 2792,
+              "language_code": "tr",
+              "keyword_info": {
+                "se_type": "google",
+                "last_updated_time": null,
+                "competition": null,
+                "competition_level": null,
+                "cpc": null,
+                "search_volume": null,
+                "monthly_searches": null,
+                "search_volume_trend": null
+              },
+              "keyword_properties": null,
+              "serp_info": null,
+              "avg_backlinks_info": null,
+              "search_intent_info": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

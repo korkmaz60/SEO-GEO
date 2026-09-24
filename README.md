@@ -5,9 +5,11 @@ audits, keyword research and measurement of how often ChatGPT, Gemini, Claude, P
 Google AI Overviews mention and cite your brand. Self-hostable, built for in-house teams and
 agencies, powered by bring-your-own-key data providers (DataForSEO first).
 
-> **Status: pre-alpha (M1 — platform core).** Accounts, workspaces, projects, competitors,
-> DataForSEO connection, budgets, audit log and self-hosting with Docker work; rank
-> tracking, site audits and AI visibility arrive in M2–M3. See the
+> **Status: pre-alpha (M2 — SEO core).** Accounts, workspaces, projects and competitors,
+> DataForSEO connection with budgets, rank tracking with AI Overview citations, keyword
+> research, site audits (including AI crawler access and `llms.txt`), Search Console and
+> GA4 with AI assistant traffic, and self-hosting with Docker work. Tracking brand mentions
+> in ChatGPT, Gemini, Claude and Perplexity answers arrives in M3. See the
 > [roadmap](docs/roadmap.md).
 
 **Türkçe özet:** SEO-GEO; sıralama takibi, site denetimi, anahtar kelime araştırması ve

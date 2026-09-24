@@ -20,10 +20,13 @@ import { toast } from "sonner";
 
 /**
  * Confirmation for destructive or costly actions. With `confirmText`, the person has to type it
- * (e.g. the project's slug) before the action unlocks.
+ * (e.g. the project's slug) before the action unlocks. Opens from `trigger`, or is controlled
+ * with `open` and `onOpenChange`.
  */
 export function ConfirmDialog({
   trigger,
+  open: controlledOpen,
+  onOpenChange,
   title,
   description,
   confirmLabel,
@@ -31,7 +34,9 @@ export function ConfirmDialog({
   destructive = true,
   onConfirm,
 }: {
-  trigger: ReactElement;
+  trigger?: ReactElement;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   title: string;
   description: ReactNode;
   confirmLabel: string;
@@ -41,7 +46,12 @@ export function ConfirmDialog({
   onConfirm: () => Promise<void>;
 }) {
   const t = useTranslations("common");
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = controlledOpen ?? uncontrolledOpen;
+  const setOpen = (next: boolean) => {
+    setUncontrolledOpen(next);
+    onOpenChange?.(next);
+  };
   const [typed, setTyped] = useState("");
   const [pending, setPending] = useState(false);
   const locked = confirmText !== undefined && typed.trim() !== confirmText;
@@ -66,7 +76,7 @@ export function ConfirmDialog({
         if (!next) setTyped("");
       }}
     >
-      <AlertDialogTrigger render={trigger} />
+      {trigger && <AlertDialogTrigger render={trigger} />}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>

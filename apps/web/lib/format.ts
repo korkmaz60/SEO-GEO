@@ -26,6 +26,23 @@ export function formatPercent(ratio: number, locale: Locale, maximumFractionDigi
   }).format(ratio);
 }
 
+/** A byte size with a binary unit, e.g. "1,2 MB". */
+export function formatBytes(bytes: number, locale: Locale): string {
+  const units = ["byte", "kilobyte", "megabyte", "gigabyte"] as const;
+  let value = bytes;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit++;
+  }
+  return new Intl.NumberFormat(intlLocale(locale), {
+    style: "unit",
+    unit: units[unit],
+    unitDisplay: "short",
+    maximumFractionDigits: unit === 0 ? 0 : 1,
+  }).format(value);
+}
+
 export function formatUsd(value: number, locale: Locale): string {
   return new Intl.NumberFormat(intlLocale(locale), {
     style: "currency",
@@ -91,4 +108,22 @@ export function formatRelativeTime(date: Date, locale: Locale, now: Date = new D
     }
   }
   return formatter.format(0, "second");
+}
+
+/** A calendar day (`YYYY-MM-DD`) as a short label, e.g. "24 Eyl" / "Sep 24". */
+export function formatDay(day: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(intlLocale(locale), {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  }).format(new Date(`${day}T00:00:00Z`));
+}
+
+/** A percent change with its sign, e.g. "+%12" (tr) / "+12%" (en); `value` is in percent. */
+export function formatSignedPercent(value: number, locale: Locale): string {
+  return new Intl.NumberFormat(intlLocale(locale), {
+    style: "percent",
+    maximumFractionDigits: 0,
+    signDisplay: "exceptZero",
+  }).format(value / 100);
 }

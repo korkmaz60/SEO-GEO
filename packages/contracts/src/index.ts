@@ -5,3 +5,8 @@ export * from "./errors.js";
 export * from "./health.js";
 export * from "./projects.js";
 export * from "./workspace-data.js";
+export * from "./rank-tracker.js";
+export * from "./keyword-research.js";
+export * from "./site-audit.js";
+export * from "./google.js";
+export * from "./audit-issues.js";
