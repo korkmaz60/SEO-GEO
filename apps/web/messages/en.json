@@ -1,0 +1,241 @@
+{
+  "meta": {
+    "description": "Open-source platform for SEO and AI search visibility (GEO/AEO)"
+  },
+  "common": {
+    "noData": "No data",
+    "notConnected": "Not connected",
+    "preview": "Interface preview",
+    "previewHint": "These screens are a design preview. Data connects to real sources from M1 on.",
+    "comingIn": "Coming in {milestone}",
+    "source": "Source",
+    "method": "Method",
+    "updated": "Updated",
+    "sampleData": "Sample data",
+    "readRoadmap": "See the roadmap",
+    "percentagePoints": "{value} pp"
+  },
+  "nav": {
+    "groups": {
+      "general": "General",
+      "aiVisibility": "AI Visibility",
+      "seo": "SEO",
+      "content": "Content",
+      "research": "Research",
+      "manage": "Manage"
+    },
+    "items": {
+      "overview": "Overview",
+      "aiSummary": "Summary",
+      "prompts": "Prompts",
+      "sources": "Sources",
+      "competitors": "Competitors",
+      "rankTracker": "Rank Tracker",
+      "siteAudit": "Site Audit",
+      "backlinks": "Backlinks",
+      "searchConsole": "Search Console",
+      "optimizer": "Content Optimizer",
+      "keywordExplorer": "Keyword Explorer",
+      "domainOverview": "Domain Overview",
+      "reports": "Reports",
+      "projectSettings": "Project Settings",
+      "workspaceSettings": "Workspace Settings",
+      "designSystem": "Design System"
+    }
+  },
+  "shell": {
+    "workspace": "Workspace",
+    "project": "Project",
+    "switchProject": "Switch project",
+    "commandPlaceholder": "Search pages or commands…",
+    "commandEmpty": "No results.",
+    "commandPages": "Pages",
+    "commandPreferences": "Preferences",
+    "openCommand": "Search",
+    "toggleSidebar": "Toggle sidebar",
+    "skipToContent": "Skip to content",
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": "Language",
+    "languages": {
+      "tr": "Türkçe",
+      "en": "English"
+    },
+    "api": {
+      "checking": "Checking API…",
+      "online": "API connected · v{version}",
+      "offline": "API unreachable"
+    },
+    "usage": {
+      "title": "Provider spend this month",
+      "noBudget": "No budget set"
+    },
+    "newProject": "New project"
+  },
+  "pages": {
+    "overview": {
+      "title": "Overview",
+      "description": "A unified view of your SEO and AI visibility.",
+      "emptyTitle": "This project is not collecting data yet",
+      "emptyBody": "Connect your provider key and add keywords and prompts to track; the indicators fill in here."
+    },
+    "aiSummary": {
+      "title": "AI Visibility",
+      "description": "How visible your brand is in answers from ChatGPT, Gemini, Claude, Perplexity and Google AI.",
+      "emptyTitle": "No prompts tracked yet",
+      "emptyBody": "Build your prompt library to see mention rate, citation rate and share of voice per platform."
+    },
+    "prompts": {
+      "title": "Prompts",
+      "description": "The questions you track and the latest answer on each platform.",
+      "emptyTitle": "The prompt library is empty",
+      "emptyBody": "Add the questions your customers ask AI assistants; every run keeps the answer and its sources."
+    },
+    "sources": {
+      "title": "Sources",
+      "description": "Domains and pages cited in AI answers.",
+      "emptyTitle": "No cited sources yet",
+      "emptyBody": "See which sites AI answers cite; the list is a starting point for partnerships and content opportunities."
+    },
+    "competitors": {
+      "title": "Competitors",
+      "description": "Your share of voice in AI answers against your competitors.",
+      "emptyTitle": "No competitors defined",
+      "emptyBody": "Add competitors and brand variations in project settings to compare share of voice and mention order."
+    },
+    "rankTracker": {
+      "title": "Rank Tracker",
+      "description": "Daily rankings of your keywords by location, language and device.",
+      "emptyTitle": "No keywords tracked",
+      "emptyBody": "Add keywords; rankings, SERP features and whether AI Overviews cite you are recorded every day."
+    },
+    "siteAudit": {
+      "title": "Site Audit",
+      "description": "Technical SEO issues, site health and AI crawler access.",
+      "emptyTitle": "No audit yet",
+      "emptyBody": "The first audit crawls your site following robots.txt and lists issues by severity."
+    },
+    "backlinks": {
+      "title": "Backlinks",
+      "description": "Referring domains, anchors and new or lost links.",
+      "emptyTitle": "No backlink data",
+      "emptyBody": "The backlink profile and competitor comparisons come from the DataForSEO Backlinks API."
+    },
+    "searchConsole": {
+      "title": "Search Console",
+      "description": "Query and page performance from Google Search Console.",
+      "emptyTitle": "Search Console is not connected",
+      "emptyBody": "Connect your Google account to sync clicks, impressions and average position every day."
+    },
+    "optimizer": {
+      "title": "Content Optimizer",
+      "description": "Content briefs and live scoring based on SERPs and AI citations.",
+      "emptyTitle": "Content tools are coming",
+      "emptyBody": "An editor that shows GEO and SEO scores while you write arrives in the last roadmap stage."
+    },
+    "keywordExplorer": {
+      "title": "Keyword Explorer",
+      "description": "Search volume, difficulty, intent and related keywords.",
+      "emptyTitle": "Start your research with a keyword",
+      "emptyBody": "Results come from DataForSEO Labs; the estimated cost of each search is shown before it runs."
+    },
+    "domainOverview": {
+      "title": "Domain Overview",
+      "description": "Organic visibility, traffic and competitors of any domain.",
+      "emptyTitle": "Enter a domain",
+      "emptyBody": "Organic keywords, estimated traffic and competing domains will be listed here."
+    },
+    "reports": {
+      "title": "Reports",
+      "description": "Branded PDF reports and scheduled delivery.",
+      "emptyTitle": "No reports yet",
+      "emptyBody": "Create PDF reports with your own logo and email them to clients on a schedule."
+    },
+    "projectSettings": {
+      "title": "Project Settings",
+      "description": "Domain, default location and language, brand, competitors and integrations.",
+      "emptyTitle": "Settings arrive with M1",
+      "emptyBody": "This page becomes active once project details, brand variations and competitors can be saved."
+    },
+    "workspaceSettings": {
+      "title": "Workspace Settings",
+      "description": "Members and roles, provider keys, usage and budget.",
+      "emptyTitle": "Settings arrive with M1",
+      "emptyBody": "Invitations, encrypted provider keys and spending limits will be managed on this page."
+    }
+  },
+  "kpi": {
+    "aiVisibility": "AI visibility score",
+    "shareOfVoice": "Share of voice",
+    "avgPosition": "Average position",
+    "trackedKeywords": "Tracked keywords",
+    "siteHealth": "Site health",
+    "spend": "Spend this month"
+  },
+  "onboarding": {
+    "title": "Getting started",
+    "description": "Complete these steps so the project starts collecting data.",
+    "steps": {
+      "provider": "Connect your DataForSEO key",
+      "brand": "Define your brand and competitors",
+      "keywords": "Add keywords and prompts to track",
+      "audit": "Start the first site audit",
+      "gsc": "Connect Search Console"
+    }
+  },
+  "design": {
+    "title": "Design System",
+    "description": "Tokens and components used across the interface.",
+    "colors": "Colors",
+    "surfaces": "Surfaces",
+    "accents": "Module accents",
+    "status": "Status colors",
+    "chartPalette": "Chart palette",
+    "chartPaletteHint": "Eight colors in a fixed order, validated for color vision deficiency and contrast. Your own brand is always color 1.",
+    "typography": "Typography",
+    "buttons": "Buttons",
+    "kpiTiles": "KPI tiles",
+    "emptyStates": "Empty states",
+    "chartExample": "Chart example",
+    "chartExampleHint": "Sample data. Two series use a legend, a tooltip and a table view together.",
+    "hues": {
+      "blue": "blue",
+      "orange": "orange",
+      "aqua": "aqua",
+      "yellow": "yellow",
+      "magenta": "magenta",
+      "green": "green",
+      "violet": "violet",
+      "red": "red"
+    },
+    "statusGood": "Good",
+    "statusWarning": "Warning",
+    "statusSerious": "Serious",
+    "statusCritical": "Critical",
+    "ownBrand": "Your brand",
+    "competitor": "Competitor",
+    "week": "Week",
+    "shareOfVoice": "Share of voice (%)",
+    "backToApp": "Back to the app",
+    "tableView": "Table view"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for may have moved or never existed.",
+    "back": "Back to the preview"
+  },
+  "overview": {
+    "aiTrendTitle": "AI visibility trend",
+    "aiTrendEmpty": "Once prompt tracking starts, weekly visibility per platform is charted here.",
+    "rankTitle": "Ranking distribution",
+    "rankEmptyTitle": "No keywords tracked",
+    "rankEmpty": "Keywords are grouped into top 3, top 10 and top 100 here.",
+    "scoresTitle": "Scores",
+    "aiScore": "AI visibility",
+    "siteHealth": "Site health"
+  }
+}

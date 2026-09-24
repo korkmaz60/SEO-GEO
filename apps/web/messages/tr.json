@@ -1,0 +1,241 @@
+{
+  "meta": {
+    "description": "SEO ve yapay zekâ arama görünürlüğü (GEO/AEO) için açık kaynak platform"
+  },
+  "common": {
+    "noData": "Veri yok",
+    "notConnected": "Bağlı değil",
+    "preview": "Arayüz önizlemesi",
+    "previewHint": "Bu ekranlar tasarım önizlemesidir. Veriler M1'den itibaren gerçek kaynaklara bağlanacak.",
+    "comingIn": "{milestone} ile geliyor",
+    "source": "Kaynak",
+    "method": "Yöntem",
+    "updated": "Güncellendi",
+    "sampleData": "Örnek veri",
+    "readRoadmap": "Yol haritasını gör",
+    "percentagePoints": "{value} puan"
+  },
+  "nav": {
+    "groups": {
+      "general": "Genel",
+      "aiVisibility": "AI Görünürlük",
+      "seo": "SEO",
+      "content": "İçerik",
+      "research": "Araştırma",
+      "manage": "Yönetim"
+    },
+    "items": {
+      "overview": "Genel Bakış",
+      "aiSummary": "Özet",
+      "prompts": "Prompt'lar",
+      "sources": "Kaynaklar",
+      "competitors": "Rakipler",
+      "rankTracker": "Sıralama Takibi",
+      "siteAudit": "Site Denetimi",
+      "backlinks": "Backlinkler",
+      "searchConsole": "Search Console",
+      "optimizer": "İçerik Optimizasyonu",
+      "keywordExplorer": "Anahtar Kelime Gezgini",
+      "domainOverview": "Domain Analizi",
+      "reports": "Raporlar",
+      "projectSettings": "Proje Ayarları",
+      "workspaceSettings": "Çalışma Alanı Ayarları",
+      "designSystem": "Tasarım Sistemi"
+    }
+  },
+  "shell": {
+    "workspace": "Çalışma alanı",
+    "project": "Proje",
+    "switchProject": "Proje değiştir",
+    "commandPlaceholder": "Sayfa veya komut ara…",
+    "commandEmpty": "Sonuç bulunamadı.",
+    "commandPages": "Sayfalar",
+    "commandPreferences": "Tercihler",
+    "openCommand": "Ara",
+    "toggleSidebar": "Kenar çubuğunu aç/kapat",
+    "skipToContent": "İçeriğe geç",
+    "theme": {
+      "label": "Tema",
+      "light": "Açık",
+      "dark": "Koyu",
+      "system": "Sistem"
+    },
+    "language": "Dil",
+    "languages": {
+      "tr": "Türkçe",
+      "en": "English"
+    },
+    "api": {
+      "checking": "API kontrol ediliyor…",
+      "online": "API bağlı · v{version}",
+      "offline": "API'ye ulaşılamıyor"
+    },
+    "usage": {
+      "title": "Bu ay sağlayıcı harcaması",
+      "noBudget": "Bütçe tanımlı değil"
+    },
+    "newProject": "Yeni proje"
+  },
+  "pages": {
+    "overview": {
+      "title": "Genel Bakış",
+      "description": "SEO ve AI görünürlüğünüzün birleşik görünümü.",
+      "emptyTitle": "Proje henüz veri toplamıyor",
+      "emptyBody": "Sağlayıcı anahtarınızı bağlayıp takip edilecek kelimeleri ve prompt'ları eklediğinizde göstergeler burada dolacak."
+    },
+    "aiSummary": {
+      "title": "AI Görünürlük",
+      "description": "Markanızın ChatGPT, Gemini, Claude, Perplexity ve Google AI yanıtlarındaki görünürlüğü.",
+      "emptyTitle": "Henüz prompt takibi yok",
+      "emptyBody": "Prompt kütüphanenizi oluşturduğunuzda platform bazında anılma oranı, atıf oranı ve görünürlük payı burada görünecek."
+    },
+    "prompts": {
+      "title": "Prompt'lar",
+      "description": "Takip ettiğiniz sorular ve her platformdaki son yanıtlar.",
+      "emptyTitle": "Prompt kütüphanesi boş",
+      "emptyBody": "Müşterilerinizin AI asistanlarına sorduğu soruları ekleyin; her çalıştırmanın yanıtı ve kaynakları saklanır."
+    },
+    "sources": {
+      "title": "Kaynaklar",
+      "description": "AI yanıtlarında alıntılanan alan adları ve sayfalar.",
+      "emptyTitle": "Henüz alıntılanan kaynak yok",
+      "emptyBody": "AI yanıtlarının hangi siteleri kaynak gösterdiğini burada göreceksiniz; bu liste iş birliği ve içerik fırsatları için başlangıç noktasıdır."
+    },
+    "competitors": {
+      "title": "Rakipler",
+      "description": "AI yanıtlarında rakiplerinize karşı görünürlük payınız.",
+      "emptyTitle": "Rakip tanımlı değil",
+      "emptyBody": "Rakiplerinizi ve marka varyasyonlarını proje ayarlarından ekleyin; görünürlük payı ve anılma sırası burada karşılaştırılır."
+    },
+    "rankTracker": {
+      "title": "Sıralama Takibi",
+      "description": "Anahtar kelimelerinizin konum, dil ve cihaz bazında günlük sıralamaları.",
+      "emptyTitle": "Takip edilen anahtar kelime yok",
+      "emptyBody": "Kelimeleri ekleyin; sıralama, SERP özellikleri ve AI Overview'da alıntılanıp alıntılanmadığınız her gün kaydedilir."
+    },
+    "siteAudit": {
+      "title": "Site Denetimi",
+      "description": "Teknik SEO sorunları, site sağlığı ve AI tarayıcı erişimi.",
+      "emptyTitle": "Henüz denetim yapılmadı",
+      "emptyBody": "İlk denetim sitenizi robots.txt kurallarına uyarak tarar ve sorunları önem sırasına göre listeler."
+    },
+    "backlinks": {
+      "title": "Backlinkler",
+      "description": "Referans veren alan adları, bağlantı metinleri ve kazanılan/kaybedilen bağlantılar.",
+      "emptyTitle": "Backlink verisi yok",
+      "emptyBody": "Backlink profili ve rakip karşılaştırmaları DataForSEO Backlinks API üzerinden gelecek."
+    },
+    "searchConsole": {
+      "title": "Search Console",
+      "description": "Google Search Console'dan sorgu ve sayfa performansı.",
+      "emptyTitle": "Search Console bağlı değil",
+      "emptyBody": "Google hesabınızı bağladığınızda tıklama, gösterim ve ortalama konum verileri her gün senkronize edilir."
+    },
+    "optimizer": {
+      "title": "İçerik Optimizasyonu",
+      "description": "SERP ve AI atıflarına dayalı içerik brifleri ve canlı skor.",
+      "emptyTitle": "İçerik araçları yakında",
+      "emptyBody": "Yazarken GEO ve SEO skorunu gösteren editör, yol haritasının son aşamasında geliyor."
+    },
+    "keywordExplorer": {
+      "title": "Anahtar Kelime Gezgini",
+      "description": "Arama hacmi, zorluk, niyet ve ilgili kelimeler.",
+      "emptyTitle": "Araştırmaya bir kelimeyle başlayın",
+      "emptyBody": "Sonuçlar DataForSEO Labs'tan gelir; her aramanın tahmini maliyeti çalıştırmadan önce gösterilir."
+    },
+    "domainOverview": {
+      "title": "Domain Analizi",
+      "description": "Herhangi bir alan adının organik görünürlüğü, trafiği ve rakipleri.",
+      "emptyTitle": "Bir alan adı girin",
+      "emptyBody": "Organik anahtar kelimeler, tahmini trafik ve rakip alan adları burada listelenecek."
+    },
+    "reports": {
+      "title": "Raporlar",
+      "description": "Markalı PDF raporlar ve zamanlanmış gönderimler.",
+      "emptyTitle": "Henüz rapor yok",
+      "emptyBody": "Kendi logonuzla PDF raporlar oluşturup müşterilerinize düzenli olarak e-postayla gönderebileceksiniz."
+    },
+    "projectSettings": {
+      "title": "Proje Ayarları",
+      "description": "Alan adı, varsayılan konum ve dil, marka, rakipler ve entegrasyonlar.",
+      "emptyTitle": "Ayarlar M1 ile geliyor",
+      "emptyBody": "Proje bilgileri, marka varyasyonları ve rakipler kaydedilebildiğinde bu sayfa etkinleşir."
+    },
+    "workspaceSettings": {
+      "title": "Çalışma Alanı Ayarları",
+      "description": "Üyeler ve roller, sağlayıcı anahtarları, kullanım ve bütçe.",
+      "emptyTitle": "Ayarlar M1 ile geliyor",
+      "emptyBody": "Üye davetleri, şifreli sağlayıcı anahtarları ve harcama limitleri bu sayfada yönetilecek."
+    }
+  },
+  "kpi": {
+    "aiVisibility": "AI görünürlük skoru",
+    "shareOfVoice": "Görünürlük payı",
+    "avgPosition": "Ortalama sıralama",
+    "trackedKeywords": "Takip edilen kelime",
+    "siteHealth": "Site sağlığı",
+    "spend": "Bu ay harcama"
+  },
+  "onboarding": {
+    "title": "Başlarken",
+    "description": "Projenin veri toplamaya başlaması için bu adımları tamamlayın.",
+    "steps": {
+      "provider": "DataForSEO anahtarınızı bağlayın",
+      "brand": "Markanızı ve rakiplerinizi tanımlayın",
+      "keywords": "Takip edilecek kelimeleri ve prompt'ları ekleyin",
+      "audit": "İlk site denetimini başlatın",
+      "gsc": "Search Console'u bağlayın"
+    }
+  },
+  "design": {
+    "title": "Tasarım Sistemi",
+    "description": "Arayüzde kullanılan token'lar ve bileşenler.",
+    "colors": "Renkler",
+    "surfaces": "Yüzeyler",
+    "accents": "Modül vurguları",
+    "status": "Durum renkleri",
+    "chartPalette": "Grafik paleti",
+    "chartPaletteHint": "Sabit sıralı 8 renk; renk körlüğü ve kontrast için doğrulandı. Kendi markanız her zaman 1. renktir.",
+    "typography": "Tipografi",
+    "buttons": "Butonlar",
+    "kpiTiles": "Gösterge kartları",
+    "emptyStates": "Boş durumlar",
+    "chartExample": "Grafik örneği",
+    "chartExampleHint": "Örnek veri. İki seri, lejant, ipucu ve tablo görünümü birlikte kullanılır.",
+    "hues": {
+      "blue": "mavi",
+      "orange": "turuncu",
+      "aqua": "camgöbeği",
+      "yellow": "sarı",
+      "magenta": "eflatun",
+      "green": "yeşil",
+      "violet": "mor",
+      "red": "kırmızı"
+    },
+    "statusGood": "İyi",
+    "statusWarning": "Uyarı",
+    "statusSerious": "Ciddi",
+    "statusCritical": "Kritik",
+    "ownBrand": "Markanız",
+    "competitor": "Rakip",
+    "week": "Hafta",
+    "shareOfVoice": "Görünürlük payı (%)",
+    "backToApp": "Uygulamaya dön",
+    "tableView": "Tablo görünümü"
+  },
+  "notFound": {
+    "title": "Sayfa bulunamadı",
+    "description": "Aradığınız sayfa taşınmış ya da hiç var olmamış olabilir.",
+    "back": "Önizlemeye dön"
+  },
+  "overview": {
+    "aiTrendTitle": "AI görünürlük trendi",
+    "aiTrendEmpty": "Prompt takibi başladığında platform bazında haftalık görünürlük burada çizilir.",
+    "rankTitle": "Sıralama dağılımı",
+    "rankEmptyTitle": "Takip edilen kelime yok",
+    "rankEmpty": "Kelimeler ilk 3, ilk 10 ve ilk 100 gruplarına göre burada dağılır.",
+    "scoresTitle": "Skorlar",
+    "aiScore": "AI görünürlük",
+    "siteHealth": "Site sağlığı"
+  }
+}

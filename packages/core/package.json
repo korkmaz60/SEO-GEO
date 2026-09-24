@@ -1,0 +1,38 @@
+{
+  "name": "@seo-geo/core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Framework-free domain logic: hostnames, outbound URL policy, analyzers and scoring",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./net": {
+      "types": "./dist/net/index.d.ts",
+      "default": "./dist/net/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "lint": "eslint src test",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "ipaddr.js": "^2.5.0",
+    "tldts": "^7.4.15"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "eslint": "^9.39.5",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.1"
+  }
+}

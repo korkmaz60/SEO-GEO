@@ -1,0 +1,16 @@
+packages:
+  - apps/*
+  - packages/*
+
+# pnpm only runs install scripts of the packages listed here.
+onlyBuiltDependencies:
+  - "@swc/core"
+  - esbuild
+  - sharp
+  - unrs-resolver
+
+# Install scripts we do not run: telemetry, and a native watcher (used by next-intl)
+# that ships prebuilt binaries.
+ignoredBuiltDependencies:
+  - "@parcel/watcher"
+  - "@scarf/scarf"

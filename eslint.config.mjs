@@ -1,18 +1,31 @@
+// Lint configuration for packages/* and apps/api. apps/web has its own Next.js config.
+import js from "@eslint/js";
 import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+import globals from "globals";
+import tseslint from "typescript-eslint";
 
-const eslintConfig = defineConfig([
-  ...nextVitals,
-  ...nextTs,
-  // Override default ignores of eslint-config-next.
+export default defineConfig([
   globalIgnores([
-    // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/.turbo/**",
+    "legacy/**",
+    "apps/web/**",
   ]),
+  js.configs.recommended,
+  tseslint.configs.recommended,
+  {
+    languageOptions: {
+      globals: { ...globals.node },
+    },
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/consistent-type-imports": ["error", { fixStyle: "inline-type-imports" }],
+    },
+  },
 ]);
-
-export default eslintConfig;
