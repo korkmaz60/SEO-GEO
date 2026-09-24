@@ -1,13 +1,15 @@
 import { Injectable } from "@nestjs/common";
-import type { WorkspaceRole } from "@seo-geo/contracts";
+import type { NotificationValue, WorkspaceRole } from "@seo-geo/contracts";
 import type { Prisma } from "@seo-geo/db";
 
 import { PrismaService } from "../database/prisma.service.js";
 
 export interface NotificationInput {
   type: string;
+  /** English fallback; the web app renders localized text from `type` and `data`. */
   title: string;
   body?: string;
+  data?: Record<string, NotificationValue>;
   link?: string;
 }
 
@@ -34,6 +36,7 @@ export class NotificationsService {
         type: notification.type,
         title: notification.title,
         body: notification.body ?? null,
+        data: notification.data ?? {},
         link: notification.link ?? null,
       })),
     });

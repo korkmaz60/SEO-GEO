@@ -35,6 +35,7 @@ export class NotificationsController {
         type: row.type,
         title: row.title,
         body: row.body,
+        data: (row.data ?? {}) as Notification["data"],
         link: row.link,
         readAt: iso(row.readAt),
         createdAt: iso(row.createdAt),

@@ -76,6 +76,11 @@ export class UsageService {
           type: "budget.threshold",
           title: `Provider spend reached ${highest}% of the monthly budget`,
           body: `$${after.toFixed(2)} of $${budget.monthlyLimitUsd.toFixed(2)} this month.`,
+          data: {
+            percent: highest,
+            spentUsd: after.toNumber(),
+            limitUsd: budget.monthlyLimitUsd.toNumber(),
+          },
         },
         db,
       );

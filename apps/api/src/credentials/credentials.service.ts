@@ -15,6 +15,7 @@ import type { RequestMeta } from "../common/request-meta.js";
 import { iso } from "../common/serialize.js";
 import { SecretBoxService } from "../crypto/secret-box.js";
 import { PrismaService } from "../database/prisma.service.js";
+import { NotificationsService } from "../notifications/notifications.service.js";
 import { TaskRegistry } from "../tasks/task-registry.js";
 import { DataForSeoGateway, type DataForSeoLogin } from "./dataforseo.gateway.js";
 
@@ -54,6 +55,7 @@ export class CredentialsService implements OnModuleInit {
     private readonly secrets: SecretBoxService,
     private readonly dataForSeo: DataForSeoGateway,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationsService,
     private readonly registry: TaskRegistry,
   ) {}
 
@@ -185,11 +187,21 @@ export class CredentialsService implements OnModuleInit {
             lastVerifiedAt: now,
           },
         });
-      case "rejected":
-        return this.prisma.providerCredential.update({
+      case "rejected": {
+        const updated = await this.prisma.providerCredential.update({
           where: { id: row.id },
           data: { status: "INVALID", lastError: result.message, lastVerifiedAt: now },
         });
+        if (row.status !== "INVALID") {
+          await this.notifications.notifyRoles(row.workspaceId, ["owner", "admin"], {
+            type: "credential.invalid",
+            title: "DataForSEO no longer accepts the stored credentials",
+            body: result.message,
+            data: { provider: row.provider },
+          });
+        }
+        return updated;
+      }
       case "unreachable":
         // Keep the last known status; a transient outage is not a revoked key.
         return this.prisma.providerCredential.update({

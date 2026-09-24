@@ -3,6 +3,7 @@ import {
   ErrorCode,
   MAX_BRAND_SLOTS,
   MAX_COMPETITORS,
+  RESERVED_PROJECT_SLUGS,
   type BrandEntity,
   type CompetitorInput,
   type CreateProject,
@@ -163,7 +164,7 @@ export class ProjectsService {
     archived: boolean,
     meta: RequestMeta,
   ): Promise<ProjectDetail> {
-    await this.find(workspaceId, projectId);
+    const project = await this.find(workspaceId, projectId);
     await this.prisma.project.update({
       where: { id: projectId },
       data: { archivedAt: archived ? new Date() : null },
@@ -172,6 +173,7 @@ export class ProjectsService {
       workspaceId,
       action: archived ? "project.archived" : "project.restored",
       target: { type: "project", id: projectId },
+      metadata: { name: project.name, domain: project.domain },
       meta,
     });
     return this.detail(workspaceId, projectId);
@@ -273,7 +275,10 @@ export class ProjectsService {
     return brand;
   }
 
-  private async freeSlug(workspaceId: string, base: string): Promise<string> {
+  private async freeSlug(workspaceId: string, slugBase: string): Promise<string> {
+    const base = (RESERVED_PROJECT_SLUGS as readonly string[]).includes(slugBase)
+      ? `${slugBase}-project`
+      : slugBase;
     const existing = new Set(
       (
         await this.prisma.project.findMany({

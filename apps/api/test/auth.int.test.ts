@@ -102,6 +102,30 @@ describe.skipIf(!TEST_SERVER_URL)("authentication and workspaces", () => {
     await ownerAgent.get(`/api/v1/workspaces/${workspaceId}/test/admin`).expect(200);
   });
 
+  it("records the client address resolved from trusted proxies", async () => {
+    // The request comes from loopback (trusted), so the rightmost forwarded address is the
+    // client; anything to its left may have been written by the client itself.
+    const created = await ownerAgent
+      .post("/api/auth/organization/create")
+      .set("X-Forwarded-For", "203.0.113.9, 198.51.100.7")
+      .send({ name: "Proxy Test", slug: "proxy-test" })
+      .expect(200);
+    const audit = await ownerAgent
+      .get(`/api/v1/workspaces/${created.body.id}/audit-log`)
+      .set("X-Forwarded-For", "203.0.113.9")
+      .expect(200);
+    expect(audit.body.data).toMatchObject([{ action: "workspace.created", ip: "198.51.100.7" }]);
+  });
+
+  it("rejects workspace addresses that clash with the app's routes", async () => {
+    for (const slug of ["sign-in", "Bad Slug", "-x"]) {
+      const response = await ownerAgent
+        .post("/api/auth/organization/create")
+        .send({ name: "Clash", slug });
+      expect(response.status).toBe(400);
+    }
+  });
+
   it("lets invited people sign up and join with the invited role", async () => {
     await ownerAgent
       .post("/api/auth/organization/invite-member")
@@ -152,6 +176,82 @@ describe.skipIf(!TEST_SERVER_URL)("authentication and workspaces", () => {
       const response = await agent.get(`/api/v1/workspaces/${id}`).expect(404);
       expect(ProblemDetailsSchema.parse(response.body).code).toBe("not_found");
     }
+  });
+
+  it("records membership changes with the acting user in the audit log", async () => {
+    const members = await ownerAgent
+      .get(`/api/auth/organization/list-members?organizationId=${workspaceId}`)
+      .expect(200);
+    const viewerMember = members.body.members.find(
+      (member: { user: { email: string } }) => member.user.email === viewer.email,
+    );
+    await ownerAgent
+      .post("/api/auth/organization/update-member-role")
+      .send({ memberId: viewerMember.id, role: "member", organizationId: workspaceId })
+      .expect(200);
+
+    const invitation = await ownerAgent
+      .post("/api/auth/organization/invite-member")
+      .send({ email: "later@example.com", role: "member", organizationId: workspaceId })
+      .expect(200);
+    await ownerAgent
+      .post("/api/auth/organization/cancel-invitation")
+      .send({ invitationId: invitation.body.id })
+      .expect(200);
+
+    const viewerAgent = browser(context.app);
+    await viewerAgent
+      .post("/api/auth/sign-in/email")
+      .send({ email: viewer.email, password: viewer.password })
+      .expect(200);
+    await viewerAgent
+      .post("/api/auth/organization/leave")
+      .send({ organizationId: workspaceId })
+      .expect(200);
+
+    const audit = await ownerAgent.get(`/api/v1/workspaces/${workspaceId}/audit-log`).expect(200);
+    const entries = (
+      audit.body.data as {
+        action: string;
+        actor: { email: string } | null;
+        metadata: Record<string, string>;
+      }[]
+    )
+      .map(({ action, actor, metadata }) => ({ action, actor: actor?.email, metadata }))
+      .reverse();
+    expect(entries).toEqual([
+      {
+        action: "workspace.created",
+        actor: owner.email,
+        metadata: { name: "Ajans", slug: "ajans" },
+      },
+      {
+        action: "invitation.created",
+        actor: owner.email,
+        metadata: { email: viewer.email, role: "viewer" },
+      },
+      {
+        action: "member.joined",
+        actor: viewer.email,
+        metadata: { email: viewer.email, role: "viewer" },
+      },
+      {
+        action: "member.role_changed",
+        actor: owner.email,
+        metadata: { email: viewer.email, from: "viewer", to: "member" },
+      },
+      {
+        action: "invitation.created",
+        actor: owner.email,
+        metadata: { email: "later@example.com", role: "member" },
+      },
+      {
+        action: "invitation.canceled",
+        actor: owner.email,
+        metadata: { email: "later@example.com" },
+      },
+      { action: "member.left", actor: viewer.email, metadata: {} },
+    ]);
   });
 
   it("resets a forgotten password through the emailed link", async () => {

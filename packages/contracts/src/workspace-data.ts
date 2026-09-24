@@ -98,11 +98,18 @@ export type TaskListQuery = z.output<typeof TaskListQuerySchema>;
 
 // ── Notifications ─────────────────────────────────────────────────────────────────
 
+export const NotificationValueSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+export type NotificationValue = z.infer<typeof NotificationValueSchema>;
+
 export const NotificationSchema = z.object({
   id: z.uuid(),
+  /** E.g. `budget.threshold` or `credential.invalid`; clients localize by type. */
   type: z.string(),
+  /** English fallback text. */
   title: z.string(),
   body: z.string().nullable(),
+  /** Values for the localized message. */
+  data: z.record(z.string(), NotificationValueSchema),
   link: z.string().nullable(),
   readAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),

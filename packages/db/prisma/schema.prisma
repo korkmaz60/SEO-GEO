@@ -416,8 +416,11 @@ model Notification {
   workspaceId String    @map("workspace_id") @db.Uuid
   userId      String    @map("user_id") @db.Uuid
   type        String
+  /// English fallback; clients render localized text from `type` and `data`.
   title       String
   body        String?
+  /// Values for the localized message, e.g. `{ "percent": 80 }`.
+  data        Json      @default("{}")
   link        String?
   readAt      DateTime? @map("read_at") @db.Timestamptz(3)
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)

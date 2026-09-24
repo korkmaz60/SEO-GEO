@@ -261,6 +261,22 @@ describe.skipIf(!TEST_SERVER_URL)("platform core", () => {
       const verified = await owner.post(api(`/credentials/${credentialId}/verify`)).expect(200);
       expect(verified.body.details.balanceUsd).toBe(12.25);
 
+      // A revoked key turns the credential invalid and tells owners and admins once.
+      dataForSeo.state.revoked = true;
+      const revoked = await owner.post(api(`/credentials/${credentialId}/verify`)).expect(200);
+      expect(revoked.body).toMatchObject({ status: "INVALID", details: { balanceUsd: 12.25 } });
+      await owner.post(api(`/credentials/${credentialId}/verify`)).expect(200);
+      const inbox = await owner.get(api("/notifications")).expect(200);
+      const invalid = inbox.body.data.filter(
+        (notification: { type: string }) => notification.type === "credential.invalid",
+      );
+      expect(invalid).toHaveLength(1);
+      expect(invalid[0].data).toEqual({ provider: "DATAFORSEO" });
+      const memberInbox = await member.get(api("/notifications")).expect(200);
+      expect(memberInbox.body.data).toEqual([]);
+      await owner.post(api("/notifications/read-all")).expect(204);
+      dataForSeo.state.revoked = false;
+
       await owner.delete(api(`/credentials/${credentialId}`)).expect(204);
       const audit = await owner.get(api("/audit-log")).expect(200);
       const actions = audit.body.data.map((entry: { action: string }) => entry.action);
@@ -305,7 +321,10 @@ describe.skipIf(!TEST_SERVER_URL)("platform core", () => {
 
       const notifications = await owner.get(api("/notifications")).expect(200);
       expect(notifications.body.unread).toBe(1);
-      expect(notifications.body.data[0]).toMatchObject({ type: "budget.threshold" });
+      expect(notifications.body.data[0]).toMatchObject({
+        type: "budget.threshold",
+        data: { percent: 50, spentUsd: 0.6, limitUsd: 1 },
+      });
       const memberNotifications = await member.get(api("/notifications")).expect(200);
       expect(memberNotifications.body.unread).toBe(0);
 

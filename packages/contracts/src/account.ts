@@ -23,6 +23,32 @@ export const InstanceInfoSchema = z.object({
 });
 export type InstanceInfo = z.infer<typeof InstanceInfoSchema>;
 
+/** Top-level web routes that a workspace slug must not shadow. */
+export const RESERVED_WORKSPACE_SLUGS = [
+  "account",
+  "admin",
+  "api",
+  "design",
+  "docs",
+  "forgot-password",
+  "help",
+  "invite",
+  "onboarding",
+  "reset-password",
+  "sign-in",
+  "sign-up",
+  "two-factor",
+  "verify-email",
+] as const;
+
+export const WorkspaceSlugSchema = z
+  .string()
+  .regex(/^[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?$/, "Use 1–48 lowercase letters, digits or -")
+  .refine(
+    (slug) => !(RESERVED_WORKSPACE_SLUGS as readonly string[]).includes(slug),
+    "This address is reserved",
+  );
+
 export const WorkspaceSummarySchema = z.object({
   id: z.uuid(),
   name: z.string(),

@@ -1,6 +1,8 @@
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { toNodeHandler } from "better-auth/node";
+import type { Request, Response } from "express";
 
+import { authRequestContext } from "./auth/auth-request-context.js";
 import { AUTH } from "./auth/auth.tokens.js";
 import { AUTH_BASE_PATH, type Auth } from "./auth/auth.js";
 import { setupOpenApi } from "./common/openapi.js";
@@ -21,7 +23,24 @@ export function configureApp(app: NestExpressApplication, config: AppConfig): vo
   app.use(requestIdMiddleware);
 
   const auth = app.get<Auth>(AUTH);
-  app.getHttpAdapter().getInstance().all(`${AUTH_BASE_PATH}/*splat`, toNodeHandler(auth));
+  const authHandler = toNodeHandler(auth);
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .all(`${AUTH_BASE_PATH}/*splat`, (request: Request, response: Response) => {
+      // Better Auth reads the client IP (rate limits, sessions) from X-Forwarded-For. Express
+      // has already resolved it from the proxy chain it trusts (TRUST_PROXY), so hand over
+      // exactly that address instead of a header the client could have written.
+      if (request.ip) request.headers["x-forwarded-for"] = request.ip;
+      else delete request.headers["x-forwarded-for"];
+      const userAgent = request.headers["user-agent"];
+      const context = {
+        ip: request.ip ?? null,
+        userAgent: typeof userAgent === "string" ? userAgent.slice(0, 512) : null,
+        actorId: null,
+      };
+      return authRequestContext.run(context, () => authHandler(request, response));
+    });
 
   app.useBodyParser("json", { limit: "1mb" });
   app.setGlobalPrefix(API_PREFIX);

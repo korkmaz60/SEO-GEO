@@ -6,9 +6,22 @@ import { DeviceSchema } from "./domain.js";
 export const MAX_BRAND_SLOTS = 8;
 export const MAX_COMPETITORS = MAX_BRAND_SLOTS - 1;
 
+/** Workspace-level web routes that a project slug must not shadow. */
+export const RESERVED_PROJECT_SLUGS = [
+  "account",
+  "new",
+  "projects",
+  "research",
+  "settings",
+] as const;
+
 export const ProjectSlugSchema = z
   .string()
-  .regex(/^[a-z0-9](?:[a-z0-9-]{0,48}[a-z0-9])?$/, "Use 1–50 lowercase letters, digits or -");
+  .regex(/^[a-z0-9](?:[a-z0-9-]{0,48}[a-z0-9])?$/, "Use 1–50 lowercase letters, digits or -")
+  .refine(
+    (slug) => !(RESERVED_PROJECT_SLUGS as readonly string[]).includes(slug),
+    "This address is reserved",
+  );
 
 const NameSchema = z.string().trim().min(1).max(80);
 const AliasesSchema = z.array(z.string().trim().min(1).max(80)).max(20);
