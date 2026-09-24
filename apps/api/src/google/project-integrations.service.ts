@@ -13,13 +13,14 @@ import {
   type SelectGscSite,
 } from "@seo-geo/contracts";
 import { addDays, aiReferralName } from "@seo-geo/core";
-import type { GoogleConnection, Prisma, ProjectIntegration as IntegrationRow } from "@seo-geo/db";
+import type { GoogleConnection, ProjectIntegration as IntegrationRow } from "@seo-geo/db";
 
 import { ProblemException } from "../common/problem.exception.js";
 import { PrismaService } from "../database/prisma.service.js";
 import { GoogleApi } from "./google-api.js";
 import { GoogleConnectionsService, googleProblem } from "./google-connections.service.js";
 import { GoogleSyncService } from "./google-sync.service.js";
+import { deleteImportedFacts } from "./imported-facts.js";
 
 const TOP_ROWS = 100;
 const ORGANIC_CHANNEL = "Organic Search";
@@ -137,7 +138,7 @@ export class ProjectIntegrationsService {
     await this.project(workspaceId, projectId);
     await this.prisma.$transaction([
       this.prisma.projectIntegration.deleteMany({ where: { workspaceId, projectId, type } }),
-      ...this.deleteFacts(projectId, type),
+      ...deleteImportedFacts(this.prisma, projectId, type),
     ]);
   }
 
@@ -179,9 +180,10 @@ export class ProjectIntegrationsService {
     });
     const changed = existing !== null && existing.externalId !== externalId;
     const integration = await this.prisma.$transaction(async (tx) => {
-      // Data of a previous property would mix with the new one.
-      if (changed) {
-        for (const operation of this.deleteFacts(projectId, type, tx)) await operation;
+      // Data of a previous property would mix with the new one; without a source, any rows
+      // left are stale.
+      if (changed || !existing) {
+        for (const operation of deleteImportedFacts(tx, projectId, type)) await operation;
       }
       const data = {
         connectionId,
@@ -197,20 +199,6 @@ export class ProjectIntegrationsService {
       });
     });
     await this.sync.requestSync(integration.id);
-  }
-
-  private deleteFacts(
-    projectId: string,
-    type: IntegrationType,
-    db: Prisma.TransactionClient = this.prisma,
-  ) {
-    return type === "GSC"
-      ? [
-          db.gscSiteDaily.deleteMany({ where: { projectId } }),
-          db.gscQueryDaily.deleteMany({ where: { projectId } }),
-          db.gscPageDaily.deleteMany({ where: { projectId } }),
-        ]
-      : [db.ga4PageDaily.deleteMany({ where: { projectId } })];
   }
 
   private async searchConsole(

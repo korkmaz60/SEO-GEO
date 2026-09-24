@@ -322,9 +322,12 @@ describe.skipIf(!TEST_SERVER_URL)("Google Search Console and GA4", () => {
     );
     expect(integrations.gsc).toBeNull();
 
+    expect(await prisma.ga4PageDaily.count()).toBeGreaterThan(0);
     await member.delete(ws(`/integrations/google/${connectionId}`)).expect(403);
     await owner.delete(ws(`/integrations/google/${connectionId}`)).expect(204);
     expect(google.state.revokeCalls).toEqual(["refresh-1"]);
     expect(await prisma.projectIntegration.count()).toBe(0);
+    // The GA4 source used the account: its imported data is gone too.
+    expect(await prisma.ga4PageDaily.count()).toBe(0);
   });
 });

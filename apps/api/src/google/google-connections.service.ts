@@ -20,6 +20,7 @@ import { SecretBoxService } from "../crypto/secret-box.js";
 import { PrismaService } from "../database/prisma.service.js";
 import { NotificationsService } from "../notifications/notifications.service.js";
 import { GoogleApi, GoogleApiError, type GoogleTokens } from "./google-api.js";
+import { deleteImportedFacts } from "./imported-facts.js";
 
 /** How long a sign-in with Google may take before its state expires. */
 const STATE_TTL_MS = 10 * 60 * 1000;
@@ -202,7 +203,17 @@ export class GoogleConnectionsService {
     } catch {
       // Tokens that cannot be opened are simply deleted.
     }
-    await this.prisma.googleConnection.delete({ where: { id: connection.id } });
+    // Sources that used the account go with it, and so does the data they imported.
+    const sources = await this.prisma.projectIntegration.findMany({
+      where: { connectionId: connection.id },
+      select: { projectId: true, type: true },
+    });
+    await this.prisma.$transaction([
+      ...sources.flatMap((source) =>
+        deleteImportedFacts(this.prisma, source.projectId, source.type),
+      ),
+      this.prisma.googleConnection.delete({ where: { id: connection.id } }),
+    ]);
     await this.audit.record({
       workspaceId,
       action: "google.disconnected",
