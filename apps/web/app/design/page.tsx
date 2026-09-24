@@ -108,13 +108,6 @@ export default async function DesignPage() {
         </div>
       </Section>
 
-      <Section title={t("design.accents")}>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
-          <Swatch className="bg-seo" label="--seo" />
-          <Swatch className="bg-geo" label="--geo" />
-        </div>
-      </Section>
-
       <Section title={t("design.status")}>
         <div className="flex flex-wrap gap-3">
           {STATUS.map(({ key, icon: Icon, className }) => (
@@ -168,7 +161,6 @@ export default async function DesignPage() {
           <KpiTile
             label={t("kpi.shareOfVoice")}
             icon={Sparkles}
-            accent="geo"
             value={formatPercent(0.38, locale, 0)}
             emptyLabel={t("common.noData")}
             delta={
@@ -195,7 +187,6 @@ export default async function DesignPage() {
           <KpiTile
             label={t("kpi.avgPosition")}
             icon={TrendingUp}
-            accent="seo"
             value={formatNumber(3, locale)}
             emptyLabel={t("common.noData")}
             delta={
@@ -205,12 +196,11 @@ export default async function DesignPage() {
           <KpiTile
             label={t("kpi.siteHealth")}
             icon={ScanSearch}
-            accent="seo"
             value={null}
             emptyLabel={t("common.noData")}
           />
           <Card className="items-center justify-center p-4">
-            <ScoreRing score={72} label={t("overview.aiScore")} color="var(--geo)" size={96} />
+            <ScoreRing score={72} label={t("overview.aiScore")} size={96} />
           </Card>
         </div>
       </Section>

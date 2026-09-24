@@ -89,13 +89,19 @@ Defined as OKLCH CSS variables in `app/globals.css` for light and dark themes:
 
 | Token | Meaning |
 |---|---|
-| `--seo` | SEO module accent (blue) – icons, badges, nav highlights |
-| `--geo` | GEO/AI module accent (violet) – icons, badges, nav highlights |
-| `--success`, `--warning`, `--critical` | status; always paired with an icon and a label |
+| `--success`, `--warning`, `--serious`, `--critical` | status; always paired with an icon and a label |
 | `--positive-text`, `--negative-text` | deltas and trend text (WCAG AA as text) |
+| `--chart-1` … `--chart-8` | categorical chart palette (see below) |
+
+The UI chrome is neutral: surfaces use the shadcn/ui `neutral` base color (chroma 0) and
+there is no brand hue in navigation, icons, buttons or focus rings. Hue is reserved for data
+(the chart palette) and state (status colors), so a colored mark always means something.
 
 Dark theme is the default; light theme is fully supported and selected through the toggle
-or the system setting. Dark surfaces are a deep navy (`card` ≈ `#12161d`).
+or the system setting. Dark surfaces are near-black (`background` `#0a0a0a`, `card`
+`#171717`; the sidebar shares the page black). Light surfaces are white with a `#fafafa`
+sidebar. Text contrast: `muted-foreground` is at least 6.9:1 on dark surfaces and 4.5:1 on
+light ones.
 
 ### Chart colors
 
@@ -104,13 +110,13 @@ Charts follow the data-viz method: form first, color by job, palette validated.
 - **Categorical** (identity): one fixed 8-hue order — blue, orange, aqua, yellow, magenta,
   green, violet, red — with separate steps for light and dark. The palette was validated on
   our surfaces: all adjacent pairs pass color-vision-deficiency separation (worst ΔE 9.1
-  light, 8.4 dark) and the normal-vision floor. Three light-mode slots are below 3:1
-  contrast on white, so charts always ship a legend, selective direct labels and a table view.
+  light, 8.4 dark) and the normal-vision floor, and every dark-mode slot has at least 3:1
+  contrast on both `#0a0a0a` and `#171717`. Three light-mode slots are below 3:1 contrast on
+  white, so charts always ship a legend, selective direct labels and a table view.
 - **Entities keep their color.** The project's own brand is slot 1; competitors take the
   next slots in creation order and store it (`brand_entity.color`). Filters never repaint.
-- **Module accents are not chart series.** SEO blue and GEO violet fail CVD separation when
-  drawn side by side in dark mode, so a chart that shows both uses categorical slots 1–2, or
-  better, two separate charts.
+- **The interface carries no hue of its own**, so the own-brand blue in a chart never
+  competes with a blue button or icon next to it.
 - **Status** (good / warning / serious / critical) uses its own fixed steps, never as a
   series color.
 - **Sequential** (magnitude, e.g. position heatmaps): one blue ramp, light → dark.

@@ -27,13 +27,10 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { PREVIEW } from "@/lib/preview";
-import { cn } from "@/lib/utils";
 
 import { ApiStatus } from "./api-status";
 import { NAV_GROUPS, WORKSPACE_SETTINGS, findActiveItem, type NavItem } from "./nav-config";
 import { useRouteContext } from "./use-route-context";
-
-const ACCENT_CLASS = { seo: "text-seo", geo: "text-geo" } as const;
 
 export function AppSidebar() {
   const t = useTranslations();
@@ -50,7 +47,7 @@ export function AppSidebar() {
           tooltip={label}
           render={<Link href={item.href(ctx)} />}
         >
-          <item.icon className={cn(item.accent && ACCENT_CLASS[item.accent])} />
+          <item.icon />
           <span>{label}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>

@@ -26,13 +26,12 @@ export const generateMetadata = pageMetadata("overview");
 const KPIS: {
   key: "aiVisibility" | "shareOfVoice" | "avgPosition" | "trackedKeywords" | "siteHealth" | "spend";
   icon: LucideIcon;
-  accent?: "seo" | "geo";
 }[] = [
-  { key: "aiVisibility", icon: Sparkles, accent: "geo" },
-  { key: "shareOfVoice", icon: Swords, accent: "geo" },
-  { key: "avgPosition", icon: TrendingUp, accent: "seo" },
-  { key: "trackedKeywords", icon: Search, accent: "seo" },
-  { key: "siteHealth", icon: ScanSearch, accent: "seo" },
+  { key: "aiVisibility", icon: Sparkles },
+  { key: "shareOfVoice", icon: Swords },
+  { key: "avgPosition", icon: TrendingUp },
+  { key: "trackedKeywords", icon: Search },
+  { key: "siteHealth", icon: ScanSearch },
   { key: "spend", icon: Wallet },
 ];
 
@@ -65,7 +64,6 @@ export default async function OverviewPage() {
             key={kpi.key}
             label={t(`kpi.${kpi.key}`)}
             icon={kpi.icon}
-            accent={kpi.accent}
             value={null}
             emptyLabel={t("common.noData")}
           />
@@ -131,8 +129,8 @@ export default async function OverviewPage() {
             <CardTitle>{t("overview.scoresTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-around gap-4 py-2">
-            <ScoreRing score={null} label={t("overview.aiScore")} color="var(--geo)" />
-            <ScoreRing score={null} label={t("overview.siteHealth")} color="var(--seo)" />
+            <ScoreRing score={null} label={t("overview.aiScore")} />
+            <ScoreRing score={null} label={t("overview.siteHealth")} />
           </CardContent>
         </Card>
       </div>

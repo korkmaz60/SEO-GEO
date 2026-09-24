@@ -192,7 +192,6 @@
     "description": "Tokens and components used across the interface.",
     "colors": "Colors",
     "surfaces": "Surfaces",
-    "accents": "Module accents",
     "status": "Status colors",
     "chartPalette": "Chart palette",
     "chartPaletteHint": "Eight colors in a fixed order, validated for color vision deficiency and contrast. Your own brand is always color 1.",

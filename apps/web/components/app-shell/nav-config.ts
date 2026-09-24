@@ -38,7 +38,6 @@ export interface NavItem {
   href: (ctx: RouteContext) => string;
   icon: LucideIcon;
   milestone: Milestone;
-  accent?: "seo" | "geo";
 }
 
 export interface NavGroup {
@@ -58,61 +57,29 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     key: "aiVisibility",
     items: [
-      {
-        key: "aiSummary",
-        href: project("ai-visibility"),
-        icon: Sparkles,
-        milestone: "M3",
-        accent: "geo",
-      },
+      { key: "aiSummary", href: project("ai-visibility"), icon: Sparkles, milestone: "M3" },
       {
         key: "prompts",
         href: project("ai-visibility/prompts"),
         icon: MessageSquareText,
         milestone: "M3",
-        accent: "geo",
       },
-      {
-        key: "sources",
-        href: project("ai-visibility/sources"),
-        icon: Quote,
-        milestone: "M3",
-        accent: "geo",
-      },
+      { key: "sources", href: project("ai-visibility/sources"), icon: Quote, milestone: "M3" },
       {
         key: "competitors",
         href: project("ai-visibility/competitors"),
         icon: Swords,
         milestone: "M3",
-        accent: "geo",
       },
     ],
   },
   {
     key: "seo",
     items: [
-      {
-        key: "rankTracker",
-        href: project("rank-tracker"),
-        icon: TrendingUp,
-        milestone: "M2",
-        accent: "seo",
-      },
-      {
-        key: "siteAudit",
-        href: project("site-audit"),
-        icon: ScanSearch,
-        milestone: "M2",
-        accent: "seo",
-      },
-      { key: "backlinks", href: project("backlinks"), icon: Link2, milestone: "M4", accent: "seo" },
-      {
-        key: "searchConsole",
-        href: project("search-console"),
-        icon: BarChart3,
-        milestone: "M2",
-        accent: "seo",
-      },
+      { key: "rankTracker", href: project("rank-tracker"), icon: TrendingUp, milestone: "M2" },
+      { key: "siteAudit", href: project("site-audit"), icon: ScanSearch, milestone: "M2" },
+      { key: "backlinks", href: project("backlinks"), icon: Link2, milestone: "M4" },
+      { key: "searchConsole", href: project("search-console"), icon: BarChart3, milestone: "M2" },
     ],
   },
   {

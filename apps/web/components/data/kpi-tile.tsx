@@ -3,7 +3,6 @@ import { Info, type LucideIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Delta } from "@/lib/format";
-import { cn } from "@/lib/utils";
 
 import { DeltaBadge } from "./delta-badge";
 
@@ -16,7 +15,6 @@ export interface MetricProvenance {
 interface KpiTileProps {
   label: string;
   icon?: LucideIcon;
-  accent?: "seo" | "geo";
   /** Formatted value; `null` means no data (never shown as zero). */
   value: string | null;
   emptyLabel: string;
@@ -24,28 +22,11 @@ interface KpiTileProps {
   provenance?: MetricProvenance & { labels: { source: string; method: string; updated: string } };
 }
 
-export function KpiTile({
-  label,
-  icon: Icon,
-  accent,
-  value,
-  emptyLabel,
-  delta,
-  provenance,
-}: KpiTileProps) {
+export function KpiTile({ label, icon: Icon, value, emptyLabel, delta, provenance }: KpiTileProps) {
   return (
     <Card className="gap-3 p-4">
       <div className="flex items-start gap-2 text-sm text-muted-foreground">
-        {Icon && (
-          <Icon
-            className={cn(
-              "mt-0.5 size-4 shrink-0",
-              accent === "seo" && "text-seo",
-              accent === "geo" && "text-geo",
-            )}
-            aria-hidden
-          />
-        )}
+        {Icon && <Icon className="mt-0.5 size-4 shrink-0" aria-hidden />}
         <span className="line-clamp-2 leading-snug">{label}</span>
         {provenance && (
           <Tooltip>

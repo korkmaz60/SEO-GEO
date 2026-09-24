@@ -192,7 +192,6 @@
     "description": "Arayüzde kullanılan token'lar ve bileşenler.",
     "colors": "Renkler",
     "surfaces": "Yüzeyler",
-    "accents": "Modül vurguları",
     "status": "Durum renkleri",
     "chartPalette": "Grafik paleti",
     "chartPaletteHint": "Sabit sıralı 8 renk; renk körlüğü ve kontrast için doğrulandı. Kendi markanız her zaman 1. renktir.",
