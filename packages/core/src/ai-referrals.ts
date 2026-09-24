@@ -20,7 +20,12 @@ export const AI_REFERRAL_SOURCES = [
 
 /** The AI assistant a session source (host or `host / medium`) belongs to, if any. */
 export function aiReferralName(source: string): string | null {
-  const host = source.split("/")[0]?.trim().toLowerCase().replace(/^www\./u, "") ?? "";
+  const host =
+    source
+      .split("/")[0]
+      ?.trim()
+      .toLowerCase()
+      .replace(/^www\./u, "") ?? "";
   if (!host) return null;
   const match = AI_REFERRAL_SOURCES.find(
     (entry) => host === entry.host || host.endsWith(`.${entry.host}`),
