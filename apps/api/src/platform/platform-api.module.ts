@@ -2,6 +2,10 @@ import { Module } from "@nestjs/common";
 
 import { AuditController } from "../audit/audit.controller.js";
 import { CredentialsController } from "../credentials/credentials.controller.js";
+import {
+  KeywordListsController,
+  KeywordResearchController,
+} from "../keywords/keyword-research.controller.js";
 import { NotificationsController } from "../notifications/notifications.controller.js";
 import { ProjectsController } from "../projects/projects.controller.js";
 import { ProjectsService } from "../projects/projects.service.js";
@@ -19,6 +23,8 @@ import { UsageController } from "../usage/usage.controller.js";
     NotificationsController,
     AuditController,
     RankTrackerController,
+    KeywordResearchController,
+    KeywordListsController,
   ],
   providers: [ProjectsService],
   exports: [ProjectsService],

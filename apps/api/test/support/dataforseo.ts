@@ -49,6 +49,8 @@ interface PostedTask {
 export const FAKE_TASK_COST = 0.0021;
 /** Cost DataForSEO reports per Labs request. */
 export const FAKE_LABS_COST = 0.0125;
+/** A location code the fake Labs API refuses (DataForSEO answers 40501 Invalid Field). */
+export const UNSUPPORTED_LOCATION = 1;
 
 function envelope(tasks: object[], cost: number) {
   return {
@@ -248,6 +250,47 @@ export function fakeDataForSeo(state: FakeDataForSeoState = { balance: 42.5 }) {
           FAKE_LABS_COST,
         ),
       );
+    }
+
+    const labs =
+      /^\/dataforseo_labs\/google\/(keyword_suggestions|keyword_ideas|related_keywords)\/live$/.exec(
+        path,
+      );
+    if (labs) {
+      const [request] = body as {
+        keyword?: string;
+        keywords?: string[];
+        location_code: number;
+        limit?: number;
+      }[];
+      if (request?.location_code === UNSUPPORTED_LOCATION) {
+        return Response.json(envelope([task("labs", null, 0, {}, 40501)], 0));
+      }
+      const seed = request?.keyword ?? request?.keywords?.[0] ?? "";
+      const known = Object.entries(state.metrics ?? {});
+      const matches = known
+        .filter(([keyword]) => keyword !== seed)
+        .filter(([keyword]) => labs[1] !== "keyword_suggestions" || keyword.includes(seed))
+        .slice(0, request?.limit ?? 100);
+      const seedMetrics = state.metrics?.[seed];
+      const items =
+        labs[1] === "related_keywords"
+          ? matches.map(([keyword, metrics]) => ({
+              keyword_data: labsItem(keyword, metrics),
+              depth: 1,
+              related_keywords: [],
+            }))
+          : matches.map(([keyword, metrics]) => labsItem(keyword, metrics));
+      const result = {
+        seed_keyword: seed,
+        seed_keyword_data:
+          labs[1] !== "keyword_ideas" && seedMetrics ? labsItem(seed, seedMetrics) : null,
+        total_count: matches.length,
+        items_count: items.length,
+        items,
+      };
+      const cost = FAKE_LABS_COST + items.length * 0.00012;
+      return Response.json(envelope([task("labs", [result], cost)], cost));
     }
 
     return Response.json({ status_code: 40400, status_message: "Not Found." }, { status: 404 });
