@@ -31,6 +31,8 @@ export const EnvSchema = z
     APP_VERSION: z.string().min(1).optional(),
 
     DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+    /** Session-mode connection (Supabase: direct or session pooler) for migrations and the job queue. */
+    DIRECT_URL: z.url({ protocol: /^postgres(ql)?$/ }).optional(),
     /** Signs session cookies and tokens. */
     AUTH_SECRET: z.string().min(32, "Use at least 32 characters (openssl rand -base64 32)"),
     /** Encrypts provider credentials at rest (AES-256-GCM). */
@@ -76,6 +78,8 @@ export interface AppConfig {
   apiDocsEnabled: boolean;
   version: string;
   databaseUrl: string;
+  /** Connection for pg-boss, which needs session mode; DIRECT_URL when set. */
+  queueDatabaseUrl: string;
   authSecret: string;
   encryptionKey: Buffer;
   trustProxy: string;
@@ -116,6 +120,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     apiDocsEnabled: env.API_DOCS ?? env.NODE_ENV !== "production",
     version: env.APP_VERSION ?? readPackageVersion(),
     databaseUrl: env.DATABASE_URL,
+    queueDatabaseUrl: env.DIRECT_URL ?? env.DATABASE_URL,
     authSecret: env.AUTH_SECRET,
     encryptionKey: Buffer.from(env.ENCRYPTION_KEY, "base64"),
     trustProxy: env.TRUST_PROXY,

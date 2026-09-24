@@ -14,15 +14,13 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.createApplicationContext(WorkerModule.forRoot(config), {
     logger: createLogger(config),
   });
+  // Signals are handled below; app.close() runs the shutdown hooks (pg-boss stop, disconnect).
+  await app.init();
   const logger = new Logger("Worker");
-  logger.log(`Worker started (${config.deploymentMode}); no queues are registered yet.`);
-
-  // Queue consumers will keep the event loop busy; until then keep the process alive.
-  const keepAlive = setInterval(() => undefined, 60_000);
+  logger.log(`Worker started (${config.deploymentMode})`);
 
   const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
     logger.log(`Received ${signal}, shutting down`);
-    clearInterval(keepAlive);
     await app.close();
     process.exit(0);
   };

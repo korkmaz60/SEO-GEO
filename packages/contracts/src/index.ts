@@ -3,3 +3,5 @@ export * from "./common.js";
 export * from "./domain.js";
 export * from "./errors.js";
 export * from "./health.js";
+export * from "./projects.js";
+export * from "./workspace-data.js";

@@ -43,20 +43,28 @@ export interface IntegrationApp {
   close(): Promise<void>;
 }
 
+export interface ProviderOverride {
+  provide: unknown;
+  useValue: unknown;
+}
+
 export async function createIntegrationApp(
-  options: { env?: Record<string, string>; modules?: Type[] } = {},
+  options: { env?: Record<string, string>; modules?: Type[]; overrides?: ProviderOverride[] } = {},
 ): Promise<IntegrationApp> {
   if (!TEST_SERVER_URL) throw new Error("TEST_DATABASE_URL is not set");
   const database = await createTestDatabase(TEST_SERVER_URL);
   const config = testConfig({ DATABASE_URL: database.url, WEB_URL: WEB_ORIGIN, ...options.env });
   const mailer = new CapturingMailer();
 
-  const moduleRef = await Test.createTestingModule({
+  let builder = Test.createTestingModule({
     imports: [AppModule.forRoot(config), ...(options.modules ?? [])],
   })
     .overrideProvider(MAILER)
-    .useValue(mailer)
-    .compile();
+    .useValue(mailer);
+  for (const override of options.overrides ?? []) {
+    builder = builder.overrideProvider(override.provide).useValue(override.useValue);
+  }
+  const moduleRef = await builder.compile();
   const app = moduleRef.createNestApplication<NestExpressApplication>({
     logger: false,
     bodyParser: false,
