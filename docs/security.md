@@ -61,7 +61,10 @@ All server-side fetches of user-influenced URLs — crawler, sitemaps, `robots.t
 - Redirects are followed manually (at most 5) and every hop is validated again.
 - Connect and total timeouts, a maximum response size and a content-type allowlist.
 - No cookies or credentials are forwarded; the crawler identifies itself and honors
-  `robots.txt`.
+  `robots.txt` (including a crawl delay of up to 10 seconds).
+- The site audit caps every input it reads: `robots.txt` 512 KB, each page 5 MB, `llms.txt`
+  256 KB, each sitemap 20 MB (50 MB decompressed), at most 25 sitemaps and 50,000 sitemap
+  URLs, and at most 5,000 pages and 20 clicks deep per run. Runs expire after 3 hours.
 
 The address checks and the client live in `packages/core` (`@seo-geo/core/net`) and are
 tested against a local server. `createSafeFetcher` resolves and checks host names inside
@@ -81,9 +84,18 @@ addresses cannot be allowed by configuration. In the api the client is
   the last verification time.
 
 ### Google OAuth
-- `state` is a random nonce bound to the initiating session (short-lived httpOnly cookie)
-  and PKCE is used. The callback checks that the signed-in user is the one who started the
-  flow before storing tokens. Scopes are read-only.
+- Authorization code flow with PKCE (S256). The `state` parameter is sealed with the secret
+  box (encrypted and authenticated, its own key context) and carries the workspace, the
+  project, the initiating user, the PKCE verifier and a 10-minute expiry. The callback
+  requires a signed-in session of that same user with the owner or admin role before it
+  exchanges the code; any mismatch ends on an error page without storing anything.
+- Scopes are read-only (`webmasters.readonly`, `analytics.readonly`, plus `openid` and
+  `email` to identify the account).
+- Tokens are encrypted with AES-256-GCM bound to the workspace and Google account, never
+  returned by the API and never logged. A refused refresh (`invalid_grant`) marks the
+  connection revoked and notifies owners and admins; disconnecting revokes the token at
+  Google and deletes the connection, the project sources that used it and their imported
+  data.
 
 ### CSRF and browser security
 - Cookie-authenticated state-changing requests require a matching `Origin`; API-key
@@ -106,7 +118,9 @@ addresses cannot be allowed by configuration. In the api the client is
 - Email templates escape every user-provided value.
 - CSV exports quote fields and neutralize formula injection (cells starting with `=`, `+`,
   `-` or `@`).
-- Content fetched from crawled sites is shown as text, never rendered as HTML.
+- Content fetched from crawled sites is shown as text, never rendered as HTML. URLs from
+  crawled sites and providers become links only when they are absolute `http(s)` URLs, and
+  open with `rel="noopener noreferrer nofollow"`.
 - Outgoing webhooks are signed with HMAC (`X-SEO-GEO-Signature`, timestamped).
 
 ### Logging and audit
@@ -132,7 +146,7 @@ addresses cannot be allowed by configuration. In the api the client is
 | Demo issue | Control |
 |---|---|
 | Endpoints fetched any user-supplied URL and returned the body (SSRF) | Safe fetcher; no endpoint returns raw fetched content |
-| OAuth `state` was `userId:projectId`, unsigned, callback ignored the session | Session-bound nonce + PKCE, initiator check |
+| OAuth `state` was `userId:projectId`, unsigned, callback ignored the session | Sealed, expiring state + PKCE, initiator and role check |
 | Cron endpoint accepted `Bearer undefined` when the secret was unset | No public cron; secrets fail closed |
 | Updates by ID without ownership checks (IDOR) | Tenant-scoped repositories, guards, isolation tests |
 | Unauthenticated endpoints | Global default-deny guard |

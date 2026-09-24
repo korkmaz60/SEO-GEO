@@ -33,6 +33,7 @@ erDiagram
     PROJECT ||--o{ BRAND_ENTITY : "own brand + competitors"
     PROJECT ||--o{ TRACKED_KEYWORD : tracks
     TRACKED_KEYWORD ||--o{ RANK_CHECK : "daily result"
+    SERP_SNAPSHOT ||--o{ RANK_CHECK : "shared SERP"
     PROJECT ||--o{ PROMPT : monitors
     PROMPT ||--o{ AI_RUN : "per platform, per sample"
     AI_RUN ||--o{ AI_MENTION : detects
@@ -42,6 +43,7 @@ erDiagram
     AUDIT_RUN ||--o{ AUDIT_PAGE : contains
     AUDIT_RUN ||--o{ AUDIT_ISSUE : finds
     PROJECT ||--o{ PROJECT_INTEGRATION : "GSC / GA4"
+    GOOGLE_CONNECTION ||--o{ PROJECT_INTEGRATION : authorizes
 ```
 
 ## Identity and tenancy
@@ -74,7 +76,7 @@ Managed by Better Auth; our extra fields are added through its schema options.
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `provider_cache` | key (hash of operation + normalized params), provider, operation, params, response (jsonb or storage key), cost_usd, fetched_at, expires_at | shared market data only; never caches tenant-private data such as Search Console |
+| `provider_cache` | key (SHA-256 of a versioned operation + canonical JSON params), provider, operation, params, response (jsonb), cost_usd, fetched_at, expires_at | shared market data only; never caches tenant-private data such as Search Console. Expired rows are deleted daily |
 
 ## Projects
 
@@ -83,42 +85,47 @@ Managed by Better Auth; our extra fields are added through its schema options.
 | `project` | id, workspace_id, name, slug, domain, include_subdomains, default_location_code, default_language_code, timezone, archived_at | `domain` is a normalized host; unique (workspace_id, slug) |
 | `brand_entity` | id, workspace_id, project_id, kind (`OWN`/`COMPETITOR`), name, domains[], aliases[], color | one `OWN` entity per project; competitors are entities too, so rank tracking, AI mentions and share of voice use one definition |
 | `project_member` | project_id, user_id, role | M4: restrict client viewers to specific projects |
-| `project_integration` | id, project_id, type (`GSC`/`GA4`), connection_id, external_id, settings, last_synced_at | selected Search Console site or GA4 property |
-| `google_connection` | id, workspace_id, google_email, scopes, encrypted_tokens, status, connected_by | OAuth tokens, encrypted |
+| `project_integration` | id, workspace_id, project_id, type (`GSC`/`GA4`), connection_id, external_id, display_name, settings, last_synced_at, synced_through, last_error | selected Search Console site (`sc-domain:example.com` or a URL prefix) or GA4 property (`properties/123`); unique (project_id, type) |
+| `google_connection` | id, workspace_id, google_user_id, email, scopes[], encrypted_tokens (bytea), key_version, status (`ACTIVE`/`REVOKED`), last_error, connected_by | refresh and access tokens, AES-256-GCM encrypted; unique (workspace_id, google_user_id) |
 
 ## Rank tracking and keywords
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `keyword_metric` | keyword, location_code, language_code, search_volume, cpc, competition, keyword_difficulty, intent, monthly_searches, source, fetched_at | shared cache, PK (keyword, location_code, language_code) |
-| `tracked_keyword` | id, workspace_id, project_id, keyword, location_code, language_code, device, search_engine, tags[], target_url, frequency, active | unique (project_id, keyword, location_code, language_code, device, search_engine) |
-| `rank_check` | id, tracked_keyword_id, workspace_id, project_id, checked_on, checked_at, rank_group, rank_absolute, url, serp_features[], ai_overview_present, ai_overview_cited, featured_snippet_owned, competitor_ranks (jsonb), serp_snapshot_key, task_id | partitioned by month on `checked_on`; unique (tracked_keyword_id, checked_on) |
-| `keyword_list`, `keyword_list_item` | list: id, workspace_id, project_id?, name · item: list_id, keyword, location_code, language_code, note | saved research |
-| `dataforseo_location` | code, name, parent_code, country_iso, type | synced reference data |
+| `keyword_metric` | keyword, location_code, language_code, search_volume, cpc, competition, competition_level, keyword_difficulty, intent, secondary_intents[], monthly_searches (jsonb), source, fetched_at | shared cache, PK (keyword, location_code, language_code); keywords without data are stored empty so they are not requested again |
+| `tracked_keyword` | id, workspace_id, project_id, keyword, location_code, language_code, device, search_engine, tags[], target_url, frequency (`DAILY`/`WEEKLY`) | unique (project_id, keyword, location_code, language_code, device, search_engine) |
+| `rank_check` | id, workspace_id, project_id, tracked_keyword_id, checked_on, status (`PENDING`/`COMPLETED`/`FAILED`), provider_task_id, posted_at, checked_at, depth, position, rank_absolute, url, serp_features[], owned_features[], ai_overview_present, ai_overview_cited, competitor_ranks (jsonb), serp_snapshot_id, cost_usd, error | unique (tracked_keyword_id, checked_on) |
+| `serp_snapshot` | id, search_engine, keyword, location_code, language_code, device, fetched_on, fetched_at, depth, item_types[], results_count, organic (jsonb), features (jsonb), ai_overview (jsonb), check_url | shared market data: one SERP per query, market and day, reused by every project that tracks the query; kept 90 days |
+| `keyword_list`, `keyword_list_item` | list: id, workspace_id, name · item: list_id, keyword, location_code, language_code, note | saved research |
 
-`rank_group` is the organic position; `rank_absolute` counts every SERP element. Search
-Console positions are **averages** and are stored separately (`gsc_*_daily`), never mixed
-into `rank_check`.
+`position` is the organic position (DataForSEO `rank_group`); `rank_absolute` counts every
+SERP element. Search Console positions are **averages** and are stored separately
+(`gsc_*_daily`), never mixed into `rank_check`.
 
 ## Search Console and Analytics facts
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `gsc_query_daily` | project_id, date, query, clicks, impressions, ctr, position | partitioned by month |
-| `gsc_page_daily` | project_id, date, page, clicks, impressions, ctr, position | partitioned by month |
-| `ga4_page_daily` | project_id, date, page, sessions, users, engaged_sessions, source_medium | M2+ |
+| `gsc_site_daily` | project_id, date, clicks, impressions, position | site totals, PK (project_id, date); they include the anonymized queries that the query table leaves out |
+| `gsc_query_daily` | project_id, date, query, clicks, impressions, position | PK (project_id, date, query) |
+| `gsc_page_daily` | project_id, date, page, clicks, impressions, position | PK (project_id, date, page) |
+| `ga4_page_daily` | project_id, date, page (landing page path), channel, source, sessions, users, engaged_sessions, key_events | PK (project_id, date, page, channel, source) |
+
+Positions are averages weighted by impressions; CTR is derived (clicks ÷ impressions) and not
+stored. Imported rows belong to the project's current source: changing or removing a source
+deletes them.
 
 ## Site audit
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `audit_run` | id, workspace_id, project_id, status, trigger, config (max pages, depth, include/exclude patterns, render JS), stats, health_score, score_version, task_id, started_at, finished_at | |
-| `audit_page` | id, run_id, url, normalized_url, status_code, content_type, depth, redirect_target, title, meta_description, h1, canonical, robots_meta, indexable, word_count, content_hash, load_ms, bytes, inlinks, outlinks, schema_types[], lang, last_modified, citability (jsonb) | |
-| `audit_link` | run_id, from_page_id, to_url, to_page_id?, anchor, rel, internal, status_code | internal link graph: orphans, depth, broken links |
-| `audit_issue` | id, run_id, page_id?, code, severity, data | `code` points to the issue catalog in `packages/core` |
+| `audit_run` | id, workspace_id, project_id, status, trigger, config (start URL, max pages, max depth), stats (jsonb: status classes, severities, crawl outcome, robots.txt, sitemaps, llms.txt), pages_crawled, health_score, score_version, task_id, error, created_by, started_at, finished_at | |
+| `audit_page` | id, run_id, url (normalized), depth, status_code, fetch_error, content_type, redirect_target, title, meta_description, h1, h1_count, canonical, robots_meta, indexable, word_count, content_hash, load_ms, bytes, inlinks, outlinks, external_links, schema_types[], lang, hreflang (jsonb), in_sitemap | unique (run_id, url) |
+| `audit_link` | run_id, from_page_id, to_url, anchor, nofollow | internal links only |
+| `audit_issue` | id, run_id, page_id?, code, severity, data (jsonb) | `code` points to the issue catalog in `packages/contracts`; site-wide issues have no page |
 
-Issue definitions (title, description, how to fix, severity) live in code, versioned, and
-translated through the i18n catalogs, not in the database.
+Issue definitions (severity, category, scope) live in code; titles, explanations and fixes
+are translated in the web app's message catalogs, not stored in the database.
 
 ## AI visibility (GEO/AEO)
 
@@ -159,12 +166,16 @@ See [geo-aeo.md](geo-aeo.md) for detection rules and metric formulas.
 
 ## Time series and retention
 
-- `rank_check`, `ai_run`, `usage_entry`, `gsc_*_daily` are **range-partitioned by month**.
-  Partitions are created by migrations and a maintenance job (or `pg_partman` where
-  available). The partition key is part of the primary key.
-- Raw payloads in object storage expire after 90 days by default (configurable).
-- Audit runs: the latest 10 runs per project keep pages and links; older runs keep summary
-  stats and issue counts only.
+- Daily facts are keyed by project and date and indexed for range scans
+  (`rank_check (project_id, checked_on)`, the `gsc_*_daily` and `ga4_page_daily` primary
+  keys). Monthly range partitioning of `rank_check`, `ai_run`, `usage_entry` and the
+  `gsc_*_daily` tables is planned for when volumes need it; it was not needed in M2.
+- `serp_snapshot` rows are deleted after 90 days; checks keep their positions and lose the
+  link to the snapshot.
+- Audit runs: the latest 10 runs per project keep pages, links and issues; older runs keep
+  their summary stats and score only.
+- Search Console and GA4 imports cover the last 90 days when a source is added and then grow
+  by one day at a time.
 
 ## PostgreSQL and Supabase specifics
 

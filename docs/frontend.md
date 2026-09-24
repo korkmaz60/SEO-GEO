@@ -35,10 +35,11 @@ chart components · next-intl · next-themes · lucide-react · cmdk · Geist Sa
 /:workspace/:project/ai-visibility/prompts           prompt library and results
 /:workspace/:project/ai-visibility/sources           cited sources and pages
 /:workspace/:project/ai-visibility/competitors       share of voice
-/:workspace/:project/rank-tracker                    tracked keywords
-/:workspace/:project/site-audit                      audit runs and issues
+/:workspace/:project/rank-tracker                    tracked keywords, visibility, share of voice
+/:workspace/:project/site-audit                      audit runs, issues, pages, history
 /:workspace/:project/backlinks                       backlink profile (M4)
-/:workspace/:project/search-console                  GSC performance (M2)
+/:workspace/:project/search-console                  Search Console and GA4 performance;
+                                                     Google connection and property choice
 /:workspace/:project/reports                         reports and schedules (M4)
 /:workspace/:project/settings                        brand name, market, device, time zone,
                                                      competitors, archive and delete
@@ -47,7 +48,7 @@ chart components · next-intl · next-themes · lucide-react · cmdk · Geist Sa
 /:workspace/settings                                 general (rename, delete, leave)
 /:workspace/settings/members                         members, roles, invitations
 /:workspace/settings/projects                        all projects incl. archived
-/:workspace/settings/providers                       DataForSEO connection
+/:workspace/settings/providers                       DataForSEO key, connected Google accounts
 /:workspace/settings/usage                           monthly spend and budget
 /:workspace/settings/audit-log                       audit log (admins)
 /design                                              living style guide
@@ -202,8 +203,12 @@ apps/web/
   components/
     ui/                         shadcn primitives
     app-shell/                  sidebar, header, switchers, command palette
-    data/                       KPI tile, metric source, empty state, deltas, tables
-    charts/                     chart wrappers following the chart rules
+    data/                       KPI tile, metric source, empty state, deltas, score ring,
+                                safe external links
+    charts/                     time series chart (with table view), sparkline
+    rank-tracker/ keywords/     feature components, one folder per module
+    site-audit/ search-console/
+    overview/
   i18n/                         next-intl request config
   lib/                          api client, query client, formatters, navigation config
   messages/                     tr.json, en.json
