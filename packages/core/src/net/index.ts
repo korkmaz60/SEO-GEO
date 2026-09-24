@@ -12,3 +12,14 @@ export {
   type UnsafeUrlReason,
   type UrlPolicyOptions,
 } from "./url-policy.js";
+export {
+  DEFAULT_USER_AGENT,
+  SafeFetchError,
+  acceptsMediaType,
+  createSafeFetcher,
+  type SafeFetchFailure,
+  type SafeFetchOptions,
+  type SafeFetcher,
+  type SafeFetcherConfig,
+  type SafeResponse,
+} from "./safe-fetch.js";

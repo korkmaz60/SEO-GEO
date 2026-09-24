@@ -22,6 +22,8 @@ describe("loadConfig", () => {
       webUrl: "http://localhost:3000",
       apiDocsEnabled: true,
       trustProxy: "loopback, linklocal, uniquelocal",
+      outboundAllowedPorts: [80, 443],
+      migrateOnStart: false,
       smtp: null,
     });
     expect(config.version).toMatch(/^\d+\.\d+\.\d+/);
@@ -68,6 +70,15 @@ describe("loadConfig", () => {
       loadConfig({ ...required, NODE_ENV: "production", API_DOCS: "true" }).apiDocsEnabled,
     ).toBe(true);
     expect(loadConfig({ ...required, API_DOCS: "false" }).apiDocsEnabled).toBe(false);
+  });
+
+  it("parses outbound ports and rejects invalid ones", () => {
+    expect(
+      loadConfig({ ...required, OUTBOUND_ALLOWED_PORTS: "80, 443,8080" }).outboundAllowedPorts,
+    ).toEqual([80, 443, 8080]);
+    expect(() => loadConfig({ ...required, OUTBOUND_ALLOWED_PORTS: "80,http" })).toThrow(
+      /OUTBOUND_ALLOWED_PORTS/,
+    );
   });
 
   it("requires the database and secrets", () => {

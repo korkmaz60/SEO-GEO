@@ -4,7 +4,7 @@
   "description": "Open-source platform for SEO and AI search visibility (GEO/AEO)",
   "packageManager": "pnpm@10.33.0",
   "engines": {
-    "node": ">=22.12"
+    "node": ">=22.19"
   },
   "scripts": {
     "dev": "turbo run dev",

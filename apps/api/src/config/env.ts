@@ -39,6 +39,14 @@ export const EnvSchema = z
     ENCRYPTION_KEY: Base64Key32,
     /** Express `trust proxy`: which hops may set X-Forwarded-*; the web app is one. */
     TRUST_PROXY: z.string().min(1).default("loopback, linklocal, uniquelocal"),
+    /** Apply pending database migrations before the api starts listening. */
+    MIGRATE_ON_START: z.stringbool().default(false),
+    /** Ports the crawler and other outbound fetches of user URLs may use, e.g. `80,443,8080`. */
+    OUTBOUND_ALLOWED_PORTS: z
+      .string()
+      .default("80,443")
+      .transform((value) => value.split(",").map((port) => Number(port.trim())))
+      .pipe(z.array(z.int().min(1).max(65535)).min(1)),
 
     SMTP_HOST: z.string().min(1).optional(),
     SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
@@ -78,11 +86,14 @@ export interface AppConfig {
   apiDocsEnabled: boolean;
   version: string;
   databaseUrl: string;
-  /** Connection for pg-boss, which needs session mode; DIRECT_URL when set. */
+  /** Connection for pg-boss and migrations, which need session mode; DIRECT_URL when set. */
   queueDatabaseUrl: string;
+  migrateOnStart: boolean;
   authSecret: string;
   encryptionKey: Buffer;
   trustProxy: string;
+  /** Ports that fetches of user-supplied URLs may use. */
+  outboundAllowedPorts: number[];
   /** `null` when no SMTP server is configured. */
   smtp: SmtpConfig | null;
 }
@@ -121,9 +132,11 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     version: env.APP_VERSION ?? readPackageVersion(),
     databaseUrl: env.DATABASE_URL,
     queueDatabaseUrl: env.DIRECT_URL ?? env.DATABASE_URL,
+    migrateOnStart: env.MIGRATE_ON_START,
     authSecret: env.AUTH_SECRET,
     encryptionKey: Buffer.from(env.ENCRYPTION_KEY, "base64"),
     trustProxy: env.TRUST_PROXY,
+    outboundAllowedPorts: env.OUTBOUND_ALLOWED_PORTS,
     smtp: env.SMTP_HOST
       ? {
           host: env.SMTP_HOST,

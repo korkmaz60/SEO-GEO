@@ -27,7 +27,8 @@
   },
   "dependencies": {
     "ipaddr.js": "^2.5.0",
-    "tldts": "^7.4.15"
+    "tldts": "^7.4.15",
+    "undici": "^8.11.2"
   },
   "devDependencies": {
     "@types/node": "^22.20.4",

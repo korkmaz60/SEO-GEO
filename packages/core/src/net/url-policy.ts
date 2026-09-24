@@ -24,6 +24,8 @@ export class UnsafeUrlError extends Error {
 export interface UrlPolicyOptions {
   /** Ports that may be requested. Defaults to 80 and 443. */
   allowedPorts?: readonly number[];
+  /** Which IP addresses may be contacted. Defaults to public unicast addresses. */
+  isAllowedAddress?: (address: string) => boolean;
 }
 
 export const DEFAULT_ALLOWED_PORTS: readonly number[] = [80, 443];
@@ -53,7 +55,7 @@ export function assertAllowedUrl(input: string | URL, options: UrlPolicyOptions 
   }
 
   const host = stripBrackets(url.hostname);
-  if (isIP(host) !== 0 && !isPublicIpAddress(host)) {
+  if (isIP(host) !== 0 && !(options.isAllowedAddress ?? isPublicIpAddress)(host)) {
     throw new UnsafeUrlError("private_address", `${host} is not a public address`);
   }
   return url;
@@ -80,11 +82,12 @@ const systemLookup: LookupFunction = (hostname) =>
 export async function resolvePublicAddresses(
   hostname: string,
   lookup: LookupFunction = systemLookup,
+  isAllowedAddress: (address: string) => boolean = isPublicIpAddress,
 ): Promise<ResolvedAddress[]> {
   const host = stripBrackets(hostname);
   const family = isIP(host);
   if (family !== 0) {
-    if (!isPublicIpAddress(host)) {
+    if (!isAllowedAddress(host)) {
       throw new UnsafeUrlError("private_address", `${host} is not a public address`);
     }
     return [{ address: host, family }];
@@ -99,7 +102,7 @@ export async function resolvePublicAddresses(
   if (records.length === 0) {
     throw new UnsafeUrlError("unresolvable_host", `${host} could not be resolved`);
   }
-  if (records.some((record) => !isPublicIpAddress(record.address))) {
+  if (records.some((record) => !isAllowedAddress(record.address))) {
     throw new UnsafeUrlError("private_address", `${host} resolves to a non-public address`);
   }
   return records;
@@ -115,6 +118,10 @@ export async function assertPublicUrl(
   options: PublicUrlCheckOptions = {},
 ): Promise<{ url: URL; addresses: ResolvedAddress[] }> {
   const url = assertAllowedUrl(input, options);
-  const addresses = await resolvePublicAddresses(url.hostname, options.lookup);
+  const addresses = await resolvePublicAddresses(
+    url.hostname,
+    options.lookup,
+    options.isAllowedAddress,
+  );
   return { url, addresses };
 }

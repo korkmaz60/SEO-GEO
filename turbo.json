@@ -17,6 +17,8 @@
     "AUTH_SECRET",
     "ENCRYPTION_KEY",
     "TRUST_PROXY",
+    "OUTBOUND_ALLOWED_PORTS",
+    "MIGRATE_ON_START",
     "HOST",
     "API_DOCS",
     "SMTP_HOST",

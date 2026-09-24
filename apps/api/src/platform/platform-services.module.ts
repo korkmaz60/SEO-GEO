@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { AuditModule } from "../audit/audit.module.js";
 import { CredentialsModule } from "../credentials/credentials.module.js";
 import { CryptoModule } from "../crypto/crypto.module.js";
+import { NetModule } from "../net/net.module.js";
 import { NotificationsModule } from "../notifications/notifications.module.js";
 import { TasksModule } from "../tasks/tasks.module.js";
 import { UsageModule } from "../usage/usage.module.js";
@@ -11,6 +12,7 @@ import { UsageModule } from "../usage/usage.module.js";
 @Module({
   imports: [
     CryptoModule,
+    NetModule,
     AuditModule,
     NotificationsModule,
     UsageModule,
