@@ -198,9 +198,17 @@ Stripe keys.
 - **Usage credits.** Provider costs from the usage ledger that were paid with platform keys
   are converted to credits. When credits run out, paid jobs stop until the next period or a
   top-up (a one-off Checkout payment); a workspace can also switch to its own provider keys.
-- **Implementation.** Better Auth's Stripe plugin is evaluated first, because it attaches
-  subscriptions to organizations (our workspaces); otherwise a thin module over the official
-  `stripe` SDK. Tax handling (Stripe Tax or manual VAT) is decided before launch.
+- **Tax.** The company is run by one person without an accountant, so the preferred setup
+  is a merchant of record that calculates, collects and remits sales tax and VAT (for
+  example EU and UK VAT on consumer sales, Turkish VAT on electronic services, US sales
+  tax): Stripe Managed Payments if it is available for the account, otherwise Paddle or
+  Lemon Squeezy. Plain Stripe with Stripe Tax is the fallback; it calculates and collects
+  tax but leaves registrations and filings to us.
+- **Implementation.** A small billing provider interface (create checkout, open portal,
+  parse webhook) keeps plans, limits and credits independent of the provider. For the Stripe
+  path, Better Auth's Stripe plugin is evaluated first, because it attaches subscriptions
+  to organizations (our workspaces); otherwise a thin module over the official `stripe`
+  SDK.
 
 ## Testing
 
