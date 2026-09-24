@@ -62,7 +62,7 @@ using DataForSEO, SEO-GEO competes on the product layer:
 | Reports & alerts | Server-rendered PDF (white-label), schedules and email delivery, alert rules (email, Slack, webhook) | M4 |
 | Backlinks & domain overview | Domain metrics and history, referring domains, anchors, new/lost links, competitor gaps | M4 |
 | Content | Optimizer and briefs based on SERP + AI citations, schema and `llms.txt` generators | M5 |
-| Cloud billing | Plans, usage credits, provider cost pass-through (cloud edition only) | M5 |
+| Cloud billing | Stripe subscriptions (Checkout, Customer Portal), plans, usage credits, provider cost pass-through (cloud edition only) | M5 |
 
 ## Editions
 
@@ -73,7 +73,7 @@ Both editions are built from the same repository and Docker images.
 | Installation | `docker compose up` (web, api, worker, PostgreSQL) | Managed by us |
 | Provider keys | The workspace's own keys, entered in settings | Platform keys with usage credits, or the workspace's own keys |
 | Sign-up | First user becomes admin; others join by invitation | Public sign-up with email verification |
-| Billing | Not loaded | Subscriptions and credits |
+| Billing | Not loaded | Stripe subscriptions and usage credits |
 | Updates | Pull a new image; migrations run on start | Continuous deployment |
 | Telemetry | Off, or opt-in | On |
 

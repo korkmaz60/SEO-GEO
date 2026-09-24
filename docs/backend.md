@@ -177,6 +177,31 @@ are configuration, not code.
 - Tools that spend money require `run:paid` scope, return a cost estimate first, and need an
   explicit confirmation argument.
 
+## Billing (cloud edition)
+
+Payments go through Stripe, on the owner's company outside Turkey. The `billing` module is
+registered only when `DEPLOYMENT_MODE=cloud`; self-hosted installs never load it and need no
+Stripe keys.
+
+- **The workspace is the customer.** Each workspace maps to one Stripe customer and at most
+  one subscription. Owners manage billing (see the role matrix above).
+- **Stripe-hosted pages.** Plans are bought through Stripe Checkout; plan changes, payment
+  methods, invoices and cancellation go through the Stripe Customer Portal. Card data never
+  reaches our servers.
+- **Webhooks are the source of truth.** `checkout.session.completed`,
+  `customer.subscription.*` and `invoice.paid` / `invoice.payment_failed` update the
+  `subscription` row. Signatures are verified with the endpoint secret, and processed event
+  IDs are stored so that retries and replays are no-ops. The browser's redirect after
+  Checkout is never trusted as proof of payment.
+- **Plans and limits.** A plan sets limits (projects, tracked keywords, AI prompts, members)
+  and a monthly credit allowance. Limits are enforced in services on every write.
+- **Usage credits.** Provider costs from the usage ledger that were paid with platform keys
+  are converted to credits. When credits run out, paid jobs stop until the next period or a
+  top-up (a one-off Checkout payment); a workspace can also switch to its own provider keys.
+- **Implementation.** Better Auth's Stripe plugin is evaluated first, because it attaches
+  subscriptions to organizations (our workspaces); otherwise a thin module over the official
+  `stripe` SDK. Tax handling (Stripe Tax or manual VAT) is decided before launch.
+
 ## Testing
 
 | Level | Tooling | Scope |

@@ -149,6 +149,14 @@ See [geo-aeo.md](geo-aeo.md) for detection rules and metric formulas.
 | `alert_rule` | id, workspace_id, project_id, type, config (jsonb), channels (jsonb), active |
 | `alert_event` | id, rule_id, triggered_at, payload, delivery_status, delivered_at |
 
+## Billing (cloud edition, M5)
+
+| Table | Key columns | Notes |
+|---|---|---|
+| `subscription` | workspace_id (PK), stripe_customer_id, stripe_subscription_id, plan, status, current_period_end, cancel_at_period_end | mirror of Stripe state, written only by webhook handlers |
+| `credit_grant` | id, workspace_id, source (`plan`, `top_up`, `manual`), credits, expires_at, created_at | monthly allowance and top-ups; spending is derived from `usage_entry` rows billed to the platform |
+| `stripe_event` | event_id (PK), type, processed_at | processed webhook events; makes retries and replays no-ops |
+
 ## Time series and retention
 
 - `rank_check`, `ai_run`, `usage_entry`, `gsc_*_daily` are **range-partitioned by month**.

@@ -40,3 +40,4 @@ open for change until the milestone that depends on it starts.
 | D9 | DataForSEO as the first-class data provider, bring-your-own-key | Accepted |
 | D10 | Positioning: GEO/AEO depth + agency workflows, Turkish + English at launch | Proposed |
 | D11 | License: AGPL-3.0 | Proposed — needs the owner's explicit approval before a `LICENSE` file is added |
+| D12 | Cloud billing with Stripe, through the owner's company outside Turkey; loaded only in the cloud edition | Accepted |
