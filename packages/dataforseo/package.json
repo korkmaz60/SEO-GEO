@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "description": "Typed DataForSEO v3 client: envelope and task status handling, retries, cost reporting",
+  "license": "AGPL-3.0-only",
   "type": "module",
   "sideEffects": false,
   "exports": {

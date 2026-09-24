@@ -35,7 +35,6 @@ packages/
   billing     Cloud edition billing: plans, Stripe Managed Payments checkout and webhooks
 deploy/     Docker Compose stack for self-hosting
 docs/       Design documentation
-legacy/     The previous demo, kept for reference only
 ```
 
 The browser only talks to the web app; the web app forwards `/api/*` to the api. Read the
@@ -94,6 +93,9 @@ first; changes that affect architecture or data should update the relevant docum
 
 ## License
 
-To be decided before the first release (AGPL-3.0 is proposed; see decision D11 in
-[docs/README.md](docs/README.md)). Until a `LICENSE` file is added, all rights are reserved
-by the author.
+SEO-GEO is free software: you can redistribute it and/or modify it under the terms of the
+[GNU Affero General Public License, version 3](LICENSE) (AGPL-3.0-only). You may use,
+change and self-host it; if you let people use a modified version over a network, you must
+offer them its source code under the same license.
+
+Copyright © 2026 the SEO-GEO contributors.

@@ -18,7 +18,7 @@ Each milestone ends with a working, tested, releasable state.
 **Exit:** `pnpm install && pnpm build && pnpm test` passes locally and in CI; the web shell
 runs against the api health endpoint.
 
-## M1 — Platform core *(done, except the demo removal)*
+## M1 — Platform core *(done)*
 
 - [x] `packages/db`: Prisma schema for identity, workspaces, projects, brand entities,
   credentials, usage, budgets, tasks, audit log, notifications; RLS lockdown migration.
@@ -33,7 +33,7 @@ runs against the api health endpoint.
 - [x] Docker images and `docker compose` for self-hosting ([self-hosting.md](self-hosting.md)).
 - [x] Audit log for workspace, membership, project, credential and budget changes;
   localized in-app notifications (budget thresholds, rejected provider keys).
-- [ ] Remove `legacy/demo` — waiting for the owner's go-ahead.
+- [x] Remove `legacy/demo` (it remains in the Git history).
 
 **Exit:** a new user can install with Docker, sign up, create a workspace and project,
 connect DataForSEO and see the balance; tenant isolation tests pass.

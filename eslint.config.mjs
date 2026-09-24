@@ -11,7 +11,6 @@ export default defineConfig([
     "**/node_modules/**",
     "**/.next/**",
     "**/.turbo/**",
-    "legacy/**",
     "**/src/generated/**",
     "apps/web/**",
   ]),

@@ -6,7 +6,8 @@ agencies, powered by bring-your-own-key data providers (DataForSEO first).
 
 The previous code in this repository was a demo. Its review is recorded in
 [`audit/2026-09-demo-audit.md`](audit/2026-09-demo-audit.md); the new system is built
-from scratch in a monorepo, reusing the demo's visual language.
+from scratch in a monorepo, reusing the demo's visual language. The demo was removed in
+M1 and remains available in the Git history.
 
 ## Documents
 
@@ -41,6 +42,6 @@ change until the milestone that depends on it starts.
 | D8 | Shared Zod contracts for validation, OpenAPI and typed clients | Accepted (M1) |
 | D9 | DataForSEO as the first-class data provider, bring-your-own-key | Accepted |
 | D10 | Positioning: GEO/AEO depth + agency workflows, Turkish + English at launch | Proposed |
-| D11 | License: AGPL-3.0 | Proposed — needs the owner's explicit approval before a `LICENSE` file is added |
+| D11 | License: AGPL-3.0-only ([LICENSE](../LICENSE)); one license for the self-hosted and cloud editions | Accepted |
 | D12 | Cloud billing with Stripe Managed Payments (Stripe is the merchant of record and handles sales tax and VAT) on the owner's company outside Turkey; Paddle as fallback; loaded only in the cloud edition | Accepted |
 | D13 | Self-hosting with Docker: one image for api and worker, one for the web app, Docker Compose with PostgreSQL and optional Caddy for HTTPS; migrations run on api start | Accepted (M1) |

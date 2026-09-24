@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "description": "SEO-GEO web app (Next.js)",
+  "license": "AGPL-3.0-only",
   "scripts": {
     "dev": "next dev --port 3000",
     "build": "next build",

@@ -2,6 +2,7 @@
   "name": "seo-geo",
   "private": true,
   "description": "Open-source platform for SEO and AI search visibility (GEO/AEO)",
+  "license": "AGPL-3.0-only",
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=22.19"

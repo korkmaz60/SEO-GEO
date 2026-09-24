@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "description": "SEO-GEO backend: REST API and background worker (NestJS)",
+  "license": "AGPL-3.0-only",
   "type": "module",
   "files": [
     "dist"

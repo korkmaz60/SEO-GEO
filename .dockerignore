@@ -8,7 +8,6 @@
 **/src/generated
 .git
 .github
-legacy
 docs
 deploy/.env
 .env
