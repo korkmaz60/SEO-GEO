@@ -30,6 +30,7 @@ packages/
   contracts   Zod schemas shared by api and web
   core        Domain logic: hostname matching, outbound URL (SSRF) policy, analyzers
   dataforseo  Typed DataForSEO v3 client: status handling, retries, cost reporting
+  billing     Cloud edition billing: plans, Stripe Managed Payments checkout and webhooks
 docs/       Design documentation
 legacy/     The previous demo, kept for reference only
 ```

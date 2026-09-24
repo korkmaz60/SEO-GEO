@@ -198,17 +198,35 @@ Stripe keys.
 - **Usage credits.** Provider costs from the usage ledger that were paid with platform keys
   are converted to credits. When credits run out, paid jobs stop until the next period or a
   top-up (a one-off Checkout payment); a workspace can also switch to its own provider keys.
-- **Tax.** The company is run by one person without an accountant, so the preferred setup
-  is a merchant of record that calculates, collects and remits sales tax and VAT (for
-  example EU and UK VAT on consumer sales, Turkish VAT on electronic services, US sales
-  tax): Stripe Managed Payments if it is available for the account, otherwise Paddle or
-  Lemon Squeezy. Plain Stripe with Stripe Tax is the fallback; it calculates and collects
-  tax but leaves registrations and filings to us.
-- **Implementation.** A small billing provider interface (create checkout, open portal,
-  parse webhook) keeps plans, limits and credits independent of the provider. For the Stripe
-  path, Better Auth's Stripe plugin is evaluated first, because it attaches subscriptions
-  to organizations (our workspaces); otherwise a thin module over the official `stripe`
-  SDK.
+- **Tax: Stripe Managed Payments.** Stripe is the merchant of record: it calculates,
+  collects and remits sales tax and VAT (80+ countries, including EU and UK VAT and Turkish
+  VAT on electronic services) and handles fraud and disputes. It adds 3.5% per transaction
+  on top of Stripe's processing fees, works only with hosted Checkout and Payment Links, and
+  needs an eligible account (a business in one of about 35 supported countries, reviewed by
+  Stripe) and products with an eligible tax code. The company is run by one person without
+  an accountant, which is why a merchant of record beats plain Stripe Tax (which calculates
+  tax but leaves registrations and filings to us). Fallback if the account is not eligible:
+  Paddle. Lemon Squeezy was not chosen: it now belongs to Stripe, and its team builds
+  Managed Payments.
+- **Implementation.** `packages/billing` holds the plan catalog, the provider interface,
+  normalized webhook events and the Stripe adapter (`managed_payments.enabled` on Checkout
+  Sessions). The api module (raw-body webhook endpoint, persistence, limits, credits) is
+  wired once workspaces and the database exist. Paddle would only need a second adapter.
+
+Stripe setup, done by the owner in test mode first:
+
+1. Activate Managed Payments in the Dashboard (eligibility review).
+2. Create a product per plan with an eligible SaaS tax code and a monthly price, and a
+   product per credit top-up with a one-time price. The price IDs go into the billing
+   catalog.
+3. Configure the Customer Portal: switching between our plans, cancellation at period end,
+   invoice history.
+4. Add a webhook endpoint `https://<api>/v1/billing/webhooks/stripe` for
+   `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+   `customer.subscription.created`, `.updated`, `.deleted`, `invoice.paid` and
+   `invoice.payment_failed`.
+5. Set `STRIPE_SECRET_KEY` (a restricted key), `STRIPE_WEBHOOK_SECRET` and
+   `STRIPE_MANAGED_PAYMENTS=true` on the cloud deployment.
 
 ## Testing
 

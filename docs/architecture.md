@@ -52,6 +52,7 @@ packages/
   contracts/           Zod schemas shared by api and web (DTOs, enums, errors)
   core/                Pure domain logic: domains/URLs, SSRF policy, analyzers, scoring
   dataforseo/          Typed DataForSEO client (envelopes, errors, retries, cost)
+  billing/             Cloud billing: plan catalog, provider interface, Stripe adapter
   db/                  Prisma schema, migrations and client factory (M1)
 docs/                  Design documentation
 docker-compose.yml     Local development services (PostgreSQL)

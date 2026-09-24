@@ -75,4 +75,5 @@ share of voice; an MCP client can query rankings and AI visibility.
 - Content optimizer and briefs based on SERP and AI citations; live score while writing.
 - Schema (JSON-LD) and `llms.txt` generators.
 - WordPress integration.
-- Cloud edition: Stripe billing (Checkout, Customer Portal, webhooks), plans and usage credits.
+- Cloud edition: wire `packages/billing` (Stripe Managed Payments) into the api and web:
+  webhook endpoint, subscriptions, plan limits, usage credits, billing settings page.
