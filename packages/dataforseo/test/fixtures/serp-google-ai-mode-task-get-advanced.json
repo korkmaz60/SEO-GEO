@@ -1,0 +1,106 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "2.1344 sec.",
+  "cost": 0,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "09241104-1535-0066-0000-a10de0000001",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "time": "2.0815 sec.",
+      "cost": 0,
+      "result_count": 1,
+      "path": [
+        "v3",
+        "serp",
+        "google",
+        "ai_mode",
+        "task_get",
+        "advanced",
+        "09241104-1535-0066-0000-a10de0000001"
+      ],
+      "data": {
+        "api": "serp",
+        "function": "task_get",
+        "se": "google",
+        "se_type": "ai_mode",
+        "keyword": "Türkiye'de en iyi kahve makinesi markaları hangileri?",
+        "location_code": 2792,
+        "language_code": "tr",
+        "device": "desktop",
+        "os": "windows",
+        "tag": "01926f3e-0000-7c11-9d2e-00000000d001"
+      },
+      "result": [
+        {
+          "keyword": "Türkiye'de en iyi kahve makinesi markaları hangileri?",
+          "type": "ai_mode",
+          "se_domain": "google.com.tr",
+          "location_code": 2792,
+          "language_code": "tr",
+          "check_url": "https://www.google.com.tr/search?q=T%C3%BCrkiye%27de+en+iyi+kahve+makinesi&udm=50&hl=tr&gl=TR",
+          "datetime": "2026-09-24 10:16:10 +00:00",
+          "spell": null,
+          "refinement_chips": null,
+          "item_types": [
+            "ai_overview"
+          ],
+          "se_results_count": 0,
+          "items_count": 1,
+          "items": [
+            {
+              "type": "ai_overview",
+              "rank_group": 1,
+              "rank_absolute": 1,
+              "page": 1,
+              "position": "left",
+              "xpath": "/html[1]/body[1]",
+              "markdown": "Türkiye'de kahve makinesi için sık önerilen markalar **Example Store**, **Rakip A**, De'Longhi ve Philips'tir. Example Store geniş ürün yelpazesiyle, Rakip A ise uygun fiyatlarıyla öne çıkar.",
+              "items": [
+                {
+                  "type": "ai_overview_element",
+                  "references": [
+                    {
+                      "type": "ai_overview_reference",
+                      "position": "right",
+                      "source": "Rakip A",
+                      "domain": "www.rakip-a.com",
+                      "url": "https://www.rakip-a.com/blog/en-iyi-kahve-makineleri",
+                      "title": "En iyi kahve makineleri 2026",
+                      "text": null
+                    }
+                  ]
+                }
+              ],
+              "references": [
+                {
+                  "type": "ai_overview_reference",
+                  "position": "right",
+                  "source": "Example Store",
+                  "domain": "www.example.com",
+                  "url": "https://www.example.com/kahve-makineleri",
+                  "title": "Kahve Makineleri",
+                  "text": null
+                },
+                {
+                  "type": "ai_overview_reference",
+                  "position": "right",
+                  "source": "Vikipedi",
+                  "domain": "tr.wikipedia.org",
+                  "url": "https://tr.wikipedia.org/wiki/Kahve_makinesi",
+                  "title": "Kahve makinesi",
+                  "text": null
+                }
+              ],
+              "rectangle": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

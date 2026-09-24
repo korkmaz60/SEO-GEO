@@ -182,6 +182,8 @@ describe("getGoogleOrganicTaskAdvanced", () => {
     expect(serp.aiOverview).toEqual({
       rankAbsolute: 1,
       asynchronous: true,
+      markdown:
+        "Kahve makinesi seçerken **demleme yöntemi**, kapasite ve bakım kolaylığı öne çıkar.",
       references: [
         {
           domain: "tr.wikipedia.org",

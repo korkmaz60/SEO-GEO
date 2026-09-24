@@ -1,0 +1,48 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "2.1344 sec.",
+  "cost": 0,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "09241103-1535-0603-0000-5e0000000001",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "time": "2.0815 sec.",
+      "cost": 0,
+      "result_count": 3,
+      "path": [
+        "v3",
+        "ai_optimization",
+        "claude",
+        "llm_responses",
+        "models"
+      ],
+      "data": {
+        "api": "ai_optimization",
+        "function": "models",
+        "se": "claude"
+      },
+      "result": [
+        {
+          "model_name": "claude-sonnet-4-5-20250929",
+          "web_search_supported": true,
+          "task_post_supported": true
+        },
+        {
+          "model_name": "claude-haiku-4-5-20251001",
+          "web_search_supported": true,
+          "task_post_supported": true
+        },
+        {
+          "model_name": "claude-3-haiku-20240307",
+          "web_search_supported": false,
+          "task_post_supported": true
+        }
+      ]
+    }
+  ]
+}
