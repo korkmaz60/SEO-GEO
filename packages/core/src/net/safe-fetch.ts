@@ -61,6 +61,16 @@ export interface SafeFetchOptions {
    * `/*` matches a whole type. Any type is accepted when omitted.
    */
   accept?: readonly string[];
+  /**
+   * `manual` returns redirect responses (with their `location` header) instead of following
+   * them, e.g. for a crawler that records every hop. Defaults to `follow`.
+   */
+  redirect?: "follow" | "manual";
+  /**
+   * Decides from the media type whether the body is read; skipped bodies are discarded and
+   * the response has an empty body. Every body is read when omitted.
+   */
+  readBodyIf?: (contentType: string | null) => boolean;
   signal?: AbortSignal;
 }
 
@@ -184,7 +194,7 @@ export function createSafeFetcher(config: SafeFetcherConfig = {}): SafeFetcher {
       }
 
       const location = header(response.headers, "location");
-      if (REDIRECT_STATUSES.has(response.statusCode) && location) {
+      if (REDIRECT_STATUSES.has(response.statusCode) && location && options.redirect !== "manual") {
         await discard(response.body);
         if (redirects.length >= maxRedirects) {
           throw new SafeFetchError("too_many_redirects", `More than ${maxRedirects} redirects`);
@@ -204,18 +214,28 @@ export function createSafeFetcher(config: SafeFetcherConfig = {}): SafeFetcher {
           `${contentType ?? "A missing content type"} is not accepted`,
         );
       }
+      const skipBody =
+        method === "HEAD" ||
+        REDIRECT_STATUSES.has(response.statusCode) ||
+        (options.readBodyIf !== undefined && !options.readBodyIf(contentType));
       const declaredLength = Number(header(response.headers, "content-length"));
-      if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
+      if (!skipBody && Number.isFinite(declaredLength) && declaredLength > maxBytes) {
         await discard(response.body);
         throw new SafeFetchError("too_large", `The response is larger than ${maxBytes} bytes`);
       }
 
       let body: Buffer;
       try {
-        body =
-          method === "HEAD"
-            ? Buffer.alloc(0)
-            : await readBody(response.body, header(response.headers, "content-encoding"), maxBytes);
+        if (skipBody) {
+          await discard(response.body);
+          body = Buffer.alloc(0);
+        } else {
+          body = await readBody(
+            response.body,
+            header(response.headers, "content-encoding"),
+            maxBytes,
+          );
+        }
       } catch (error) {
         throw toSafeFetchError(error, timeout, url);
       }

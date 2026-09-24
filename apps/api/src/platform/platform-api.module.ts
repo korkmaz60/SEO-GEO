@@ -10,6 +10,7 @@ import { NotificationsController } from "../notifications/notifications.controll
 import { ProjectsController } from "../projects/projects.controller.js";
 import { ProjectsService } from "../projects/projects.service.js";
 import { RankTrackerController } from "../rank-tracker/rank-tracker.controller.js";
+import { SiteAuditController } from "../site-audit/site-audit.controller.js";
 import { TasksController } from "../tasks/tasks.controller.js";
 import { UsageController } from "../usage/usage.controller.js";
 
@@ -25,6 +26,7 @@ import { UsageController } from "../usage/usage.controller.js";
     RankTrackerController,
     KeywordResearchController,
     KeywordListsController,
+    SiteAuditController,
   ],
   providers: [ProjectsService],
   exports: [ProjectsService],
