@@ -1,5 +1,6 @@
 import { Controller, Get, Module } from "@nestjs/common";
 import { InstanceInfoSchema, MeResponseSchema, ProblemDetailsSchema } from "@seo-geo/contracts";
+import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { RequireRole, WorkspaceScoped } from "../src/auth/decorators.js";
@@ -252,6 +253,28 @@ describe.skipIf(!TEST_SERVER_URL)("authentication and workspaces", () => {
       },
       { action: "member.left", actor: viewer.email, metadata: {} },
     ]);
+  });
+
+  it("accepts personal API keys in the x-api-key header", async () => {
+    const created = await ownerAgent
+      .post("/api/auth/api-key/create")
+      .send({ name: "CI script", expiresIn: 60 * 60 * 24 })
+      .expect(200);
+    const key = created.body.key as string;
+    expect(key).toMatch(/^sg_/);
+
+    const withKey = await request(context.app.getHttpServer())
+      .get("/api/v1/me")
+      .set("x-api-key", key)
+      .expect(200);
+    expect(MeResponseSchema.parse(withKey.body).user.email).toBe(owner.email);
+    await request(context.app.getHttpServer())
+      .get(`/api/v1/workspaces/${workspaceId}/audit-log`)
+      .set("x-api-key", key)
+      .expect(200);
+
+    await ownerAgent.post("/api/auth/api-key/delete").send({ keyId: created.body.id }).expect(200);
+    await request(context.app.getHttpServer()).get("/api/v1/me").set("x-api-key", key).expect(401);
   });
 
   it("resets a forgotten password through the emailed link", async () => {

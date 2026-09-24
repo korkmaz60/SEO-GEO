@@ -761,7 +761,7 @@
     },
     "apiKeys": {
       "title": "API keys",
-      "description": "Personal keys for scripts and integrations. A key acts with your permissions; send it in an Authorization: Bearer header.",
+      "description": "Personal keys for scripts and integrations. A key acts with your permissions; send it in the x-api-key header.",
       "empty": "You have no API keys yet.",
       "unnamed": "Unnamed key",
       "created": "created {date}",

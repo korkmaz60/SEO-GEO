@@ -761,7 +761,7 @@
     },
     "apiKeys": {
       "title": "API anahtarları",
-      "description": "Betikler ve entegrasyonlar için kişisel anahtarlar. Anahtar sizin yetkilerinizle çalışır; Authorization: Bearer başlığıyla gönderin.",
+      "description": "Betikler ve entegrasyonlar için kişisel anahtarlar. Anahtar sizin yetkilerinizle çalışır; isteklerde x-api-key başlığıyla gönderin.",
       "empty": "Henüz API anahtarınız yok.",
       "unnamed": "Adsız anahtar",
       "created": "{date} oluşturuldu",
