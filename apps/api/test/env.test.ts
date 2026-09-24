@@ -85,6 +85,25 @@ describe("loadConfig", () => {
     expect(() => loadConfig({})).toThrow(/DATABASE_URL[\s\S]*AUTH_SECRET[\s\S]*ENCRYPTION_KEY/);
   });
 
+  it("configures Google OAuth only with both client values", () => {
+    expect(loadConfig(required).google).toBeNull();
+    expect(
+      loadConfig({
+        ...required,
+        WEB_URL: "https://seo.example.com/app",
+        GOOGLE_CLIENT_ID: "id",
+        GOOGLE_CLIENT_SECRET: "secret",
+      }).google,
+    ).toEqual({
+      clientId: "id",
+      clientSecret: "secret",
+      redirectUri: "https://seo.example.com/api/v1/integrations/google/callback",
+    });
+    expect(() => loadConfig({ ...required, GOOGLE_CLIENT_ID: "id" })).toThrow(
+      /GOOGLE_CLIENT_SECRET/,
+    );
+  });
+
   it("requires email delivery for the cloud edition", () => {
     expect(() => loadConfig({ ...required, DEPLOYMENT_MODE: "cloud" })).toThrow(/SMTP_HOST/);
   });

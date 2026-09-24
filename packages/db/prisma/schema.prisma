@@ -235,6 +235,7 @@ model Project {
   trackedKeywords TrackedKeyword[]
   rankChecks      RankCheck[]
   integrations    ProjectIntegration[]
+  gscSiteDaily    GscSiteDaily[]
   gscQueryDaily   GscQueryDaily[]
   gscPageDaily    GscPageDaily[]
   ga4PageDaily    Ga4PageDaily[]
@@ -720,6 +721,21 @@ model ProjectIntegration {
   @@unique([projectId, type])
   @@index([connectionId])
   @@map("project_integration")
+}
+
+/// Search Console totals by day, including queries Google does not report individually.
+model GscSiteDaily {
+  projectId   String   @map("project_id") @db.Uuid
+  date        DateTime @db.Date
+  clicks      Int
+  impressions Int
+  /// Average position, weighted by impressions.
+  position    Float
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, date])
+  @@map("gsc_site_daily")
 }
 
 /// Search Console performance by query and day.

@@ -8,3 +8,4 @@ export * from "./workspace-data.js";
 export * from "./rank-tracker.js";
 export * from "./keyword-research.js";
 export * from "./site-audit.js";
+export * from "./google.js";

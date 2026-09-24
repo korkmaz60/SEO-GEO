@@ -30,3 +30,14 @@ describe("keywordProblem", () => {
     expect(keywordProblem("kahve makinesi")).toBeNull();
   });
 });
+
+describe("aiReferralName", () => {
+  it("recognizes AI assistants by referrer host", async () => {
+    const { aiReferralName } = await import("../src/index.js");
+    expect(aiReferralName("chatgpt.com")).toBe("ChatGPT");
+    expect(aiReferralName("www.perplexity.ai / referral")).toBe("Perplexity");
+    expect(aiReferralName("gemini.google.com")).toBe("Gemini");
+    expect(aiReferralName("google")).toBeNull();
+    expect(aiReferralName("notchatgpt.com")).toBeNull();
+  });
+});

@@ -55,8 +55,19 @@ export const EnvSchema = z
     SMTP_USER: z.string().min(1).optional(),
     SMTP_PASSWORD: z.string().min(1).optional(),
     SMTP_FROM: z.string().min(3).default("SEO-GEO <noreply@localhost>"),
+
+    /** OAuth client for Search Console and Analytics (Google Cloud, "Web application"). */
+    GOOGLE_CLIENT_ID: z.string().min(1).optional(),
+    GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
   })
   .superRefine((env, ctx) => {
+    if (Boolean(env.GOOGLE_CLIENT_ID) !== Boolean(env.GOOGLE_CLIENT_SECRET)) {
+      ctx.addIssue({
+        code: "custom",
+        path: [env.GOOGLE_CLIENT_ID ? "GOOGLE_CLIENT_SECRET" : "GOOGLE_CLIENT_ID"],
+        message: "Set both GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET, or neither",
+      });
+    }
     if (env.DEPLOYMENT_MODE === "cloud" && !env.SMTP_HOST) {
       ctx.addIssue({
         code: "custom",
@@ -73,6 +84,13 @@ export interface SmtpConfig {
   user: string | undefined;
   password: string | undefined;
   from: string;
+}
+
+export interface GoogleOAuthConfig {
+  clientId: string;
+  clientSecret: string;
+  /** Registered in Google Cloud as an authorized redirect URI. */
+  redirectUri: string;
 }
 
 export interface AppConfig {
@@ -96,6 +114,8 @@ export interface AppConfig {
   outboundAllowedPorts: number[];
   /** `null` when no SMTP server is configured. */
   smtp: SmtpConfig | null;
+  /** `null` when Google OAuth is not configured (Search Console and GA4 unavailable). */
+  google: GoogleOAuthConfig | null;
 }
 
 export class ConfigError extends Error {
@@ -147,6 +167,14 @@ export function loadConfig(source: Record<string, string | undefined> = process.
           from: env.SMTP_FROM,
         }
       : null,
+    google:
+      env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+        ? {
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET,
+            redirectUri: `${new URL(env.WEB_URL).origin}/api/v1/integrations/google/callback`,
+          }
+        : null,
   };
 }
 

@@ -3,6 +3,11 @@ import { Module } from "@nestjs/common";
 import { AuditController } from "../audit/audit.controller.js";
 import { CredentialsController } from "../credentials/credentials.controller.js";
 import {
+  GoogleCallbackController,
+  GoogleConnectionsController,
+  ProjectIntegrationsController,
+} from "../google/google.controller.js";
+import {
   KeywordListsController,
   KeywordResearchController,
 } from "../keywords/keyword-research.controller.js";
@@ -27,6 +32,9 @@ import { UsageController } from "../usage/usage.controller.js";
     KeywordResearchController,
     KeywordListsController,
     SiteAuditController,
+    GoogleCallbackController,
+    GoogleConnectionsController,
+    ProjectIntegrationsController,
   ],
   providers: [ProjectsService],
   exports: [ProjectsService],
