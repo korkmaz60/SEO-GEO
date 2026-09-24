@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   computeDelta,
+  formatBytes,
   formatCompact,
   formatNumber,
   formatPercent,
@@ -16,6 +17,12 @@ describe("number formatting", () => {
     expect(formatPercent(0.384, "tr")).toBe("%38,4");
     expect(formatPercent(0.384, "en")).toBe("38.4%");
     expect(formatCompact(12_400, "en")).toBe("12.4K");
+  });
+
+  it("formats byte sizes with binary units", () => {
+    expect(formatBytes(512, "en")).toBe("512 byte");
+    expect(formatBytes(2.5 * 1024 * 1024, "en")).toBe("2.5 MB");
+    expect(formatBytes(2.5 * 1024 * 1024, "tr")).toBe("2,5 MB");
   });
 
   it("shows small provider costs with enough precision", () => {

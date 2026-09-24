@@ -111,6 +111,18 @@
         "credentialInvalid": {
           "title": "The DataForSEO key stopped working",
           "body": "Data collection is paused. Replace the key in the provider settings."
+        },
+        "rankBudgetBlocked": {
+          "title": "Rank checks are paused",
+          "body": "The daily checks of {project} would exceed the monthly budget of {limit}. Raise the budget to resume them."
+        },
+        "dataforseoBlocked": {
+          "title": "DataForSEO refused requests",
+          "body": "Data collection stopped (DataForSEO code {code}). Check your account balance and API access permissions."
+        },
+        "googleRevoked": {
+          "title": "Google access was revoked",
+          "body": "Reconnect {email} to keep Search Console and Analytics data current."
         }
       }
     }
@@ -166,7 +178,7 @@
     },
     "searchConsole": {
       "title": "Search Console",
-      "description": "Query and page performance from Google Search Console.",
+      "description": "Real clicks, impressions and traffic from Search Console and Google Analytics 4.",
       "emptyTitle": "Search Console is not connected",
       "emptyBody": "Connect your Google account to sync clicks, impressions and average position every day."
     },
@@ -221,7 +233,7 @@
     "steps": {
       "provider": "Connect your DataForSEO key",
       "brand": "Define your brand and competitors",
-      "keywords": "Add keywords and prompts to track",
+      "keywords": "Add keywords to track",
       "audit": "Start the first site audit",
       "gsc": "Connect Search Console"
     },
@@ -272,14 +284,41 @@
     "aiTrendTitle": "AI visibility trend",
     "aiTrendEmpty": "Once prompt tracking starts, weekly visibility per platform is charted here.",
     "rankTitle": "Ranking distribution",
-    "rankEmptyTitle": "No keywords tracked",
-    "rankEmpty": "Keywords are grouped into top 3, top 10 and top 100 here.",
-    "scoresTitle": "Scores",
+    "rankEmptyTitle": "No tracked keywords",
+    "rankEmpty": "Once you add keywords, rankings are checked every day and spread across position bands here.",
     "aiScore": "AI visibility",
     "siteHealth": "Site health",
     "brandsTitle": "Tracked brands",
     "brandsDescription": "Each brand keeps its color in every chart.",
-    "ownBrand": "You"
+    "ownBrand": "You",
+    "open": "Open",
+    "sources": {
+      "rankTracker": "Rank tracker"
+    },
+    "shareMethod": "Your CTR-weighted visibility as a share of the total visibility of all tracked brands.",
+    "rankDescription": "Visibility {visibility} · in the last check {improved, plural, one {# keyword} other {# keywords}} moved up and {declined} moved down",
+    "rankAction": "Add keywords",
+    "traffic": {
+      "title": "Organic traffic",
+      "description": "Search Console · {start} – {end}",
+      "source": "Google Search Console",
+      "clicks": "Clicks",
+      "impressions": "Impressions",
+      "position": "Average position",
+      "emptyTitle": "Search Console is not connected",
+      "emptyBody": "Connect the project's Search Console property to see real clicks and impressions.",
+      "connect": "Connect Search Console",
+      "tableView": "Show as table",
+      "date": "Date"
+    },
+    "audit": {
+      "score": "Health score",
+      "noIssues": "No errors or warnings.",
+      "emptyTitle": "No audit yet",
+      "emptyBody": "The first audit checks technical issues and AI crawler access.",
+      "running": "The first audit is running; results appear here when it finishes.",
+      "action": "Go to site audit"
+    }
   },
   "auth": {
     "email": "Email",
@@ -483,14 +522,24 @@
     "upcomingTitle": "More connections",
     "upcomingDescription": "Data sources that are coming, per the roadmap.",
     "upcoming": {
-      "searchConsole": {
-        "title": "Google Search Console",
-        "description": "Real clicks, impressions and queries."
-      },
       "aiPlatforms": {
         "title": "AI platforms",
         "description": "Your own API keys for ChatGPT, Gemini, Claude and Perplexity."
       }
+    },
+    "google": {
+      "title": "Google (Search Console and Analytics)",
+      "description": "Google accounts connected to the workspace. Each project's Search Console and GA4 property is chosen on the project's Search Console page.",
+      "empty": "No Google account is connected yet. You can connect one from a project's Search Console page.",
+      "notConfigured": "This server has no Google OAuth client (GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET). See the self-hosting guide for the setup steps.",
+      "openSearchConsole": "Go to Search Console",
+      "connectedAt": "Connected {time}",
+      "active": "Connected",
+      "revoked": "Access revoked",
+      "disconnect": "Disconnect",
+      "disconnectTitle": "Disconnect {email}?",
+      "disconnectBody": "The access granted in Google is revoked. The Search Console and GA4 sources of projects that use this account are removed together with their imported data.",
+      "removed": "The Google account was disconnected."
     }
   },
   "workspaceSettings": {
@@ -802,6 +851,814 @@
       "current": "This device",
       "lastActive": "active {when}",
       "revoke": "Sign out"
+    }
+  },
+  "serpFeatures": {
+    "owned": "yours",
+    "aiCited": "you are cited",
+    "aiNotCited": "not cited",
+    "types": {
+      "ai_overview": "AI Overview",
+      "featured_snippet": "Featured snippet",
+      "local_pack": "Local pack",
+      "people_also_ask": "People also ask",
+      "knowledge_graph": "Knowledge panel",
+      "top_stories": "Top stories",
+      "video": "Videos",
+      "short_videos": "Short videos",
+      "images": "Images",
+      "shopping": "Shopping",
+      "popular_products": "Popular products",
+      "discussions_and_forums": "Discussions and forums",
+      "perspectives": "Perspectives",
+      "twitter": "X (Twitter)",
+      "google_reviews": "Reviews",
+      "paid": "Ads"
+    }
+  },
+  "keywordMetrics": {
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard",
+      "veryHard": "Very hard"
+    },
+    "intents": {
+      "informational": "Informational",
+      "navigational": "Navigational",
+      "commercial": "Commercial",
+      "transactional": "Transactional"
+    }
+  },
+  "rankTracker": {
+    "addKeywords": "Add keywords",
+    "checkNow": "Check now",
+    "checkQueued": "Check queued; results usually arrive within a few minutes.",
+    "checkFailed": "The check could not be started.",
+    "providerMissing": {
+      "title": "DataForSEO is not connected",
+      "body": "Rankings are checked with the DataForSEO SERP API. Checks start once you connect your key.",
+      "action": "Connect provider"
+    },
+    "pendingNotice": "{count, plural, one {Waiting for the SERP of # keyword} other {Waiting for the SERPs of # keywords}}; results usually arrive within a few minutes.",
+    "historyPending": "The trend appears after the second daily check.",
+    "rangeLabel": "Time range",
+    "range": {
+      "7": "7 days",
+      "30": "30 days",
+      "90": "90 days"
+    },
+    "tableView": "Show as a table",
+    "date": "Date",
+    "kpi": {
+      "visibility": "Visibility",
+      "traffic": "Estimated monthly clicks",
+      "averagePosition": "Average position",
+      "top3": "Top 3 / top 10",
+      "aiOverview": "AI Overview cited / seen",
+      "keywords": "Tracked keywords"
+    },
+    "visibilityTitle": "Visibility trend",
+    "visibilityDescription": "Weighted by search volume and a click-through model; 100% means first for every keyword.",
+    "distributionTitle": "Position distribution",
+    "distributionDescription": "Position bands of your keywords at the latest check.",
+    "buckets": {
+      "label": "Keywords per position band",
+      "top3": "1–3",
+      "top10": "4–10",
+      "top20": "11–20",
+      "top30": "21–30",
+      "none": "Not in top 30"
+    },
+    "shareTitle": "Share of voice",
+    "shareDescription": "Visibility of you and your competitors on your tracked keywords.",
+    "rankingCount": "{count} keywords",
+    "positionFilter": {
+      "all": "All positions",
+      "top3": "Top 3",
+      "top10": "Top 10",
+      "top30": "Top 30",
+      "none": "Not ranking"
+    },
+    "aiFilter": {
+      "label": "AI Overview",
+      "all": "AI Overview: all",
+      "present": "Has AI Overview",
+      "cited": "Cited in AI Overview"
+    },
+    "notRanking": "Not in top {depth}",
+    "pending": "Pending",
+    "failed": "Failed",
+    "new": "New",
+    "lost": "Lost",
+    "movedUp": "moved up",
+    "movedDown": "moved down",
+    "unchanged": "unchanged",
+    "mobile": "Mobile",
+    "trendLabel": "Ranking trend of {keyword}",
+    "wrongUrl": "Another page ranks instead of the target URL (target: {url})",
+    "addedOn": "Tracked since {date}",
+    "deleteTitle": "{count, plural, one {Delete # keyword} other {Delete # keywords}}",
+    "deleteDescription": "Tracking stops and the ranking history is deleted.",
+    "deleteConfirm": "Delete",
+    "deleted": "{count, plural, one {# keyword deleted} other {# keywords deleted}}",
+    "table": {
+      "keyword": "Keyword",
+      "position": "Position",
+      "change": "Change",
+      "week": "7 days",
+      "month": "30 days",
+      "trend": "Trend",
+      "features": "SERP features",
+      "volume": "Volume",
+      "difficulty": "Difficulty",
+      "intent": "Intent",
+      "url": "Ranking URL",
+      "tags": "Tag",
+      "search": "Search keywords",
+      "allTags": "All tags",
+      "empty": "No keywords match the filters.",
+      "count": "{shown} of {total} keywords",
+      "deleteSelected": "Delete {count} keywords",
+      "selectPage": "Select this page",
+      "select": "Select {keyword}",
+      "page": "Page {page} of {pages}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "add": {
+      "title": "Track keywords",
+      "description": "Keywords are checked right away and then at the frequency you choose.",
+      "keywords": "Keywords",
+      "placeholder": "coffee machine\nfilter coffee machine\nespresso machine prices",
+      "keywordsHint": "One keyword per line (commas work too). Up to 80 characters and 10 words.",
+      "device": "Device",
+      "frequency": "Frequency",
+      "frequencies": {
+        "DAILY": "Daily",
+        "WEEKLY": "Weekly"
+      },
+      "tags": "Tags",
+      "tagsPlaceholder": "product, campaign",
+      "newKeywords": "To add",
+      "duplicates": "Already tracked",
+      "invalid": "Invalid",
+      "checkCost": "One check (at most)",
+      "monthlyCost": "Estimated monthly cost",
+      "metricsCost": "Volume and difficulty data (once)",
+      "costNote": "Estimates use DataForSEO list prices; the actual cost is written to the usage ledger.",
+      "submit": "{count, plural, =0 {Add keywords} one {Add # keyword} other {Add # keywords}}",
+      "added": "{count, plural, =0 {No new keywords added} one {# keyword added} other {# keywords added}}",
+      "budgetExceeded": "This would exceed the monthly budget. You can raise it in the workspace settings.",
+      "failed": "The keywords could not be added."
+    },
+    "detail": {
+      "position": "Position",
+      "volume": "Monthly volume",
+      "difficulty": "Difficulty",
+      "cpc": "CPC",
+      "intent": "Intent",
+      "historyTitle": "Ranking history",
+      "historyEmpty": "History appears after the second check.",
+      "historyTable": "Ranking history table",
+      "historyNote": "Gaps mean the site was not in the top {depth} results that day.",
+      "date": "Date",
+      "serpTitle": "Latest search results",
+      "serpFetched": "Fetched on {date}",
+      "aiOverviewSources": "AI Overview sources",
+      "aiOverviewNoSources": "The AI Overview showed no sources.",
+      "openResult": "Open the result in a new tab",
+      "settingsTitle": "Tracking settings",
+      "targetUrl": "Target URL",
+      "save": "Save",
+      "saved": "Saved.",
+      "saveFailed": "Could not save."
+    }
+  },
+  "keywordExplorer": {
+    "tabs": {
+      "research": "Research",
+      "lists": "My lists"
+    },
+    "seed": "Keyword",
+    "seedPlaceholder": "Type a keyword, e.g. coffee machine",
+    "market": "Market",
+    "limitLabel": "Number of results",
+    "limit": "{count} results",
+    "search": "Search",
+    "modeLabel": "Research type",
+    "modes": {
+      "ideas": {
+        "label": "Ideas",
+        "description": "Keywords from the same product and service categories."
+      },
+      "suggestions": {
+        "label": "Suggestions",
+        "description": "Long-tail searches that contain your keyword."
+      },
+      "related": {
+        "label": "Related",
+        "description": "Keywords from Google's \"related searches\" graph."
+      }
+    },
+    "quote": "Estimated cost: {cost}",
+    "quoteCached": "Cached — free",
+    "viewerNote": "Research needs at least the member role.",
+    "failed": "The research could not be completed.",
+    "emptyTitle": "Start with a keyword",
+    "emptyBody": "Find new keywords with search volume, difficulty, CPC and search intent; track the ones you like or save them to a list.",
+    "filter": "Search results",
+    "minVolume": "Min. volume",
+    "maxDifficulty": "Max. difficulty",
+    "intent": "Intent",
+    "allIntents": "All intents",
+    "intents": {
+      "informational": "Informational",
+      "navigational": "Navigational",
+      "commercial": "Commercial",
+      "transactional": "Transactional"
+    },
+    "resultCount": "Showing {shown} ({total} available)",
+    "fromCache": "from cache, {date}",
+    "cost": "cost {cost}",
+    "selected": "{count} keywords selected",
+    "track": "Track",
+    "trackIn": "Choose a project",
+    "saveToList": "Save to list",
+    "clearSelection": "Clear selection",
+    "noResults": "No keywords match the filters.",
+    "monthsLabel": "Monthly search volume of {keyword}",
+    "competition": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High"
+    },
+    "columns": {
+      "keyword": "Keyword",
+      "volume": "Volume",
+      "months": "12 months",
+      "trend": "Yearly change",
+      "difficulty": "Difficulty",
+      "cpc": "CPC",
+      "competition": "Ad competition",
+      "intent": "Intent"
+    },
+    "saveDialog": {
+      "title": "Save to list",
+      "description": "{count, plural, one {# keyword will be saved.} other {# keywords will be saved.}}",
+      "list": "List",
+      "newList": "New list",
+      "name": "List name",
+      "save": "Save",
+      "saved": "{count, plural, one {# keyword saved} other {# keywords saved}}",
+      "failed": "Could not save."
+    },
+    "lists": {
+      "emptyTitle": "No saved lists",
+      "emptyBody": "Select keywords from research results and save them to a list; lists are shared with your team.",
+      "name": "List",
+      "keywords": "Keywords",
+      "updated": "Updated",
+      "count": "{count, plural, one {# keyword} other {# keywords}}",
+      "market": "Market",
+      "delete": "Delete list",
+      "deleteTitle": "Delete \"{name}\"?",
+      "deleteDescription": "The list and its keywords are deleted. Tracked keywords are not affected.",
+      "deleted": "List deleted.",
+      "remove": "Remove {keyword} from the list"
+    }
+  },
+  "siteAudit": {
+    "lastFailed": "The last audit could not finish: {error}",
+    "lastCanceled": "The last audit was canceled. The previous completed audit is shown below.",
+    "tabs": {
+      "issues": "Issues",
+      "pages": "Pages",
+      "history": "History"
+    },
+    "active": {
+      "queued": "Audit queued",
+      "running": "Crawling the site",
+      "progress": "{pages} of up to {max} pages crawled · {url}",
+      "cancel": "Stop audit",
+      "cancelTitle": "Stop the audit?",
+      "cancelDescription": "The crawl stops and this audit produces no results. The results of the previous audit stay as they are.",
+      "canceled": "Audit stopped"
+    },
+    "health": {
+      "title": "Site health",
+      "label": "Health score",
+      "lastRun": "Last audit: {date}",
+      "sincePrevious": "{score} in the previous audit",
+      "formula": "Pages with errors count fully and pages with only warnings count half against the score."
+    },
+    "kpi": {
+      "crawled": "Pages crawled",
+      "errors": "Pages with errors",
+      "warnings": "Pages with only warnings",
+      "indexable": "Indexable pages",
+      "changes": "Since the previous audit",
+      "changesValue": "{fixed} fixed · {new} new",
+      "firstRun": "First audit, nothing to compare"
+    },
+    "ai": {
+      "title": "AI search readiness",
+      "ok": "Good",
+      "attention": "Needs attention",
+      "searchAllowed": "AI search bots can access the site",
+      "searchBlocked": "AI search bots are blocked in robots.txt",
+      "llmsFound": "llms.txt is published",
+      "llmsMissing": "No llms.txt",
+      "schemaCoverage": "Structured data coverage: {percent}",
+      "schemaUnknown": "Structured data coverage could not be calculated"
+    },
+    "status": {
+      "title": "HTTP status distribution",
+      "2xx": "2xx success",
+      "3xx": "3xx redirect",
+      "4xx": "4xx client error",
+      "5xx": "5xx server error",
+      "failed": "No response",
+      "blocked": "{count, plural, one {# page blocked by robots.txt was not crawled} other {# pages blocked by robots.txt were not crawled}}"
+    },
+    "category": "Category",
+    "allCategories": "All categories",
+    "showFixed": "{count, plural, one {Show # fixed issue} other {Show # fixed issues}}",
+    "hideFixed": "Hide fixed issues",
+    "noIssues": "No issues found in this category.",
+    "newCount": "{count} new",
+    "fixedCount": "{count} fixed",
+    "site": "Site",
+    "why": "Why it matters",
+    "howToFix": "How to fix it",
+    "affected": "Affected pages ({count})",
+    "siteWide": "Site-wide",
+    "openPage": "Open the page in a new tab",
+    "showMore": "Show more",
+    "detail": {
+      "status": "HTTP {value}",
+      "length": "{value} characters",
+      "words": "{value} words",
+      "count": "{value} found",
+      "images": "{value} images in total",
+      "hops": "{value} redirect hops",
+      "depth": "{value} clicks from the home page",
+      "ms": "{value} ms",
+      "bytes": "{value}",
+      "reason": "Reason: {reason, select, timeout {timed out} network {network error} too_large {response too large} content_type {unsupported content type} too_many_redirects {too many redirects} private_address {private network address} unresolvable_host {host could not be resolved} port_not_allowed {port not allowed} unsupported_protocol {unsupported protocol} invalid_url {invalid URL} other {{reason}}}",
+      "canonical": "Canonical: {url}",
+      "bots": "Blocked: {bots}"
+    },
+    "severity": {
+      "ERROR": "Error",
+      "WARNING": "Warning",
+      "NOTICE": "Notice"
+    },
+    "categories": {
+      "crawlability": "Crawlability",
+      "indexability": "Indexability",
+      "content": "Content",
+      "links": "Links",
+      "performance": "Performance",
+      "structured_data": "Structured data",
+      "ai_search": "AI search"
+    },
+    "start": {
+      "button": "Start audit",
+      "title": "Start a site audit",
+      "description": "{domain} is crawled from the home page, following links and sitemaps. robots.txt rules and crawl delays are respected.",
+      "maxPages": "Maximum pages",
+      "maxDepth": "Maximum depth",
+      "pages": "{count, plural, one {# page} other {# pages}}",
+      "depth": "{count, plural, one {# click} other {# clicks}}",
+      "politeness": "The crawler sends requests one after another with pauses so it does not strain your server. Large sites can take several minutes.",
+      "confirm": "Start",
+      "started": "Audit queued",
+      "failed": "The audit could not be started"
+    },
+    "pages": {
+      "filters": {
+        "all": "All pages",
+        "errors": "Pages with errors",
+        "warnings": "Pages with warnings",
+        "broken": "Broken (4xx/5xx)",
+        "redirects": "Redirects",
+        "noindex": "Not indexable"
+      },
+      "search": "Search URL or title",
+      "filter": "Page filter",
+      "count": "{count, plural, one {# page} other {# pages}}",
+      "url": "Page",
+      "status": "Status",
+      "issues": "Issues",
+      "depth": "Depth",
+      "inlinks": "Internal inlinks",
+      "words": "Words",
+      "responseTime": "Response time",
+      "indexable": "Indexable",
+      "empty": "No pages match this filter.",
+      "blocked": "Blocked by robots.txt",
+      "failedFetch": "Not fetched ({reason})",
+      "errors": "Errors",
+      "warnings": "Warnings",
+      "notices": "Notices",
+      "yes": "Yes",
+      "no": "No",
+      "range": "{from}–{to} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "history": {
+      "scoreTitle": "Health score history",
+      "score": "Health score",
+      "table": "Show as table",
+      "date": "Date",
+      "status": "Status",
+      "pages": "Pages",
+      "errors": "Pages with errors",
+      "retention": "Page details are kept for the last {count} audits; older audits keep their summary only.",
+      "statuses": {
+        "QUEUED": "Queued",
+        "RUNNING": "Running",
+        "COMPLETED": "Completed",
+        "FAILED": "Failed",
+        "CANCELED": "Canceled"
+      }
+    },
+    "issues": {
+      "page_4xx": {
+        "title": "Page returns a 4xx error",
+        "description": "These URLs return a client error such as 404. Visitors land on an empty page, search engines drop the page from the index and links pointing to it are wasted.",
+        "fix": "If the page moved, add a 301 redirect to its new URL; if it was removed, update the internal links pointing to it. Restore the content if the page is still needed."
+      },
+      "page_5xx": {
+        "title": "Page returns a server error (5xx)",
+        "description": "The server could not produce these pages. If the error persists, Google slows down crawling and may drop the pages from its index.",
+        "fix": "Find the error for these URLs in your server and application logs. If it is a temporary load problem, review capacity and caching, then run the audit again."
+      },
+      "fetch_failed": {
+        "title": "Page could not be fetched",
+        "description": "The crawler could not connect to this URL or the response did not arrive in time. If search engines hit the same problem, the page is never indexed.",
+        "fix": "The reason is shown under the page. For timeouts check server response time, for host errors check DNS records, and for oversized responses check the page size."
+      },
+      "redirect_loop": {
+        "title": "Redirect loop",
+        "description": "The redirects eventually lead back to a URL they started from. Browsers and search engines never reach the page.",
+        "fix": "Follow the URLs in the chain and make every redirect end at a final page that returns 200. Conflicting HTTP→HTTPS, www or trailing slash rules usually cause loops."
+      },
+      "redirect_chain": {
+        "title": "Redirect chain",
+        "description": "The page passes through more than one redirect before reaching its final URL. Every hop slows loading and uses crawl budget.",
+        "fix": "Redirect the first URL straight to the final target with a single 301 and update internal links to the final URL."
+      },
+      "blocked_by_robots": {
+        "title": "Page blocked by robots.txt",
+        "description": "These URLs were not crawled because of your robots.txt rules. That is fine if intended; otherwise the pages may appear in search results without content, or not at all.",
+        "fix": "Confirm that the block is intended. If the page should be indexed, remove or narrow the matching Disallow rule."
+      },
+      "no_https": {
+        "title": "Site does not use HTTPS",
+        "description": "The home page is served over insecure HTTP. Browsers mark the site as \"not secure\" and HTTPS is one of Google's ranking signals.",
+        "fix": "Install a TLS certificate (for example from Let's Encrypt), 301-redirect every HTTP URL to its HTTPS counterpart and update canonicals, sitemaps and internal links to HTTPS."
+      },
+      "robots_txt_unreachable": {
+        "title": "robots.txt cannot be read",
+        "description": "The request for robots.txt ended in a server error or connection problem. Google may pause crawling the site while this lasts.",
+        "fix": "Make sure /robots.txt returns 200 (or 404 when there is no file). Check that firewall or CDN rules do not block crawlers."
+      },
+      "robots_txt_missing": {
+        "title": "No robots.txt file",
+        "description": "No robots.txt was found. The whole site is then considered crawlable, but without the file you cannot point crawlers to your sitemap or keep them out of areas you do not want crawled.",
+        "fix": "Add a robots.txt to the site root that at least lists your Sitemap and any areas that should not be crawled."
+      },
+      "sitemap_missing": {
+        "title": "No XML sitemap found",
+        "description": "No readable sitemap was found in robots.txt or at /sitemap.xml. A sitemap helps search engines find new and updated pages quickly.",
+        "fix": "Create an XML sitemap that lists your indexable pages, reference it with a Sitemap line in robots.txt and submit it in Search Console."
+      },
+      "sitemap_non_200": {
+        "title": "Sitemap URL does not return 200",
+        "description": "The sitemap lists URLs that redirect or return errors. Search engines trust the sitemap less and crawl budget is wasted.",
+        "fix": "Keep only canonical, indexable URLs that return 200 in the sitemap, and replace redirected URLs with their final targets."
+      },
+      "canonical_broken": {
+        "title": "Canonical points to a broken page",
+        "description": "The canonical tag points to a URL that returns an error or redirects. Search engines ignore the tag and pick the version to index themselves.",
+        "fix": "Point the canonical to the final URL that returns 200 and is indexable. In most cases the page should reference itself (self-canonical)."
+      },
+      "canonical_multiple": {
+        "title": "Multiple canonical tags",
+        "description": "The page has more than one canonical tag. When they conflict, search engines may ignore all of them.",
+        "fix": "Keep a single canonical tag. Themes, plugins and SEO modules often each add one; make sure only one of them does."
+      },
+      "sitemap_noindex": {
+        "title": "Noindex page in the sitemap",
+        "description": "The sitemap lists pages you do not want indexed. That sends search engines conflicting signals.",
+        "fix": "Remove the page from the sitemap if it should not be indexed; otherwise remove its noindex."
+      },
+      "noindex_page": {
+        "title": "Page is excluded with noindex",
+        "description": "These pages block indexing with meta robots or X-Robots-Tag. That can be deliberate, but accidentally removing important pages from search is a common mistake.",
+        "fix": "Review the list and remove noindex from pages that should appear in search results."
+      },
+      "canonicalized": {
+        "title": "Page declares another URL as canonical",
+        "description": "The canonical tag of these pages points to a different URL, which search engines will most likely index instead. That is normal for filtered and parameterized pages.",
+        "fix": "Check that the canonical target is right. If the page should rank on its own, make the canonical point to the page's own URL."
+      },
+      "canonical_missing": {
+        "title": "No canonical tag",
+        "description": "The page does not declare a canonical URL. When parameter, www or trailing slash duplicates appear, search engines have to guess the right version.",
+        "fix": "Add a canonical tag with its own absolute URL to every indexable page."
+      },
+      "title_missing": {
+        "title": "Missing title tag",
+        "description": "The page has no title tag or it is empty. The title is the clickable line in search results and one of the strongest on-page signals.",
+        "fix": "Write a unique title of about 50–60 characters that states the topic of the page and its main keyword."
+      },
+      "title_duplicate": {
+        "title": "Duplicate title",
+        "description": "Several pages use the same title. Search engines struggle to tell them apart and the pages may compete for the same query.",
+        "fix": "Give every page a unique title that sets its content apart. If the pages really are the same, point one to the main version with a canonical."
+      },
+      "title_too_long": {
+        "title": "Title too long",
+        "description": "The title is longer than 60 characters and will most likely be cut off in search results, hiding important words.",
+        "fix": "Shorten the title to under 60 characters, put the most important words first and move the brand name to the end."
+      },
+      "title_too_short": {
+        "title": "Title too short",
+        "description": "The title is shorter than 15 characters. Short titles do not describe the page well and miss ranking opportunities.",
+        "fix": "Expand the title so it describes the topic of the page and its main keyword."
+      },
+      "meta_description_missing": {
+        "title": "Missing meta description",
+        "description": "The page has no meta description. Google then shows an arbitrary snippet from the page, which can lower the click-through rate in search results.",
+        "fix": "Write a unique description of 120–160 characters that summarizes what the page offers and invites the click."
+      },
+      "meta_description_duplicate": {
+        "title": "Duplicate meta description",
+        "description": "Several pages use the same meta description, so they cannot be told apart in search results.",
+        "fix": "Write a unique description for every page that describes its own content."
+      },
+      "meta_description_too_long": {
+        "title": "Meta description too long",
+        "description": "The description is longer than 160 characters and will most likely be cut off in search results.",
+        "fix": "Shorten the description to under 160 characters and put the main message in the first sentence."
+      },
+      "h1_missing": {
+        "title": "Missing H1 heading",
+        "description": "The page has no H1 heading. The H1 tells visitors and search engines what the page is mainly about.",
+        "fix": "Add a single H1 that states the main topic of the page; it usually matches the title tag."
+      },
+      "h1_multiple": {
+        "title": "Multiple H1 headings",
+        "description": "The page has more than one H1. That is not an error, but it can blur what the page is mainly about.",
+        "fix": "Keep the main heading as the H1 and turn the others into H2 or H3."
+      },
+      "content_duplicate": {
+        "title": "Duplicate content",
+        "description": "The text content of these pages is identical. Search engines show only one version and decide which one themselves.",
+        "fix": "Merge the copies and 301-redirect them, or use a canonical pointing to the main page on every version."
+      },
+      "content_thin": {
+        "title": "Thin content",
+        "description": "The indexable page has fewer than 200 words. Pages with little content usually rank poorly and are rarely chosen as sources in AI answers.",
+        "fix": "Expand the page with original content that answers the searcher's question; if it adds no value, merge it with a similar page or noindex it."
+      },
+      "images_missing_alt": {
+        "title": "Images without alt text",
+        "description": "Some images have no alt text. People using screen readers cannot understand them and search engines cannot tell what they show.",
+        "fix": "Add a short alt text describing every meaningful image. Use alt=\"\" for decorative images."
+      },
+      "lang_missing": {
+        "title": "Page language not declared",
+        "description": "The html element has no lang attribute. Screen readers and translation tools have to guess the language of the page.",
+        "fix": "Add a lang attribute with the page's language to the html element, for example lang=\"en\"."
+      },
+      "broken_internal_links": {
+        "title": "Broken internal links",
+        "description": "The page links to internal URLs that return errors. Visitors hit dead ends and crawl budget is wasted.",
+        "fix": "Update the links to working URLs or remove them. The broken targets are listed under the page."
+      },
+      "links_to_redirects": {
+        "title": "Internal links to redirects",
+        "description": "The page links to internal URLs that redirect. Every click costs an extra request and some link value may be lost.",
+        "fix": "Update internal links to point straight to the final URL."
+      },
+      "nofollow_internal_links": {
+        "title": "Nofollow internal links",
+        "description": "The page links to pages on your own site with nofollow. That stops internal link value from flowing and is rarely needed.",
+        "fix": "Remove nofollow from internal links. If a page should not be indexed, use noindex on that page instead."
+      },
+      "orphan_page": {
+        "title": "Orphan page",
+        "description": "The page is in the sitemap but no crawled page links to it. Visitors cannot find it and search engines may treat it as unimportant.",
+        "fix": "Link to the page from related category, menu or content pages; remove it from the sitemap if it is no longer needed."
+      },
+      "deep_page": {
+        "title": "Deep page",
+        "description": "The page is more than 3 clicks away from the home page. Deep pages are crawled less often and are usually considered less important.",
+        "fix": "Give important pages a shorter link path from the home page, the menu or category pages."
+      },
+      "slow_response": {
+        "title": "Slow server response",
+        "description": "Downloading the page took longer than 2 seconds. Slow responses hurt user experience and reduce how many pages search engines crawl.",
+        "fix": "Shorten response times with server-side caching, a CDN and database query optimization, and profile the application code behind these URLs."
+      },
+      "page_too_large": {
+        "title": "Page too large",
+        "description": "The HTML response is larger than 2 MB. Large pages load slowly and search engines may process only part of very large pages.",
+        "fix": "Move inline scripts, styles and embedded data into separate files, and split long lists into pages."
+      },
+      "viewport_missing": {
+        "title": "Missing viewport meta tag",
+        "description": "The page has no viewport meta tag, so mobile devices show it shrunk to desktop width. Google indexes sites by their mobile version.",
+        "fix": "Add a viewport meta tag with content=\"width=device-width, initial-scale=1\" to the page head and make sure the layout is responsive."
+      },
+      "structured_data_invalid": {
+        "title": "Invalid structured data",
+        "description": "Some JSON-LD blocks on the page cannot be parsed. Invalid markup is not used for rich results and makes the page harder for AI systems to interpret.",
+        "fix": "Check the JSON-LD blocks with Google's Rich Results Test or the Schema.org validator and fix missing commas, quotes or escape characters."
+      },
+      "structured_data_missing": {
+        "title": "No structured data",
+        "description": "The indexable page has no JSON-LD structured data. Schema.org markup makes pages eligible for rich results and helps AI search engines understand your content.",
+        "fix": "Add markup that fits the page type, such as Organization, Article, Product, FAQPage or BreadcrumbList."
+      },
+      "ai_search_crawlers_blocked": {
+        "title": "AI search crawlers are blocked",
+        "description": "robots.txt keeps AI search engines such as ChatGPT Search, Perplexity or Claude from fetching your pages, so they cannot cite your site in their answers.",
+        "fix": "If you want to appear in AI answers, remove the Disallow rules for the blocked bots. You can manage search bots (such as OAI-SearchBot) separately from training bots (such as GPTBot)."
+      },
+      "ai_training_crawlers_blocked": {
+        "title": "AI training crawlers are blocked",
+        "description": "robots.txt blocks bots that collect data to train models, such as GPTBot or Google-Extended. That is a policy choice and does not directly affect your visibility in AI search.",
+        "fix": "No action is needed if the choice is deliberate. Allow these bots if you want your content to be used to train AI models."
+      },
+      "llms_txt_missing": {
+        "title": "No llms.txt file",
+        "description": "The site has no /llms.txt. It is an emerging proposal that summarizes your most important pages for language models; it is not widely used yet.",
+        "fix": "Publish a Markdown file at /llms.txt that briefly introduces your site and links to its most important pages."
+      }
+    }
+  },
+  "searchConsole": {
+    "rangeLabel": "Period",
+    "range": {
+      "7": "7 days",
+      "28": "28 days",
+      "90": "90 days"
+    },
+    "syncNow": "Sync now",
+    "syncQueued": "Sync queued",
+    "syncFailed": "The sync could not be started",
+    "manage": "Sources",
+    "addGa4": {
+      "title": "See traffic from AI assistants too",
+      "body": "Add your Google Analytics 4 property to track organic sessions and visits from AI assistants such as ChatGPT, Perplexity and Gemini separately.",
+      "action": "Add GA4"
+    },
+    "provenance": {
+      "source": "Source",
+      "method": "Method",
+      "dataThrough": "Data through"
+    },
+    "oauth": {
+      "connected": "Google account connected. Now choose the project's properties.",
+      "denied": "Google access was not granted; nothing was connected.",
+      "failed": "The Google account could not be connected. Please try again.",
+      "forbidden": "Only owners and admins can connect Google accounts."
+    },
+    "status": {
+      "type": {
+        "gsc": "Search Console",
+        "ga4": "Google Analytics 4"
+      },
+      "healthy": "working",
+      "failing": "has a problem",
+      "domainProperty": "{domain} (domain property)",
+      "lastSync": "Last synced {time} · data through {date}",
+      "neverSynced": "Waiting for the first import",
+      "error": "Last error: {error}",
+      "revokedTitle": "Google access was revoked",
+      "revokedBody": "The Google account removed this app's access or its password changed. Reconnect the account to receive new data; existing data is kept.",
+      "revokedAskAdmin": "The Google account lost its access. Ask an owner or admin to reconnect it to receive new data.",
+      "reconnect": "Reconnect",
+      "reconnectFailed": "The Google connection could not be started"
+    },
+    "pending": {
+      "source": {
+        "GSC": "Search Console",
+        "GA4": "Google Analytics 4"
+      },
+      "title": "Importing {source} data",
+      "body": "The last 90 days are being imported. This can take a few minutes; the page updates by itself.",
+      "failedTitle": "{source} data could not be imported",
+      "failedBody": "Check the error above. Once it is resolved, try again with \"Sync now\"."
+    },
+    "setup": {
+      "title": "Connect Google Search Console",
+      "body": "Connect your Google account and choose this project's Search Console property to get real clicks, impressions and queries. Optionally add a GA4 property for organic and AI-referred traffic.",
+      "connect": "Connect Google account",
+      "choose": "Choose properties",
+      "askAdmin": "An owner or admin can connect the Google account. Once connected, you can choose the properties yourself.",
+      "privacy": "Only read access is requested (Search Console and Analytics read-only). Tokens are stored encrypted and you can remove the connection at any time.",
+      "connectFailed": "The Google connection could not be started",
+      "connectAnother": "Connect another Google account"
+    },
+    "notConfigured": {
+      "title": "Google sign-in is not configured on this server",
+      "body": "Search Console and GA4 data need a Google OAuth client on the server. Whoever runs the installation does the steps below once.",
+      "step1": "Create a project in Google Cloud Console and enable the Search Console API, the Google Analytics Data API and the Google Analytics Admin API.",
+      "step2": "Create an OAuth client of type \"Web application\" and add this authorized redirect URI:",
+      "step3": "Add the client ID and secret to the api and worker environment:",
+      "step4": "Restart the services. A \"Connect Google account\" button will appear on this page."
+    },
+    "sources": {
+      "title": "Data sources",
+      "description": "Choose the Search Console and GA4 properties to use for {domain}.",
+      "noAccount": "No Google account is connected to this workspace.",
+      "askAdmin": "No Google account is connected to this workspace. Ask an owner or admin to connect one.",
+      "connect": "Connect Google account",
+      "connectAnother": "Connect another Google account",
+      "connectFailed": "The Google connection could not be started",
+      "account": "Google account",
+      "loadFailed": "The properties could not be loaded",
+      "site": "Search Console property",
+      "noSite": "Don't use Search Console",
+      "domainProperty": "{domain} (domain property)",
+      "suggested": "suggested",
+      "noSites": "This account cannot access any Search Console property.",
+      "siteHint": "Properties that cover the project's domain are listed first.",
+      "property": "Google Analytics 4 property",
+      "noProperty": "Don't use GA4",
+      "noProperties": "This account cannot access any GA4 property.",
+      "propertyHint": "Used to separate organic sessions and sessions from AI assistants.",
+      "readOnly": "Read-only access",
+      "save": "Save and import",
+      "saved": "Sources saved; importing data.",
+      "saveFailed": "The sources could not be saved"
+    },
+    "search": {
+      "title": "Google search performance",
+      "range": "{start} – {end}",
+      "clicks": "Clicks",
+      "impressions": "Impressions",
+      "ctr": "Click-through rate",
+      "position": "Average position",
+      "short": {
+        "clicks": "Clicks",
+        "impressions": "Impressions",
+        "ctr": "CTR",
+        "position": "Position"
+      },
+      "metric": "Metric shown in the chart",
+      "chartTitle": "Daily performance",
+      "chartDescription": "Search Console data arrives with a delay of 2–3 days.",
+      "tableView": "Show as table",
+      "date": "Date",
+      "queries": "Queries",
+      "pages": "Pages",
+      "query": "Query",
+      "page": "Page",
+      "filter": "Filter",
+      "change": "Change",
+      "new": "New",
+      "openPage": "Open the page in a new tab",
+      "noMatches": "No matching rows.",
+      "noRows": "No data in this period.",
+      "showAll": "Show all {count} rows",
+      "showFewer": "Show fewer"
+    },
+    "analytics": {
+      "title": "Site traffic (GA4)",
+      "range": "{start} – {end}",
+      "sessions": "Sessions",
+      "organicShare": "Organic search · {share}",
+      "aiShare": "AI assistants · {share}",
+      "keyEvents": "Key events",
+      "metric": "Metric shown in the chart",
+      "metrics": {
+        "sessions": "All sessions",
+        "organicSessions": "Organic",
+        "aiSessions": "AI assistants"
+      },
+      "chartTitle": "Daily sessions",
+      "chartDescription": "By GA4 channel grouping and referring source.",
+      "tableView": "Show as table",
+      "date": "Date",
+      "aiTitle": "Traffic from AI assistants",
+      "aiDescription": "Sessions from links in assistants such as ChatGPT, Perplexity and Gemini, with the change from the previous period.",
+      "aiEmpty": "No sessions from AI assistants in this period.",
+      "landingTitle": "Landing pages",
+      "landingDescription": "Pages where visits start.",
+      "page": "Page",
+      "engagementRate": "Engagement rate",
+      "openPage": "Open the page in a new tab",
+      "noRows": "No data in this period.",
+      "showAll": "Show all {count} rows",
+      "showFewer": "Show fewer"
     }
   }
 }

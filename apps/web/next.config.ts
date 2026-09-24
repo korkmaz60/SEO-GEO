@@ -16,6 +16,8 @@ const nextConfig: NextConfig = {
   output: "standalone",
   reactCompiler: true,
   poweredByHeader: false,
+  // `next dev` would otherwise write AGENTS.md and CLAUDE.md into the app directory.
+  agentRules: false,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
