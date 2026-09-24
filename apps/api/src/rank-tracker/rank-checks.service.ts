@@ -23,6 +23,7 @@ import { Prisma, type Device, type RankCheck } from "@seo-geo/db";
 
 import { CredentialsService } from "../credentials/credentials.service.js";
 import { PrismaService } from "../database/prisma.service.js";
+import { KeywordMetricsService } from "../keywords/keyword-metrics.service.js";
 import { NotificationsService } from "../notifications/notifications.service.js";
 import { QueueService } from "../tasks/queue.service.js";
 import { TaskRegistry } from "../tasks/task-registry.js";
@@ -91,6 +92,7 @@ export class RankChecksService implements OnModuleInit {
     private readonly notifications: NotificationsService,
     private readonly queue: QueueService,
     private readonly registry: TaskRegistry,
+    private readonly metrics: KeywordMetricsService,
   ) {}
 
   onModuleInit(): void {
@@ -157,6 +159,7 @@ export class RankChecksService implements OnModuleInit {
       );
       return;
     }
+    await this.refreshMetrics(project.workspaceId, projectId, due);
 
     const checks = await this.prisma.rankCheck.createManyAndReturn({
       data: due.map((keyword) => ({
@@ -189,6 +192,35 @@ export class RankChecksService implements OnModuleInit {
         });
         return;
       }
+    }
+  }
+
+  /**
+   * Search volumes and difficulty change over time: metrics of due keywords that are older
+   * than their TTL are fetched again (the enrichment job skips fresh ones and checks the
+   * budget).
+   */
+  private async refreshMetrics(
+    workspaceId: string,
+    projectId: string,
+    keywords: readonly DueKeyword[],
+  ): Promise<void> {
+    const markets = new Map<
+      string,
+      { locationCode: number; languageCode: string; keywords: string[] }
+    >();
+    for (const keyword of keywords) {
+      const key = `${keyword.locationCode}:${keyword.languageCode}`;
+      const market = markets.get(key) ?? {
+        locationCode: keyword.locationCode,
+        languageCode: keyword.languageCode,
+        keywords: [],
+      };
+      market.keywords.push(keyword.keyword);
+      markets.set(key, market);
+    }
+    for (const market of markets.values()) {
+      await this.metrics.requestEnrichment({ workspaceId, projectId, ...market });
     }
   }
 

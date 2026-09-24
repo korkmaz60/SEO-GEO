@@ -5,7 +5,7 @@ import {
   TrackKeywordsQuoteSchema,
   type ProjectDetail,
 } from "@seo-geo/contracts";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { DATAFORSEO_OPTIONS } from "../src/credentials/dataforseo.gateway.js";
 import { PrismaService } from "../src/database/prisma.service.js";
@@ -302,6 +302,48 @@ describe.skipIf(!TEST_SERVER_URL)("rank tracker", () => {
       ["www.wikipedia.org", null],
       ["www.example.com", project.brands[0]?.id],
     ]);
+  });
+
+  it("fetches metrics older than 30 days again with the daily check", async () => {
+    const prisma = context.app.get(PrismaService);
+    const metrics = context.app.get(KeywordMetricsService);
+    const checks = context.app.get(RankChecksService);
+    const market = { locationCode: 2792, languageCode: "tr" };
+    await prisma.keywordMetric.updateMany({
+      where: { keyword: "kahve makinesi", ...market },
+      data: { fetchedAt: new Date(Date.now() - 40 * 86_400_000) },
+    });
+    expect(await metrics.stale(market, ["kahve makinesi", "espresso makinesi"])).toEqual([
+      "kahve makinesi",
+    ]);
+
+    const requested = vi.spyOn(metrics, "requestEnrichment");
+    try {
+      await checks.checkProject(project.id, new Date(Date.now() + 86_400_000));
+      expect(requested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workspaceId: workspace,
+          projectId: project.id,
+          ...market,
+          keywords: expect.arrayContaining(["kahve makinesi", "espresso makinesi"]),
+        }),
+      );
+    } finally {
+      requested.mockRestore();
+    }
+    const overview = dataForSeo.requests.filter((r) => r.path.endsWith("/keyword_overview/live"));
+    const before = overview.length;
+    await metrics.enrich({
+      workspaceId: workspace,
+      projectId: project.id,
+      ...market,
+      keywords: ["kahve makinesi", "espresso makinesi"],
+    });
+    const after = dataForSeo.requests.filter((r) => r.path.endsWith("/keyword_overview/live"));
+    // Only the stale keyword is requested.
+    expect(after).toHaveLength(before + 1);
+    expect(after.at(-1)?.body).toEqual([expect.objectContaining({ keywords: ["kahve makinesi"] })]);
+    expect(await metrics.stale(market, ["kahve makinesi"])).toEqual([]);
   });
 
   it("updates, blocks over budget and deletes keywords", async () => {
