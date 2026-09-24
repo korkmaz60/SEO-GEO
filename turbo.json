@@ -1,0 +1,60 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "stream",
+  "globalDependencies": ["tsconfig.base.json"],
+  "globalPassThroughEnv": [
+    "NODE_ENV",
+    "CI",
+    "APP_MODE",
+    "DEPLOYMENT_MODE",
+    "PORT",
+    "LOG_LEVEL",
+    "API_URL",
+    "WEB_URL",
+    "DATABASE_URL",
+    "DIRECT_URL",
+    "TEST_DATABASE_URL",
+    "AUTH_SECRET",
+    "ENCRYPTION_KEY",
+    "TRUST_PROXY",
+    "OUTBOUND_ALLOWED_PORTS",
+    "MIGRATE_ON_START",
+    "HOST",
+    "API_DOCS",
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USER",
+    "SMTP_PASSWORD",
+    "SMTP_FROM",
+    "DATAFORSEO_LOGIN",
+    "DATAFORSEO_PASSWORD",
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "STRIPE_MANAGED_PAYMENTS"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "@seo-geo/web#build": {
+      "dependsOn": ["^build", "typecheck"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    }
+  }
+}

@@ -1,0 +1,807 @@
+{
+  "meta": {
+    "description": "Open-source platform for SEO and AI search visibility (GEO/AEO)"
+  },
+  "common": {
+    "noData": "No data",
+    "notConnected": "Not connected",
+    "preview": "Interface preview",
+    "previewHint": "These screens are a design preview. Data connects to real sources from M1 on.",
+    "comingIn": "Coming in {milestone}",
+    "source": "Source",
+    "method": "Method",
+    "updated": "Updated",
+    "sampleData": "Sample data",
+    "readRoadmap": "See the roadmap",
+    "percentagePoints": "{value} pp",
+    "cancel": "Cancel",
+    "actionFailed": "That didn't work. Please try again.",
+    "typeToConfirm": "Type <code>{text}</code> to confirm"
+  },
+  "nav": {
+    "groups": {
+      "general": "General",
+      "aiVisibility": "AI Visibility",
+      "seo": "SEO",
+      "content": "Content",
+      "research": "Research",
+      "manage": "Manage"
+    },
+    "items": {
+      "overview": "Overview",
+      "aiSummary": "Summary",
+      "prompts": "Prompts",
+      "sources": "Sources",
+      "competitors": "Competitors",
+      "rankTracker": "Rank Tracker",
+      "siteAudit": "Site Audit",
+      "backlinks": "Backlinks",
+      "searchConsole": "Search Console",
+      "optimizer": "Content Optimizer",
+      "keywordExplorer": "Keyword Explorer",
+      "domainOverview": "Domain Overview",
+      "reports": "Reports",
+      "projectSettings": "Project Settings",
+      "workspaceSettings": "Workspace Settings",
+      "designSystem": "Design System"
+    }
+  },
+  "shell": {
+    "workspace": "Workspace",
+    "project": "Project",
+    "switchProject": "Switch project",
+    "commandPlaceholder": "Search pages or commands…",
+    "commandEmpty": "No results.",
+    "commandPages": "Pages",
+    "commandPreferences": "Preferences",
+    "openCommand": "Search",
+    "toggleSidebar": "Toggle sidebar",
+    "skipToContent": "Skip to content",
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": "Language",
+    "languages": {
+      "tr": "Türkçe",
+      "en": "English"
+    },
+    "usage": {
+      "title": "Provider spend this month",
+      "noBudget": "No budget set",
+      "budgetUsed": "{percent}% of the budget used"
+    },
+    "newProject": "New project",
+    "noProject": "No project",
+    "projects": "Projects",
+    "noProjects": "No projects yet",
+    "switchWorkspace": "Switch workspace",
+    "workspaces": "Workspaces",
+    "newWorkspace": "New workspace",
+    "account": "Account settings",
+    "signOut": "Sign out",
+    "tasks": {
+      "running": "{count, plural, one {# task running} other {# tasks running}}",
+      "title": "Background tasks",
+      "description": "Queued and running work. It continues when you leave the page.",
+      "cancel": "Cancel task",
+      "cancelFailed": "The task could not be canceled.",
+      "progress": "Progress",
+      "status": {
+        "queued": "Queued",
+        "running": "Running",
+        "succeeded": "Done",
+        "failed": "Failed",
+        "canceled": "Canceled"
+      }
+    },
+    "notifications": {
+      "label": "Notifications",
+      "labelUnread": "Notifications, {count} unread",
+      "title": "Notifications",
+      "markAllRead": "Mark all as read",
+      "empty": "No new notifications.",
+      "types": {
+        "budgetThreshold": {
+          "title": "{percent}% of the monthly budget spent",
+          "body": "{spent} of {limit} spent this month."
+        },
+        "credentialInvalid": {
+          "title": "The DataForSEO key stopped working",
+          "body": "Data collection is paused. Replace the key in the provider settings."
+        }
+      }
+    }
+  },
+  "pages": {
+    "overview": {
+      "title": "Overview",
+      "description": "A unified view of your SEO and AI visibility.",
+      "emptyTitle": "This project is not collecting data yet",
+      "emptyBody": "Connect your provider key and add keywords and prompts to track; the indicators fill in here."
+    },
+    "aiSummary": {
+      "title": "AI Visibility",
+      "description": "How visible your brand is in answers from ChatGPT, Gemini, Claude, Perplexity and Google AI.",
+      "emptyTitle": "No prompts tracked yet",
+      "emptyBody": "Build your prompt library to see mention rate, citation rate and share of voice per platform."
+    },
+    "prompts": {
+      "title": "Prompts",
+      "description": "The questions you track and the latest answer on each platform.",
+      "emptyTitle": "The prompt library is empty",
+      "emptyBody": "Add the questions your customers ask AI assistants; every run keeps the answer and its sources."
+    },
+    "sources": {
+      "title": "Sources",
+      "description": "Domains and pages cited in AI answers.",
+      "emptyTitle": "No cited sources yet",
+      "emptyBody": "See which sites AI answers cite; the list is a starting point for partnerships and content opportunities."
+    },
+    "competitors": {
+      "title": "Competitors",
+      "description": "Your share of voice in AI answers against your competitors.",
+      "emptyTitle": "No competitors defined",
+      "emptyBody": "Add competitors and brand variations in project settings to compare share of voice and mention order."
+    },
+    "rankTracker": {
+      "title": "Rank Tracker",
+      "description": "Daily rankings of your keywords by location, language and device.",
+      "emptyTitle": "No keywords tracked",
+      "emptyBody": "Add keywords; rankings, SERP features and whether AI Overviews cite you are recorded every day."
+    },
+    "siteAudit": {
+      "title": "Site Audit",
+      "description": "Technical SEO issues, site health and AI crawler access.",
+      "emptyTitle": "No audit yet",
+      "emptyBody": "The first audit crawls your site following robots.txt and lists issues by severity."
+    },
+    "backlinks": {
+      "title": "Backlinks",
+      "description": "Referring domains, anchors and new or lost links.",
+      "emptyTitle": "No backlink data",
+      "emptyBody": "The backlink profile and competitor comparisons come from the DataForSEO Backlinks API."
+    },
+    "searchConsole": {
+      "title": "Search Console",
+      "description": "Query and page performance from Google Search Console.",
+      "emptyTitle": "Search Console is not connected",
+      "emptyBody": "Connect your Google account to sync clicks, impressions and average position every day."
+    },
+    "optimizer": {
+      "title": "Content Optimizer",
+      "description": "Content briefs and live scoring based on SERPs and AI citations.",
+      "emptyTitle": "Content tools are coming",
+      "emptyBody": "An editor that shows GEO and SEO scores while you write arrives in the last roadmap stage."
+    },
+    "keywordExplorer": {
+      "title": "Keyword Explorer",
+      "description": "Search volume, difficulty, intent and related keywords.",
+      "emptyTitle": "Start your research with a keyword",
+      "emptyBody": "Results come from DataForSEO Labs; the estimated cost of each search is shown before it runs."
+    },
+    "domainOverview": {
+      "title": "Domain Overview",
+      "description": "Organic visibility, traffic and competitors of any domain.",
+      "emptyTitle": "Enter a domain",
+      "emptyBody": "Organic keywords, estimated traffic and competing domains will be listed here."
+    },
+    "reports": {
+      "title": "Reports",
+      "description": "Branded PDF reports and scheduled delivery.",
+      "emptyTitle": "No reports yet",
+      "emptyBody": "Create PDF reports with your own logo and email them to clients on a schedule."
+    },
+    "projectSettings": {
+      "title": "Project Settings",
+      "description": "Domain, default location and language, brand, competitors and integrations.",
+      "emptyTitle": "Settings arrive with M1",
+      "emptyBody": "This page becomes active once project details, brand variations and competitors can be saved."
+    },
+    "workspaceSettings": {
+      "title": "Workspace Settings",
+      "description": "Members and roles, provider keys, usage and budget.",
+      "emptyTitle": "Settings arrive with M1",
+      "emptyBody": "Invitations, encrypted provider keys and spending limits will be managed on this page."
+    }
+  },
+  "kpi": {
+    "aiVisibility": "AI visibility score",
+    "shareOfVoice": "Share of voice",
+    "avgPosition": "Average position",
+    "trackedKeywords": "Tracked keywords",
+    "siteHealth": "Site health",
+    "spend": "Spend this month"
+  },
+  "onboarding": {
+    "title": "Getting started",
+    "description": "Complete these steps so the project starts collecting data.",
+    "steps": {
+      "provider": "Connect your DataForSEO key",
+      "brand": "Define your brand and competitors",
+      "keywords": "Add keywords and prompts to track",
+      "audit": "Start the first site audit",
+      "gsc": "Connect Search Console"
+    },
+    "progress": "{done}/{total}",
+    "done": "Done"
+  },
+  "design": {
+    "title": "Design System",
+    "description": "Tokens and components used across the interface.",
+    "colors": "Colors",
+    "surfaces": "Surfaces",
+    "status": "Status colors",
+    "chartPalette": "Chart palette",
+    "chartPaletteHint": "Eight colors in a fixed order, validated for color vision deficiency and contrast. Your own brand is always color 1.",
+    "typography": "Typography",
+    "buttons": "Buttons",
+    "kpiTiles": "KPI tiles",
+    "emptyStates": "Empty states",
+    "chartExample": "Chart example",
+    "chartExampleHint": "Sample data. Two series use a legend, a tooltip and a table view together.",
+    "hues": {
+      "blue": "blue",
+      "orange": "orange",
+      "aqua": "aqua",
+      "yellow": "yellow",
+      "magenta": "magenta",
+      "green": "green",
+      "violet": "violet",
+      "red": "red"
+    },
+    "statusGood": "Good",
+    "statusWarning": "Warning",
+    "statusSerious": "Serious",
+    "statusCritical": "Critical",
+    "ownBrand": "Your brand",
+    "competitor": "Competitor",
+    "week": "Week",
+    "shareOfVoice": "Share of voice (%)",
+    "backToApp": "Back to the app",
+    "tableView": "Table view"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for may have moved or never existed.",
+    "back": "Back to the preview"
+  },
+  "overview": {
+    "aiTrendTitle": "AI visibility trend",
+    "aiTrendEmpty": "Once prompt tracking starts, weekly visibility per platform is charted here.",
+    "rankTitle": "Ranking distribution",
+    "rankEmptyTitle": "No keywords tracked",
+    "rankEmpty": "Keywords are grouped into top 3, top 10 and top 100 here.",
+    "scoresTitle": "Scores",
+    "aiScore": "AI visibility",
+    "siteHealth": "Site health",
+    "brandsTitle": "Tracked brands",
+    "brandsDescription": "Each brand keeps its color in every chart.",
+    "ownBrand": "You"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Full name",
+    "newPassword": "New password",
+    "passwordHint": "At least 10 characters. A long passphrase is the safest.",
+    "signIn": {
+      "title": "Sign in",
+      "description": "Sign in to your SEO-GEO account.",
+      "submit": "Sign in",
+      "forgot": "Forgot password?",
+      "noAccount": "No account yet?",
+      "signUpLink": "Sign up",
+      "unverified": "Your email address is not verified yet. We sent you a new verification link."
+    },
+    "signUp": {
+      "title": "Create your account",
+      "description": "Track your SEO and AI search visibility in one place.",
+      "firstUserTitle": "Create the admin account",
+      "firstUserDescription": "This is the first account on this server. You can invite others later.",
+      "inviteOnly": "On this server only invited email addresses can sign up. Use the address from your invitation.",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "signInLink": "Sign in"
+    },
+    "verify": {
+      "title": "Check your email",
+      "description": "We sent a verification link to {email}. Opening it activates your account and signs you in.",
+      "resend": "Send the link again",
+      "resent": "We sent a new link."
+    },
+    "forgot": {
+      "title": "Forgot your password?",
+      "description": "Enter your email address and we will send you a reset link.",
+      "submit": "Send link",
+      "sent": "If this address has an account, we sent a reset link to it.",
+      "noEmail": "This server cannot send email. Ask your server administrator to reset your password.",
+      "back": "Back to sign in"
+    },
+    "reset": {
+      "title": "Set a new password",
+      "submit": "Change password",
+      "done": "Your password was changed. Sign in with the new one.",
+      "invalid": "This link is invalid or has expired.",
+      "requestNew": "Request a new link"
+    },
+    "twoFactor": {
+      "title": "Two-factor authentication",
+      "description": "Enter the 6-digit code from your authenticator app.",
+      "backupDescription": "Enter one of your saved backup codes. Each code works once.",
+      "code": "Verification code",
+      "backupCode": "Backup code",
+      "useBackup": "Use a backup code",
+      "useApp": "Use an app code",
+      "trustDevice": "Trust this device for 30 days",
+      "submit": "Verify"
+    },
+    "invite": {
+      "title": "Workspace invitation",
+      "signInFirst": "To accept the invitation, sign in or create an account with the invited email address.",
+      "createAccount": "Create account",
+      "signIn": "Sign in",
+      "description": "{inviter} invited you to the {workspace} workspace as {role}.",
+      "accept": "Accept invitation",
+      "decline": "Decline",
+      "invalid": "This invitation was not found, has expired, or was not sent to {email}."
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "tooManyRequests": "Too many attempts. Wait a moment and try again.",
+    "auth": {
+      "INVALID_EMAIL_OR_PASSWORD": "Wrong email or password.",
+      "EMAIL_NOT_VERIFIED": "Your email address is not verified yet.",
+      "USER_ALREADY_EXISTS": "An account with this email already exists.",
+      "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL": "An account with this email already exists.",
+      "PASSWORD_TOO_SHORT": "The password needs at least 10 characters.",
+      "PASSWORD_TOO_LONG": "The password can have at most 128 characters.",
+      "INVALID_PASSWORD": "Wrong password.",
+      "SIGN_UP_INVITE_ONLY": "On this server only invited addresses can sign up.",
+      "INVALID_TOKEN": "The link is invalid or has expired. Sign in to request a new one.",
+      "INVALID_CODE": "The code is wrong or has expired.",
+      "INVALID_BACKUP_CODE": "The backup code is wrong or was already used.",
+      "INVALID_SLUG": "This address cannot be used. Use lowercase letters, digits and dashes.",
+      "ORGANIZATION_ALREADY_EXISTS": "Another workspace already uses this address.",
+      "ORGANIZATION_SLUG_ALREADY_TAKEN": "Another workspace already uses this address.",
+      "INVITATION_NOT_FOUND": "The invitation was not found or has expired.",
+      "YOU_ARE_NOT_THE_RECIPIENT_OF_THE_INVITATION": "This invitation was sent to another email address.",
+      "USER_IS_ALREADY_A_MEMBER_OF_THIS_ORGANIZATION": "This person is already a member of the workspace.",
+      "TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE": "Too many wrong attempts. Request a new code.",
+      "USER_IS_ALREADY_INVITED_TO_THIS_ORGANIZATION": "There's already a pending invitation for this address.",
+      "YOU_ARE_NOT_ALLOWED_TO_INVITE_USER_WITH_THIS_ROLE": "You can't invite people with this role.",
+      "YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_MEMBER": "You can't change this member's role.",
+      "YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_MEMBER": "You can't remove this member.",
+      "YOU_CANNOT_LEAVE_THE_ORGANIZATION_AS_THE_ONLY_OWNER": "You're the only owner, so you can't leave. Make someone else an owner first.",
+      "YOU_CANNOT_LEAVE_THE_ORGANIZATION_WITHOUT_AN_OWNER": "A workspace needs at least one owner.",
+      "ORGANIZATION_MEMBERSHIP_LIMIT_REACHED": "The workspace has reached its member limit.",
+      "INVITATION_LIMIT_REACHED": "The limit of pending invitations is reached.",
+      "EMAIL_VERIFICATION_REQUIRED_BEFORE_ACCEPTING_OR_REJECTING_INVITATION": "Verify your email address before responding to the invitation.",
+      "SESSION_EXPIRED": "For your security, please sign in again."
+    }
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "member": "Member",
+    "viewer": "Viewer"
+  },
+  "workspaceHome": {
+    "emptyTitle": "This workspace has no projects yet",
+    "emptyBody": "Owners and admins create projects. Once one is added, it opens here."
+  },
+  "setup": {
+    "welcome": "Welcome, {name}",
+    "intro": "Three steps to get started: your workspace, your first project and a data provider.",
+    "progress": "Setup steps",
+    "steps": {
+      "workspace": "Workspace",
+      "project": "Project",
+      "provider": "Data provider"
+    },
+    "backToApp": "Back to the app",
+    "workspace": {
+      "title": "Create your workspace",
+      "description": "Your team, projects, provider keys and budget live in a workspace.",
+      "name": "Workspace name",
+      "namePlaceholder": "e.g. Acme Marketing",
+      "nameHint": "Usually your company or agency name.",
+      "slug": "Address",
+      "slugHint": "Shown in links: /{slug}",
+      "submit": "Create workspace"
+    },
+    "project": {
+      "title": "Add your first project",
+      "description": "A project is a website you track in {workspace}. Keywords, audits and AI visibility belong to a project.",
+      "pageTitle": "New project",
+      "pageDescription": "Define the website you want to track, its market and its competitors.",
+      "domain": "Website",
+      "domainHint": "A domain or address, e.g. example.com. Subdomains are included.",
+      "invalidDomain": "Enter a valid, public domain name.",
+      "name": "Brand name",
+      "namePlaceholder": "e.g. Example Store",
+      "nameHint": "We look for your brand under this name in AI answers.",
+      "market": "Market",
+      "marketHint": "Rankings and search volumes are measured for this country and language.",
+      "competitors": "Competitors (optional)",
+      "competitorsHint": "Add up to 3 now; you can track up to 7 from the project settings.",
+      "competitorName": "Competitor name",
+      "competitorDomain": "Competitor domain",
+      "addCompetitor": "Add competitor",
+      "removeCompetitor": "Remove competitor",
+      "invalidCompetitor": "One of the competitor domains is not valid.",
+      "submit": "Create project",
+      "forbidden": "You can't create projects in this workspace. Ask an owner or admin to add one.",
+      "newWorkspace": "Create my own workspace"
+    },
+    "provider": {
+      "title": "Connect DataForSEO",
+      "description": "Keyword, SERP, backlink and AI answer data comes from DataForSEO. You connect your own account, so costs go straight to it.",
+      "connected": "DataForSEO is connected",
+      "balance": "Balance: {amount}",
+      "done": "Go to the project",
+      "skip": "Skip for now"
+    }
+  },
+  "providers": {
+    "cancel": "Cancel",
+    "status": {
+      "VALID": "Connected",
+      "INVALID": "Invalid",
+      "UNVERIFIED": "Not verified"
+    },
+    "dataforseo": {
+      "description": "The source of keyword, SERP, backlink and AI answer data. The key is used by every project in this workspace.",
+      "login": "API login",
+      "loginHint": "The email address of your DataForSEO account.",
+      "password": "API password",
+      "passwordHint": "Not your account password: the password shown under API Access in the DataForSEO dashboard.",
+      "openDashboard": "Show in the dashboard",
+      "encrypted": "Stored encrypted and never shown again. DataForSEO checks the credentials before they are saved.",
+      "submit": "Connect and check the balance",
+      "verifying": "Checking…",
+      "rejected": "DataForSEO rejected these credentials. Check the login and the API password.",
+      "unreachable": "DataForSEO can't be reached right now; nothing was saved. Please try again shortly.",
+      "forbidden": "Only owners and admins can change provider keys.",
+      "saved": "DataForSEO is connected.",
+      "verified": "The key works; the balance is updated.",
+      "removed": "DataForSEO was disconnected.",
+      "disconnect": "Disconnect",
+      "disconnectTitle": "Disconnect DataForSEO?",
+      "disconnectBody": "The stored key is deleted. Data collection stops until a new key is connected; collected data is kept.",
+      "replace": "Replace key",
+      "verify": "Check again",
+      "balanceLabel": "Balance",
+      "lastVerified": "Last checked",
+      "invalidHint": "DataForSEO no longer accepts this key. Data collection is paused; replace the key.",
+      "unreachableHint": "DataForSEO couldn't be reached at the last check. The key is still treated as valid.",
+      "askAdmin": "DataForSEO isn't connected yet. Ask an owner or admin to connect it."
+    },
+    "upcomingTitle": "More connections",
+    "upcomingDescription": "Data sources that are coming, per the roadmap.",
+    "upcoming": {
+      "searchConsole": {
+        "title": "Google Search Console",
+        "description": "Real clicks, impressions and queries."
+      },
+      "aiPlatforms": {
+        "title": "AI platforms",
+        "description": "Your own API keys for ChatGPT, Gemini, Claude and Perplexity."
+      }
+    }
+  },
+  "workspaceSettings": {
+    "title": "Workspace settings",
+    "description": "Team, projects, connections and costs for {workspace}.",
+    "nav": {
+      "general": "General",
+      "members": "Members",
+      "projects": "Projects",
+      "providers": "Providers",
+      "usage": "Usage & budget",
+      "auditLog": "Audit log"
+    },
+    "general": {
+      "title": "Workspace",
+      "description": "The name and address change for every member.",
+      "name": "Name",
+      "slug": "Address",
+      "slugHint": "Old links stop working when the address changes.",
+      "save": "Save",
+      "saved": "Workspace updated.",
+      "dangerTitle": "Danger zone",
+      "deleteDescription": "Deleting the workspace permanently deletes all of its projects, keys and history.",
+      "leaveDescription": "If you leave, you need a new invitation to join again.",
+      "delete": "Delete workspace",
+      "deleteConfirmTitle": "Delete {workspace}?",
+      "deleteConfirmBody": "This can't be undone. All projects, brands, provider keys, usage records and memberships are deleted.",
+      "leave": "Leave workspace",
+      "leaveConfirmTitle": "Leave {workspace}?",
+      "leaveConfirmBody": "You lose access to its projects right away."
+    },
+    "members": {
+      "inviteTitle": "Invite a member",
+      "inviteDescription": "The invitation is emailed and stays valid for 7 days.",
+      "inviteDescriptionNoEmail": "This server doesn't send email; the invitation link is copied to your clipboard for you to share. It stays valid for 7 days.",
+      "email": "Email",
+      "role": "Role",
+      "invite": "Invite",
+      "invited": "Invitation sent to {email}.",
+      "invitedNoEmail": "Invitation for {email} created; the link is on your clipboard.",
+      "title": "Members",
+      "description": "{count, plural, =0 {No members yet.} one {# member} other {# members}}",
+      "member": "Member",
+      "joined": "Joined",
+      "actions": "Actions",
+      "you": "(you)",
+      "roleUpdated": "Role updated.",
+      "remove": "Remove from workspace",
+      "removeTitle": "Remove {name}?",
+      "removeBody": "They lose access to {workspace} right away.",
+      "removed": "Member removed.",
+      "pendingTitle": "Pending invitations",
+      "pendingDescription": "Invitations that haven't been accepted yet. You can also copy the link and share it yourself.",
+      "expires": "Expires",
+      "copyLink": "Copy invitation link",
+      "linkCopied": "Invitation link copied.",
+      "cancelInvitation": "Cancel invitation",
+      "roleDescriptions": {
+        "owner": "Everything, including deleting the workspace and adding owners.",
+        "admin": "Manages members, projects, keys and the budget.",
+        "member": "Works on projects: adds keywords, prompts and competitors.",
+        "viewer": "Can only view and download reports."
+      }
+    },
+    "projects": {
+      "title": "Projects",
+      "description": "Archived projects keep their data and stop scheduled work; you can restore them any time.",
+      "new": "New project",
+      "empty": "No projects yet.",
+      "project": "Project",
+      "market": "Market",
+      "created": "Created",
+      "actions": "Actions",
+      "archivedBadge": "Archived",
+      "archive": "Archive",
+      "restore": "Restore",
+      "archived": "{name} archived.",
+      "restored": "{name} restored.",
+      "delete": "Delete project",
+      "deleteTitle": "Delete {name}?",
+      "deleteBody": "All of the project's data is deleted permanently. This can't be undone.",
+      "deleted": "{name} deleted."
+    },
+    "usage": {
+      "title": "Usage",
+      "description": "Provider costs per calendar month (UTC).",
+      "month": "Month",
+      "spent": "Spent",
+      "budget": "Monthly budget",
+      "noBudget": "No budget",
+      "used": "Budget used",
+      "empty": "No paid work this month yet.",
+      "provider": "Provider",
+      "operations": "Operations",
+      "cost": "Cost",
+      "providers": {
+        "DATAFORSEO": "DataForSEO",
+        "OPENAI": "OpenAI",
+        "ANTHROPIC": "Anthropic",
+        "GOOGLE_AI": "Google AI",
+        "OPENROUTER": "OpenRouter",
+        "PERPLEXITY": "Perplexity"
+      },
+      "budgetTitle": "Monthly budget",
+      "budgetDescription": "A ceiling for provider spend. Owners and admins are notified at each threshold.",
+      "limit": "Monthly limit (USD)",
+      "limitHint": "The total cost across all providers.",
+      "hardStop": "Stop at the limit",
+      "hardStopHint": "When on, paid work that would exceed the limit doesn't start. When off, you're only notified.",
+      "alerts": "Alert thresholds",
+      "alertsHint": "Notifications go out when spend reaches these percentages.",
+      "saveBudget": "Save budget",
+      "budgetSaved": "Budget saved.",
+      "invalidLimit": "Enter a valid amount and at least one threshold.",
+      "removeBudget": "Remove budget",
+      "removeBudgetTitle": "Remove the budget?",
+      "removeBudgetBody": "The spending limit and its alerts are turned off.",
+      "budgetRemoved": "Budget removed."
+    },
+    "auditLog": {
+      "title": "Audit log",
+      "description": "Security-relevant actions, newest first. Entries never contain secrets.",
+      "empty": "No entries yet.",
+      "when": "When",
+      "who": "Who",
+      "what": "Action",
+      "ip": "IP",
+      "system": "System",
+      "loadMore": "Load more",
+      "budgetDetail": "{amount} per month",
+      "actions": {
+        "workspaceCreated": "Created the workspace",
+        "workspaceUpdated": "Updated the workspace",
+        "invitationCreated": "Sent an invitation",
+        "invitationCanceled": "Canceled an invitation",
+        "memberJoined": "Joined the workspace",
+        "memberRoleChanged": "Changed a role",
+        "memberRemoved": "Removed a member",
+        "memberLeft": "Left the workspace",
+        "projectCreated": "Created a project",
+        "projectArchived": "Archived a project",
+        "projectRestored": "Restored a project",
+        "projectDeleted": "Deleted a project",
+        "credentialSaved": "Saved a provider key",
+        "credentialDeleted": "Deleted a provider key",
+        "budgetUpdated": "Updated the budget",
+        "budgetRemoved": "Removed the budget"
+      }
+    }
+  },
+  "projectSettings": {
+    "devices": {
+      "DESKTOP": "Desktop",
+      "MOBILE": "Mobile"
+    },
+    "general": {
+      "title": "Project",
+      "description": "New measurements use these settings; past data doesn't change.",
+      "save": "Save",
+      "saved": "Project updated.",
+      "name": "Brand name",
+      "slug": "Address",
+      "slugTaken": "Another project in this workspace uses this address.",
+      "domain": "Domain",
+      "domainHint": "Create a new project for a different site.",
+      "market": "Market",
+      "device": "Device",
+      "timezone": "Time zone",
+      "timezoneHint": "Scheduled work and reports follow this time zone.",
+      "invalidTimezone": "Pick a valid time zone from the list.",
+      "subdomains": "Include subdomains",
+      "subdomainsHint": "Addresses like blog.{domain} count as this project's results too."
+    },
+    "brands": {
+      "title": "Brand and competitors",
+      "description": "We look for these brands in AI answers and search results. You can track up to {max} competitors.",
+      "add": "Add competitor",
+      "addTitle": "Add a competitor",
+      "edit": "Edit",
+      "editTitle": "Edit {name}",
+      "own": "Your brand",
+      "aliasesShort": "Also known as",
+      "remove": "Remove competitor",
+      "removeTitle": "Remove {name}?",
+      "removeBody": "The competitor isn't tracked in future measurements; past data is kept.",
+      "added": "{name} added.",
+      "updated": "{name} updated.",
+      "removed": "{name} removed.",
+      "dialogDescription": "Domains and other names let us recognize the brand in answers and cited sources.",
+      "name": "Name",
+      "domains": "Domains",
+      "domainsHint": "Separate with commas. Subdomains are included automatically.",
+      "invalidDomain": "One of the domains is not valid.",
+      "aliases": "Other names",
+      "aliasesPlaceholder": "e.g. Example, EXAMPLE Inc.",
+      "aliasesHint": "Other ways the brand is written; separate with commas.",
+      "save": "Save",
+      "limitReached": "A project can track up to 7 competitors."
+    },
+    "danger": {
+      "title": "Danger zone",
+      "description": "Archiving can be undone; deleting can't.",
+      "archive": "Archive project",
+      "archiveHint": "Data is kept and scheduled work stops. Restore it from the workspace settings.",
+      "archiveTitle": "Archive {name}?",
+      "archiveBody": "The project leaves the menus and scheduled measurements stop. No data is deleted.",
+      "archived": "{name} archived.",
+      "delete": "Delete project",
+      "deleteHint": "All keywords, audits and history are deleted permanently.",
+      "deleteTitle": "Delete {name}?",
+      "deleteBody": "This can't be undone.",
+      "deleted": "{name} deleted."
+    }
+  },
+  "account": {
+    "title": "Account",
+    "description": "Your profile, security settings and personal API keys.",
+    "backToApp": "Back to the app",
+    "profile": {
+      "title": "Profile",
+      "description": "Your name is visible to teammates; the language applies to the interface and to emails.",
+      "name": "Full name",
+      "email": "Email",
+      "language": "Language",
+      "languageHint": "Emails are sent in this language too.",
+      "save": "Save",
+      "saved": "Profile updated."
+    },
+    "password": {
+      "title": "Password",
+      "description": "Changing the password signs you out on other devices.",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "New password (again)",
+      "mismatch": "The passwords don't match.",
+      "save": "Change password",
+      "changed": "Password changed; other sessions were signed out."
+    },
+    "twoFactor": {
+      "title": "Two-factor authentication",
+      "description": "Signing in also asks for a code from your authenticator app.",
+      "on": "On",
+      "off": "Off",
+      "enable": "Turn on",
+      "enableTitle": "Turn on two-factor authentication",
+      "enableBody": "Enter your password to continue.",
+      "continue": "Continue",
+      "enabled": "Two-factor authentication is on.",
+      "disable": "Turn off",
+      "disableTitle": "Turn off two-factor authentication?",
+      "disableBody": "Your account will be protected by the password only. Enter your password to confirm.",
+      "disabled": "Two-factor authentication is off.",
+      "regenerate": "New backup codes",
+      "regenerateTitle": "Create new backup codes?",
+      "regenerateBody": "The old backup codes stop working. Enter your password to confirm.",
+      "newCodes": "Your new backup codes. The old ones no longer work; store these somewhere safe.",
+      "codesCopied": "Backup codes copied.",
+      "copyCodes": "Copy",
+      "downloadCodes": "Download",
+      "step1": "1. Scan the QR code with your authenticator app (Google Authenticator, 1Password, Authy…).",
+      "step2": "2. Save the backup codes. If you lose your phone, each one signs you in once.",
+      "step3": "3. Enter the 6-digit code from the app to finish.",
+      "qrAlt": "QR code for your authenticator app",
+      "manualEntry": "Can't scan the code? Enter this key manually:",
+      "code": "Verification code",
+      "codeHint": "The code changes every 30 seconds.",
+      "verify": "Verify and turn on"
+    },
+    "apiKeys": {
+      "title": "API keys",
+      "description": "Personal keys for scripts and integrations. A key acts with your permissions; send it in the x-api-key header.",
+      "empty": "You have no API keys yet.",
+      "unnamed": "Unnamed key",
+      "created": "created {date}",
+      "expires": "expires {date}",
+      "neverExpires": "never expires",
+      "lastUsed": "last used {when}",
+      "delete": "Delete key",
+      "deleteTitle": "Delete {name}?",
+      "deleteBody": "Integrations that use this key stop working right away.",
+      "deleted": "Key deleted.",
+      "create": "Create key",
+      "createTitle": "New API key",
+      "createBody": "The key is shown only once.",
+      "name": "Name",
+      "namePlaceholder": "e.g. Looker Studio",
+      "expiryLabel": "Valid for",
+      "expiryHint": "Expired keys stop working automatically.",
+      "expiry": {
+        "days30": "30 days",
+        "days90": "90 days",
+        "days365": "1 year",
+        "never": "No expiry"
+      },
+      "createdTitle": "Your key is ready",
+      "createdBody": "Copy it now and keep it somewhere safe; it won't be shown again.",
+      "copy": "Copy",
+      "copied": "Key copied.",
+      "done": "Done"
+    },
+    "sessions": {
+      "title": "Sessions",
+      "description": "Devices signed in to your account.",
+      "revokeOthers": "Sign out other sessions",
+      "revokeOthersTitle": "Sign out other sessions?",
+      "revokeOthersBody": "{count, plural, one {# other device is} other {# other devices are}} signed out right away.",
+      "revokedOthers": "Other sessions signed out.",
+      "unknownDevice": "Unknown device",
+      "current": "This device",
+      "lastActive": "active {when}",
+      "revoke": "Sign out"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+name: Docker
+
+# Builds both images and starts the self-hosted stack from deploy/compose.yaml, the way a
+# new user would, then checks that the web app reaches the api and the database.
+on:
+  push:
+    branches: [master]
+  pull_request:
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - "deploy/**"
+      - ".dockerignore"
+      - ".pnpmfile.cjs"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "tsconfig.base.json"
+      - "turbo.json"
+      - ".github/workflows/docker.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  self-host:
+    name: Build images and start the stack
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Create deploy/.env
+        run: ./deploy/init.sh
+
+      - name: Build and start
+        run: docker compose -f deploy/compose.yaml up -d --build --wait --wait-timeout 300
+
+      - name: Check the stack
+        run: |
+          curl -fsS http://localhost:3000/healthz
+          curl -fsS http://localhost:3000/api/v1/health | grep -q '"status":"ok"'
+          # A fresh install lets the first person sign up.
+          curl -fsS http://localhost:3000/api/v1/instance | grep -q '"signUp":"first-user"'
+          curl -fsS -o /dev/null -w "%{http_code}\n" http://localhost:3000/sign-in | grep -q 200
+          # The worker starts only after the api is healthy, so it must be running now.
+          test "$(docker compose -f deploy/compose.yaml ps --status running --services | grep -c '^worker$')" = 1
+
+      - name: Show logs
+        if: failure()
+        run: docker compose -f deploy/compose.yaml logs --no-color
+
+      - name: Stop
+        if: always()
+        run: docker compose -f deploy/compose.yaml down -v

@@ -1,0 +1,8 @@
+docs/
+node_modules/
+dist/
+.next/
+.turbo/
+coverage/
+pnpm-lock.yaml
+**/components/ui/

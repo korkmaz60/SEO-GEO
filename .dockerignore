@@ -1,0 +1,16 @@
+# Build context for apps/api/Dockerfile and apps/web/Dockerfile (repository root).
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/coverage
+**/*.tsbuildinfo
+**/src/generated
+.git
+.github
+docs
+deploy/.env
+.env
+.env.*
+!.env.example
+*.log
