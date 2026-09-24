@@ -1,12 +1,13 @@
 "use client";
 
 import type { AnalyticsData, Locale } from "@seo-geo/contracts";
-import { Bot, ExternalLink, Leaf, Target, Users } from "lucide-react";
+import { Bot, Leaf, Target, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { TimeSeriesChart } from "@/components/charts/time-series-chart";
 import { DeltaBadge } from "@/components/data/delta-badge";
+import { ExternalLinkIcon } from "@/components/data/external-link";
 import { KpiTile, type MetricProvenance } from "@/components/data/kpi-tile";
 import { Button } from "@/components/ui/button";
 import {
@@ -224,17 +225,7 @@ function LandingPages({ pages, locale }: { pages: AnalyticsData["landingPages"];
                         <span className="truncate font-medium" title={row.page}>
                           {pathOf(row.page)}
                         </span>
-                        {/^https?:\/\//.test(row.page) && (
-                          <a
-                            href={row.page}
-                            target="_blank"
-                            rel="noopener noreferrer nofollow"
-                            className="shrink-0 text-muted-foreground hover:text-foreground"
-                            aria-label={t("openPage")}
-                          >
-                            <ExternalLink className="size-3.5" />
-                          </a>
-                        )}
+                        <ExternalLinkIcon url={row.page} label={t("openPage")} />
                       </span>
                     </TableCell>
                     <TableCell className="text-right font-medium tabular-nums">

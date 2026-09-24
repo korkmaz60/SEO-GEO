@@ -9,10 +9,10 @@ import {
   type Locale,
 } from "@seo-geo/contracts";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { ExternalLink } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { z } from "zod";
 
+import { ExternalLinkIcon } from "@/components/data/external-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -166,17 +166,7 @@ export function IssueSheet({
                         </ul>
                       )}
                     </div>
-                    {row.url && (
-                      <a
-                        href={row.url}
-                        target="_blank"
-                        rel="noopener noreferrer nofollow"
-                        className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
-                        aria-label={t("openPage")}
-                      >
-                        <ExternalLink className="size-3.5" />
-                      </a>
-                    )}
+                    <ExternalLinkIcon url={row.url} label={t("openPage")} className="mt-0.5" />
                   </li>
                 ))}
               </ul>

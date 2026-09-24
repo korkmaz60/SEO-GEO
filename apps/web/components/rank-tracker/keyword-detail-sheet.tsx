@@ -7,12 +7,13 @@ import {
   type RankFrequency,
 } from "@seo-geo/contracts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { TimeSeriesChart, type SeriesPoint } from "@/components/charts/time-series-chart";
+import { ExternalLinkIcon } from "@/components/data/external-link";
 import { Difficulty, IntentBadge } from "@/components/keywords/keyword-metrics";
 import { SerpFeatureIcons } from "@/components/keywords/serp-features";
 import { BrandSwatch } from "@/components/projects/brand-swatch";
@@ -242,17 +243,7 @@ export function KeywordDetailSheet({
                           </p>
                           <p className="truncate text-xs text-muted-foreground">{result.url}</p>
                         </div>
-                        {result.url && (
-                          <a
-                            href={result.url}
-                            target="_blank"
-                            rel="noopener noreferrer nofollow"
-                            className="shrink-0 text-muted-foreground hover:text-foreground"
-                            aria-label={t("openResult")}
-                          >
-                            <ExternalLink className="size-3.5" />
-                          </a>
-                        )}
+                        <ExternalLinkIcon url={result.url} label={t("openResult")} />
                       </li>
                     );
                   })}

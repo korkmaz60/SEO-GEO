@@ -1,12 +1,13 @@
 "use client";
 
 import type { Locale, SearchConsoleData } from "@seo-geo/contracts";
-import { ExternalLink, Eye, MousePointerClick, Percent, Search, TrendingUp } from "lucide-react";
+import { Eye, MousePointerClick, Percent, Search, TrendingUp } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { TimeSeriesChart } from "@/components/charts/time-series-chart";
 import { DeltaBadge } from "@/components/data/delta-badge";
+import { ExternalLinkIcon } from "@/components/data/external-link";
 import { KpiTile, type MetricProvenance } from "@/components/data/kpi-tile";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -290,17 +291,7 @@ function RowsTable({ rows, keyLabel, locale }: { rows: Row[]; keyLabel: string; 
                       <span className="truncate font-medium" title={row.key}>
                         {row.label}
                       </span>
-                      {row.href && (
-                        <a
-                          href={row.href}
-                          target="_blank"
-                          rel="noopener noreferrer nofollow"
-                          className="shrink-0 text-muted-foreground hover:text-foreground"
-                          aria-label={t("openPage")}
-                        >
-                          <ExternalLink className="size-3.5" />
-                        </a>
-                      )}
+                      <ExternalLinkIcon url={row.href} label={t("openPage")} />
                     </span>
                   </TableCell>
                   <TableCell className="text-right font-medium tabular-nums">
