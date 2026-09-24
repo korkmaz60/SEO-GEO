@@ -66,9 +66,13 @@ services:
     environment:
       <<: *api-environment
       APP_MODE: worker
-    # The worker has no HTTP port; the image's health check is for the api.
+    # No HTTP port: the worker touches a heartbeat file while it can reach the database.
     healthcheck:
-      disable: true
+      test: ["CMD", "node", "dist/worker-health.js"]
+      interval: 15s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
     depends_on:
       api:
         condition: service_healthy

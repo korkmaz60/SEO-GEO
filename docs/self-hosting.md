@@ -100,8 +100,10 @@ while the api and worker are stopped.
 ## Operations
 
 - **Logs:** `docker compose -f deploy/compose.yaml logs -f api worker web`.
-- **Health:** the api answers `GET /api/v1/health` and the web app `GET /healthz`; both
-  images define Docker health checks.
+- **Health:** the api answers `GET /api/v1/health` and the web app `GET /healthz`; the
+  worker touches a heartbeat file while it can reach the database, checked by
+  `node dist/worker-health.js`. All three have Docker health checks, so
+  `docker compose -f deploy/compose.yaml up -d --wait` returns once the stack is ready.
 - **Scaling:** the api is stateless and can run several replicas; so can the worker (jobs
   are claimed from the database). Keep one PostgreSQL.
 - **Using an existing PostgreSQL:** remove the `postgres` service and point

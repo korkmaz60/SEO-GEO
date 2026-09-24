@@ -6,6 +6,8 @@ import { NestFactory } from "@nestjs/core";
 import { ConfigError, loadConfig } from "./config/env.js";
 import { loadDotEnv } from "./config/load-env.js";
 import { createLogger } from "./config/logger.js";
+import { PrismaService } from "./database/prisma.service.js";
+import { startHeartbeat } from "./worker-heartbeat.js";
 import { WorkerModule } from "./worker.module.js";
 
 async function bootstrap(): Promise<void> {
@@ -18,9 +20,12 @@ async function bootstrap(): Promise<void> {
   await app.init();
   const logger = new Logger("Worker");
   logger.log(`Worker started (${config.deploymentMode})`);
+  const prisma = app.get(PrismaService);
+  const stopHeartbeat = startHeartbeat(() => prisma.$queryRaw`SELECT 1`);
 
   const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
     logger.log(`Received ${signal}, shutting down`);
+    stopHeartbeat();
     await app.close();
     process.exit(0);
   };

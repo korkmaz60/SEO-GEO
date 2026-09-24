@@ -19,9 +19,13 @@ secret() {
   fi
 }
 
-# Letters and digits only, so the password is safe inside a connection URL.
+# Hex digits only, so the password is safe inside a connection URL.
 password() {
-  LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -hex 24
+  else
+    od -An -N24 -tx1 /dev/urandom | tr -d ' \n'
+  fi
 }
 
 umask 077
