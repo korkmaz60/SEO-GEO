@@ -26,6 +26,13 @@ const DetailsSchema = z.object({
 
 const DataForSeoSecretSchema = z.object({ login: z.string(), password: z.string() });
 
+export interface DataForSeoClientOptions {
+  /** Per attempt; defaults to 60 seconds. */
+  timeoutMs?: number;
+  /** Defaults to 2. */
+  maxRetries?: number;
+}
+
 /** Associated data that ties a ciphertext to its workspace and provider. */
 function secretContext(workspaceId: string, provider: Provider): string {
   return `provider_credential:${workspaceId}:${provider}`;
@@ -142,19 +149,44 @@ export class CredentialsService implements OnModuleInit {
     });
   }
 
-  /** A DataForSEO client with the workspace's stored credentials. */
-  async dataForSeoClient(workspaceId: string): Promise<DataForSeoClient> {
-    const row = await this.prisma.providerCredential.findUnique({
-      where: { workspaceId_provider: { workspaceId, provider: "DATAFORSEO" } },
-    });
-    if (!row || row.status === "INVALID") {
+  /** A DataForSEO client with the workspace's stored credentials, for data requests. */
+  async dataForSeoClient(
+    workspaceId: string,
+    options: DataForSeoClientOptions = {},
+  ): Promise<DataForSeoClient> {
+    const client = await this.findDataForSeoClient(workspaceId, options);
+    if (!client) {
       throw new ProblemException({
         status: HttpStatus.CONFLICT,
         code: ErrorCode.ProviderError,
         detail: "Connect a working DataForSEO account in the workspace settings first.",
       });
     }
-    return this.dataForSeo.client(this.openDataForSeo(row));
+    return client;
+  }
+
+  /** Like {@link dataForSeoClient}, but `null` when there are no working credentials. */
+  async findDataForSeoClient(
+    workspaceId: string,
+    options: DataForSeoClientOptions = {},
+  ): Promise<DataForSeoClient | null> {
+    const row = await this.prisma.providerCredential.findUnique({
+      where: { workspaceId_provider: { workspaceId, provider: "DATAFORSEO" } },
+    });
+    if (!row || row.status === "INVALID") return null;
+    return this.dataForSeo.client(this.openDataForSeo(row), {
+      timeoutMs: options.timeoutMs ?? 60_000,
+      maxRetries: options.maxRetries ?? 2,
+    });
+  }
+
+  /** Whether the workspace has DataForSEO credentials that are not known to be invalid. */
+  async hasDataForSeo(workspaceId: string): Promise<boolean> {
+    const row = await this.prisma.providerCredential.findUnique({
+      where: { workspaceId_provider: { workspaceId, provider: "DATAFORSEO" } },
+      select: { status: true },
+    });
+    return row !== null && row.status !== "INVALID";
   }
 
   /** Re-checks every stored DataForSEO credential; used by the daily job. */

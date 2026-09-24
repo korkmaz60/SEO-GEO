@@ -33,16 +33,29 @@ export interface ScheduledJob {
   /** Cron expression in UTC. */
   cron: string;
   handler: (signal: AbortSignal) => Promise<void>;
+  queue?: QueueOptions;
 }
 
 /**
- * Task types and scheduled jobs, registered by feature modules in `onModuleInit`. The worker
- * subscribes to all of them; the api only enqueues.
+ * Internal background work that is not shown to users as a task, e.g. collecting SERPs.
+ * Enqueued with `QueueService.send(name, data)`.
+ */
+export interface BackgroundJob<TData extends object = object> {
+  /** Queue name, e.g. `rank.check`. */
+  name: string;
+  handler: (data: TData, signal: AbortSignal) => Promise<void>;
+  queue?: QueueOptions;
+}
+
+/**
+ * Task types, background jobs and scheduled jobs, registered by feature modules in
+ * `onModuleInit`. The worker subscribes to all of them; the api only enqueues.
  */
 @Injectable()
 export class TaskRegistry {
   readonly tasks = new Map<string, TaskDefinition>();
   readonly scheduled = new Map<string, ScheduledJob>();
+  readonly jobs = new Map<string, BackgroundJob>();
 
   registerTask(type: string, definition: TaskDefinition): void {
     if (this.tasks.has(type)) throw new Error(`Task type ${type} is registered twice`);
@@ -52,5 +65,10 @@ export class TaskRegistry {
   registerScheduledJob(job: ScheduledJob): void {
     if (this.scheduled.has(job.name)) throw new Error(`Job ${job.name} is registered twice`);
     this.scheduled.set(job.name, job);
+  }
+
+  registerJob<TData extends object>(job: BackgroundJob<TData>): void {
+    if (this.jobs.has(job.name)) throw new Error(`Job ${job.name} is registered twice`);
+    this.jobs.set(job.name, job as unknown as BackgroundJob);
   }
 }

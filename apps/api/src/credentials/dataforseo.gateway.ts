@@ -5,6 +5,8 @@ export interface DataForSeoOptions {
   baseUrl?: string;
   /** Replaced in tests. */
   fetch?: typeof globalThis.fetch;
+  /** Replaced in tests to skip retry backoff. */
+  sleep?: (ms: number) => Promise<void>;
 }
 
 /** Injection token for {@link DataForSeoOptions}. */
@@ -26,14 +28,19 @@ export type VerificationResult =
 export class DataForSeoGateway {
   constructor(@Inject(DATAFORSEO_OPTIONS) private readonly options: DataForSeoOptions) {}
 
-  client(credentials: DataForSeoLogin): DataForSeoClient {
+  /** Defaults suit quick account checks; data requests pass longer timeouts. */
+  client(
+    credentials: DataForSeoLogin,
+    options: { timeoutMs?: number; maxRetries?: number } = {},
+  ): DataForSeoClient {
     return new DataForSeoClient({
       login: credentials.login,
       password: credentials.password,
       baseUrl: this.options.baseUrl,
       fetch: this.options.fetch,
-      timeoutMs: 20_000,
-      maxRetries: 1,
+      sleep: this.options.sleep,
+      timeoutMs: options.timeoutMs ?? 20_000,
+      maxRetries: options.maxRetries ?? 1,
       userAgent: "seo-geo",
     });
   }

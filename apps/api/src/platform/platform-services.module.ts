@@ -5,6 +5,7 @@ import { CredentialsModule } from "../credentials/credentials.module.js";
 import { CryptoModule } from "../crypto/crypto.module.js";
 import { NetModule } from "../net/net.module.js";
 import { NotificationsModule } from "../notifications/notifications.module.js";
+import { RankTrackerModule } from "../rank-tracker/rank-tracker.module.js";
 import { TasksModule } from "../tasks/tasks.module.js";
 import { UsageModule } from "../usage/usage.module.js";
 
@@ -18,6 +19,7 @@ import { UsageModule } from "../usage/usage.module.js";
     UsageModule,
     TasksModule,
     CredentialsModule,
+    RankTrackerModule,
   ],
 })
 export class PlatformServicesModule {}

@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger, type OnApplicationBootstrap } from "@nestjs/common";
 import { Prisma } from "@seo-geo/db";
-import type { JobWithMetadata } from "pg-boss";
+import type { Job, JobWithMetadata } from "pg-boss";
 
 import { PrismaService } from "../database/prisma.service.js";
 import { QueueService } from "./queue.service.js";
@@ -14,6 +14,13 @@ const DEFAULT_TASK_QUEUE = {
   retryDelay: 30,
   retryBackoff: true,
   expireInSeconds: 60 * 60,
+} as const;
+
+const DEFAULT_JOB_QUEUE = {
+  retryLimit: 3,
+  retryDelay: 60,
+  retryBackoff: true,
+  expireInSeconds: 30 * 60,
 } as const;
 
 interface TaskJobData {
@@ -49,8 +56,23 @@ export class TaskRunner implements OnApplicationBootstrap {
       );
     }
 
+    for (const job of this.registry.jobs.values()) {
+      await this.queue.ensureQueue(job.name, { ...DEFAULT_JOB_QUEUE, ...job.queue });
+      await boss.work(
+        job.name,
+        { pollingIntervalSeconds: this.pollingIntervalSeconds },
+        async (jobs: Job<object>[]) => {
+          for (const entry of jobs) await job.handler(entry.data, entry.signal);
+        },
+      );
+    }
+
     for (const job of this.registry.scheduled.values()) {
-      await this.queue.ensureQueue(job.name, { retryLimit: 1, expireInSeconds: 60 * 60 });
+      await this.queue.ensureQueue(job.name, {
+        retryLimit: 1,
+        expireInSeconds: 60 * 60,
+        ...job.queue,
+      });
       await boss.schedule(job.name, job.cron, null, { tz: "UTC" });
       await boss.work(
         job.name,
@@ -62,7 +84,7 @@ export class TaskRunner implements OnApplicationBootstrap {
     }
 
     this.logger.log(
-      `Listening for ${this.registry.tasks.size} task types and ${this.registry.scheduled.size} scheduled jobs`,
+      `Listening for ${this.registry.tasks.size} task types, ${this.registry.jobs.size} jobs and ${this.registry.scheduled.size} scheduled jobs`,
     );
   }
 

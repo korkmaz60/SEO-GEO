@@ -92,17 +92,29 @@ export class UsageService {
    * workspace over a hard-stop budget this month.
    */
   async assertCanSpend(workspaceId: string, estimatedUsd: string | number): Promise<void> {
-    const budget = await this.prisma.budget.findUnique({ where: { workspaceId } });
-    if (!budget?.hardStop) return;
-    const { start, end } = monthRange(currentMonth());
-    const projected = (await this.spent(workspaceId, start, end)).plus(estimatedUsd);
-    if (projected.greaterThan(budget.monthlyLimitUsd)) {
+    const limit = await this.blockingLimit(workspaceId, estimatedUsd);
+    if (limit) {
       throw new ProblemException({
         status: HttpStatus.PAYMENT_REQUIRED,
         code: ErrorCode.BudgetExceeded,
-        detail: `This would exceed the monthly budget of $${budget.monthlyLimitUsd.toFixed(2)}.`,
+        detail: `This would exceed the monthly budget of $${limit.toFixed(2)}.`,
       });
     }
+  }
+
+  /**
+   * The monthly limit of a hard-stop budget that the estimated cost would exceed, or `null`
+   * when the work may run. For background jobs, which skip work instead of failing.
+   */
+  async blockingLimit(
+    workspaceId: string,
+    estimatedUsd: string | number,
+  ): Promise<Prisma.Decimal | null> {
+    const budget = await this.prisma.budget.findUnique({ where: { workspaceId } });
+    if (!budget?.hardStop) return null;
+    const { start, end } = monthRange(currentMonth());
+    const projected = (await this.spent(workspaceId, start, end)).plus(estimatedUsd);
+    return projected.greaterThan(budget.monthlyLimitUsd) ? budget.monthlyLimitUsd : null;
   }
 
   async summary(workspaceId: string, month: string): Promise<UsageSummary> {
