@@ -69,9 +69,7 @@
               ]
             }
           ],
-          "fan_out_queries": [
-            "kahve makinesi markaları Türkiye"
-          ]
+          "fan_out_queries": ["kahve makinesi markaları Türkiye"]
         }
       ]
     }

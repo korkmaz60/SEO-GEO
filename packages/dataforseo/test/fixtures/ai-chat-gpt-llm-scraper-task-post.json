@@ -14,13 +14,7 @@
       "time": "0.0052 sec.",
       "cost": 0.0012,
       "result_count": 0,
-      "path": [
-        "v3",
-        "ai_optimization",
-        "chat_gpt",
-        "llm_scraper",
-        "task_post"
-      ],
+      "path": ["v3", "ai_optimization", "chat_gpt", "llm_scraper", "task_post"],
       "data": {
         "api": "ai_optimization",
         "function": "task_post",
@@ -42,13 +36,7 @@
       "time": "0 sec.",
       "cost": 0,
       "result_count": 0,
-      "path": [
-        "v3",
-        "ai_optimization",
-        "chat_gpt",
-        "llm_scraper",
-        "task_post"
-      ],
+      "path": ["v3", "ai_optimization", "chat_gpt", "llm_scraper", "task_post"],
       "data": {
         "api": "ai_optimization",
         "function": "task_post",

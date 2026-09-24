@@ -131,9 +131,7 @@
             }
           ],
           "se_results_count": 0,
-          "item_types": [
-            "chat_gpt_text"
-          ],
+          "item_types": ["chat_gpt_text"],
           "items_count": 1,
           "items": [
             {

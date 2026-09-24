@@ -14,13 +14,7 @@
       "time": "2.0815 sec.",
       "cost": 0,
       "result_count": 3,
-      "path": [
-        "v3",
-        "ai_optimization",
-        "claude",
-        "llm_responses",
-        "models"
-      ],
+      "path": ["v3", "ai_optimization", "claude", "llm_responses", "models"],
       "data": {
         "api": "ai_optimization",
         "function": "models",
