@@ -31,6 +31,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@seo-geo/contracts": "workspace:*",
     "cheerio": "^1.2.0",
     "ipaddr.js": "^2.5.0",
     "robots-parser": "^3.0.1",
