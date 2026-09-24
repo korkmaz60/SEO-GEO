@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { Prisma, createPrismaClient, type PrismaClient } from "../src/index.js";
+import { readdir } from "node:fs/promises";
+
+import { Prisma, createPrismaClient, migrateDeploy, type PrismaClient } from "../src/index.js";
 import { createTestDatabase, type TestDatabase } from "../src/testing.js";
 
 const serverUrl = process.env.TEST_DATABASE_URL;
@@ -137,4 +139,28 @@ describe.skipIf(!serverUrl)("database schema", () => {
 
     expect(total._sum.costUsd?.toString()).toBe("0.0038");
   });
+});
+
+describe.skipIf(!serverUrl)("migrateDeploy", () => {
+  it("applies every migration once with the Prisma CLI", async () => {
+    const database = await createTestDatabase(serverUrl as string, { migrate: false });
+    const prisma = createPrismaClient(database.url);
+    try {
+      await migrateDeploy(database.url);
+      // A second run (another instance starting) finds nothing to do.
+      await migrateDeploy(database.url);
+
+      const migrations = (
+        await readdir(new URL("../prisma/migrations/", import.meta.url), { withFileTypes: true })
+      ).filter((entry) => entry.isDirectory());
+      const applied = await prisma.$queryRaw<{ name: string }[]>`
+        SELECT migration_name AS name FROM _prisma_migrations
+        WHERE finished_at IS NOT NULL ORDER BY migration_name`;
+      expect(applied.map((row) => row.name)).toEqual(migrations.map((entry) => entry.name).sort());
+      await expect(prisma.user.count()).resolves.toBe(0);
+    } finally {
+      await prisma.$disconnect();
+      await database.drop();
+    }
+  }, 120_000);
 });

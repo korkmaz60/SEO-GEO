@@ -5,9 +5,10 @@ audits, keyword research and measurement of how often ChatGPT, Gemini, Claude, P
 Google AI Overviews mention and cite your brand. Self-hostable, built for in-house teams and
 agencies, powered by bring-your-own-key data providers (DataForSEO first).
 
-> **Status: pre-alpha (M0 — foundation).** The repository is being rebuilt from an earlier
-> demo. The web app currently shows the new interface with honest empty states; data
-> collection starts in M1–M3. See the [roadmap](docs/roadmap.md).
+> **Status: pre-alpha (M1 — platform core).** Accounts, workspaces, projects, competitors,
+> DataForSEO connection, budgets, audit log and self-hosting with Docker work; rank
+> tracking, site audits and AI visibility arrive in M2–M3. See the
+> [roadmap](docs/roadmap.md).
 
 **Türkçe özet:** SEO-GEO; sıralama takibi, site denetimi, anahtar kelime araştırması ve
 markanızın yapay zekâ yanıtlarındaki (ChatGPT, Gemini, Claude, Perplexity, Google AI
@@ -25,12 +26,14 @@ Arayüz Türkçe ve İngilizce olarak geliştirilmektedir.
 
 ```
 apps/web    Next.js 16 · React 19 · Tailwind CSS v4 · shadcn/ui · next-intl (tr, en)
-apps/api    NestJS 12 — REST /v1 + OpenAPI (APP_MODE=api) and background worker (APP_MODE=worker)
+apps/api    NestJS 12 — REST /api/v1 + OpenAPI (APP_MODE=api) and background worker (APP_MODE=worker)
 packages/
   contracts   Zod schemas shared by api and web
-  core        Domain logic: hostname matching, outbound URL (SSRF) policy, analyzers
+  core        Domain logic: hostname matching, SSRF-safe HTTP client, analyzers
+  db          Prisma schema, migrations and client
   dataforseo  Typed DataForSEO v3 client: status handling, retries, cost reporting
   billing     Cloud edition billing: plans, Stripe Managed Payments checkout and webhooks
+deploy/     Docker Compose stack for self-hosting
 docs/       Design documentation
 legacy/     The previous demo, kept for reference only
 ```
@@ -39,9 +42,21 @@ The browser only talks to the web app; the web app forwards `/api/*` to the api.
 [design documentation](docs/README.md) for the architecture, data model, GEO/AEO methodology,
 security model and frontend design system.
 
-## Getting started
+## Self-hosting
 
-Requirements: Node.js 22.12+, pnpm 10 (`corepack enable` installs the pinned version) and
+```bash
+git clone https://github.com/korkmaz60/SEO-GEO.git && cd SEO-GEO
+./deploy/init.sh                                   # creates deploy/.env with fresh secrets
+docker compose -f deploy/compose.yaml up -d --build
+```
+
+Open http://localhost:3000 and sign up: the first account on a new server needs no
+invitation. HTTPS, email, upgrades and backups are covered in
+[docs/self-hosting.md](docs/self-hosting.md).
+
+## Development
+
+Requirements: Node.js 22.19+, pnpm 10 (`corepack enable` installs the pinned version) and
 PostgreSQL 16+ (`docker compose up -d` starts one).
 
 ```bash

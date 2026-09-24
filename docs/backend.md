@@ -7,29 +7,34 @@ background worker (`APP_MODE=worker`).
 
 ```
 src/
-  main.ts                 HTTP bootstrap
+  main.ts                 HTTP bootstrap (applies migrations first with MIGRATE_ON_START)
   worker.ts               worker bootstrap (application context, no HTTP)
   app.module.ts           modules loaded in api mode
-  worker.module.ts        modules loaded in worker mode (M1)
-  config/                 Zod-validated environment
-  common/                 validation pipe, problem+json filter, guards, decorators
+  worker.module.ts        modules loaded in worker mode
+  app.setup.ts            HTTP concerns shared with the tests: Better Auth mount, body
+                          parser, /api/v1 prefix, problem+json filter, OpenAPI
+  config/                 Zod-validated environment, .env loading in development, logger
+  common/                 validation pipe, problem+json filter, params, serialization
+  auth/                   Better Auth instance and hooks, AuthGuard, WorkspaceGuard,
+                          decorators (@Public, @WorkspaceScoped, @RequireRole)
+  mail/                   SMTP or console mailer, TR/EN email templates
+  crypto/                 AES-256-GCM secret box for provider credentials
+  net/                    SafeFetcherService: the only client for user-supplied URLs
+  platform/               module groups shared by api and worker
+  audit/                  audit log service and GET /audit-log
+  notifications/          per-user notifications (type + data, localized by the client)
+  usage/                  usage ledger, monthly summary, budgets and thresholds
+  tasks/                  task rows, pg-boss queue, task registry, worker runner
+  projects/               projects and brand entities (own brand + competitors)
+  credentials/            encrypted provider keys, DataForSEO verification, daily re-check
   modules/
-    health/               liveness and readiness
-    auth/                 Better Auth mount, session and API-key guards        (M1)
-    workspaces/ members/  workspace settings, members, invitations             (M1)
-    projects/             projects and brand entities (own brand + competitors) (M1)
-    credentials/          encrypted provider keys, connection tests            (M1)
-    usage/ budgets/       usage ledger, budgets, cost estimates                (M1)
-    tasks/ queue/         task resources, pg-boss integration                  (M1)
-    notifications/ audit-log/                                                  (M1)
-    providers/
-      dataforseo/         adapter over packages/dataforseo: credentials, cache, ledger
-      llm/                LLM provider registry (AI SDK) for suggestions/classification
-      google/             OAuth and API clients for Search Console / GA4
-    rank-tracker/ keywords/ site-audit/ integrations/                          (M2)
-    ai-visibility/ mcp/                                                        (M3)
-    reports/ alerts/ backlinks/ domains/                                       (M4)
-    billing/              cloud edition only                                   (M5)
+    health/               liveness
+    account/              GET /instance (sign-up mode), GET /me
+    workspaces/           GET /workspaces/:id (membership and role)
+  rank-tracker/ keywords/ site-audit/ integrations/                           (M2)
+  ai-visibility/ mcp/ llm/                                                    (M3)
+  reports/ alerts/ backlinks/ domains/                                        (M4)
+  billing/                cloud edition only                                  (M5)
 ```
 
 **Layering.** Controllers handle HTTP (auth guard, Zod DTOs from `packages/contracts`) and
@@ -69,8 +74,14 @@ The web app uses exactly the same API as third parties.
   `@Public()`; `@WorkspaceScoped()` adds `WorkspaceGuard`, which resolves `:workspaceId`,
   checks membership (non-members get 404, so IDs cannot be probed) and the minimum role set
   with `@RequireRole()`.
-- API keys belong to a user inside one workspace and carry scopes: `read`, `write`,
-  `run:paid`.
+- **API keys** (`sg_…`, sent as `x-api-key`) are personal: a key acts as its user, with the
+  user's roles in each workspace. Keys can expire and are listed and revoked on the account
+  page. Workspace-bound keys with scopes (`read`, `write`, `run:paid`) arrive with the
+  public API (M3).
+- **Audit trail**: project, credential and budget changes are recorded by their services;
+  workspace, invitation and membership changes happen inside Better Auth and are recorded
+  by its organization hooks. The acting user, IP and user agent come from a request
+  context around the auth handler.
 
 | Action | owner | admin | member | viewer |
 |---|:-:|:-:|:-:|:-:|

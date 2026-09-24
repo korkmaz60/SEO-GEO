@@ -32,8 +32,13 @@
   password reset, optional TOTP 2FA, rate-limited sign-in.
 - Session cookies are `HttpOnly`, `Secure`, `SameSite=Lax`; sessions rotate on sign-in and
   role changes.
-- Self-hosted: the first account becomes the instance admin; public sign-up is off unless
-  enabled.
+- Self-hosted: the first account can sign up without an invitation; after that, sign-up
+  needs a pending invitation.
+- Client addresses (rate limits, sessions, audit log): Express resolves them from the proxy
+  chain it trusts (`TRUST_PROXY`) and hands Better Auth that single address, so a client
+  cannot pick its own address with `X-Forwarded-For`. Internet-facing installs put the web
+  app behind a reverse proxy that sets the header (the bundled Caddy does).
+- Invalid, expired or revoked API keys are rejected with `401`.
 
 ### Authorization
 - Role matrix and API-key scopes are defined in [backend.md](backend.md); enforced by
@@ -58,7 +63,15 @@ All server-side fetches of user-influenced URLs — crawler, sitemaps, `robots.t
 - No cookies or credentials are forwarded; the crawler identifies itself and honors
   `robots.txt`.
 
-The address checks live in `packages/core` and are unit tested.
+The address checks and the client live in `packages/core` (`@seo-geo/core/net`) and are
+tested against a local server. `createSafeFetcher` resolves and checks host names inside
+the socket's own lookup, so the connection goes to exactly the address that passed the
+check; IP literals are checked before the request. Redirects are followed by hand with
+every hop checked again, and `Authorization` and cookies are dropped when a redirect
+leaves the origin. Limits apply to the decoded body (a small gzip response cannot expand
+past `maxBytes`). Operators can allow extra ports with `OUTBOUND_ALLOWED_PORTS`; internal
+addresses cannot be allowed by configuration. In the api the client is
+`SafeFetcherService`.
 
 ### Secrets at rest
 - Provider credentials and OAuth tokens are encrypted with AES-256-GCM (random 96-bit IV,
@@ -98,8 +111,10 @@ The address checks live in `packages/core` and are unit tested.
 
 ### Logging and audit
 - Structured logs with request IDs; `Authorization`, cookies and secrets are redacted.
-- `audit_log` records credential changes, role changes, API key creation, exports and
-  deletions.
+- `audit_log` records workspace creation and changes, invitations, joins, role changes,
+  removals and departures, project creation, archiving and deletion, provider credential
+  changes and budget changes — with the acting user, IP and user agent, never secrets.
+  API key creation, exports and deletions are added as those features land.
 
 ### Supply chain and releases
 - The lockfile resolves from `registry.npmjs.org`; automated dependency updates; CodeQL and

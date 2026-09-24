@@ -1,0 +1,108 @@
+# Self-hosted SEO-GEO: PostgreSQL, api, worker and web.
+#
+#   ./deploy/init.sh                                  # creates deploy/.env with fresh secrets
+#   docker compose -f deploy/compose.yaml up -d --build
+#
+# Then open WEB_URL. The first account created becomes the first user; everyone after that
+# needs an invitation. See docs/self-hosting.md.
+name: seo-geo
+
+x-api-environment: &api-environment
+  NODE_ENV: production
+  DEPLOYMENT_MODE: selfhost
+  DATABASE_URL: postgresql://${POSTGRES_USER:-seogeo}:${POSTGRES_PASSWORD:?run deploy/init.sh or set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-seogeo}
+  WEB_URL: ${WEB_URL:-http://localhost:3000}
+  AUTH_SECRET: ${AUTH_SECRET:?run deploy/init.sh or set AUTH_SECRET}
+  ENCRYPTION_KEY: ${ENCRYPTION_KEY:?run deploy/init.sh or set ENCRYPTION_KEY}
+  LOG_LEVEL: ${LOG_LEVEL:-log}
+  API_DOCS: ${API_DOCS:-false}
+  TRUST_PROXY: ${TRUST_PROXY:-loopback, linklocal, uniquelocal}
+  OUTBOUND_ALLOWED_PORTS: ${OUTBOUND_ALLOWED_PORTS:-80,443}
+  SMTP_HOST: ${SMTP_HOST:-}
+  SMTP_PORT: ${SMTP_PORT:-587}
+  SMTP_SECURE: ${SMTP_SECURE:-}
+  SMTP_USER: ${SMTP_USER:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  SMTP_FROM: ${SMTP_FROM:-SEO-GEO <noreply@localhost>}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-seogeo}
+      POSTGRES_USER: ${POSTGRES_USER:-seogeo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run deploy/init.sh or set POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    image: seo-geo-api:${SEO_GEO_TAG:-local}
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *api-environment
+      # Pending migrations are applied before the api accepts requests.
+      MIGRATE_ON_START: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  worker:
+    image: seo-geo-api:${SEO_GEO_TAG:-local}
+    restart: unless-stopped
+    command: ["node", "--enable-source-maps", "dist/worker.js"]
+    environment:
+      <<: *api-environment
+      APP_MODE: worker
+    # The worker has no HTTP port; the image's health check is for the api.
+    healthcheck:
+      disable: true
+    depends_on:
+      api:
+        condition: service_healthy
+
+  web:
+    image: seo-geo-web:${SEO_GEO_TAG:-local}
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    environment:
+      API_URL: http://api:4000
+    ports:
+      - "${WEB_BIND:-0.0.0.0}:${WEB_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # HTTPS with automatic certificates: set DOMAIN and WEB_URL=https://<DOMAIN> in
+  # deploy/.env, WEB_BIND=127.0.0.1, then start with `--profile https`.
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["https"]
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:-}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - web
+
+volumes:
+  postgres-data:
+  caddy-data:
+  caddy-config:

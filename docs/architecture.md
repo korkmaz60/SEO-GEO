@@ -103,8 +103,13 @@ M1 replaces it with a runtime proxy route so one web image works with any `API_U
 | Storage | Local volume or MinIO | Supabase Storage / S3 |
 | Email | SMTP | Transactional email provider |
 
-Images are published to GitHub Container Registry on each tagged release. Database
-migrations run on api start behind a lock (M1).
+Self-hosted installs use [`deploy/compose.yaml`](../deploy/compose.yaml) (see
+[self-hosting.md](self-hosting.md)); the images build from `apps/api/Dockerfile` and
+`apps/web/Dockerfile` (Debian slim, non-root, `tini`, health checks). CI builds both and
+starts the stack on every change. Publishing images to GitHub Container Registry on tagged
+releases comes with the first release. With `MIGRATE_ON_START=true` the api applies
+pending migrations before it listens; `prisma migrate deploy` takes a database lock, so
+concurrent starts are safe.
 
 ## Configuration
 

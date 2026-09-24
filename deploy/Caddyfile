@@ -1,0 +1,7 @@
+# Terminates TLS for DOMAIN (certificates from Let's Encrypt) and forwards to the web app.
+# Caddy replaces any X-Forwarded-For sent by clients with the real client address, which the
+# api then uses for rate limits and the audit log.
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy web:3000
+}

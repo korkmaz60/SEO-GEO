@@ -22,8 +22,14 @@ chart components · next-intl · next-themes · lucide-react · cmdk · Geist Sa
 ### URL scheme
 
 ```
-/login, /signup, /invite/:token                      authentication (M1)
-/:workspace                                          workspace home → project list
+/sign-in, /sign-up, /verify-email                    authentication
+/forgot-password, /reset-password, /two-factor
+/invite/:invitationId                                accept a workspace invitation
+/onboarding                                          workspace → first project → DataForSEO
+/account                                             profile, password, 2FA, API keys, sessions
+/:workspace                                          opens the first project (admins without
+                                                     projects go to project creation)
+/:workspace/projects/new                             new project
 /:workspace/:project/overview                        project overview
 /:workspace/:project/ai-visibility                   AI visibility summary
 /:workspace/:project/ai-visibility/prompts           prompt library and results
@@ -34,15 +40,28 @@ chart components · next-intl · next-themes · lucide-react · cmdk · Geist Sa
 /:workspace/:project/backlinks                       backlink profile (M4)
 /:workspace/:project/search-console                  GSC performance (M2)
 /:workspace/:project/reports                         reports and schedules (M4)
-/:workspace/:project/settings                        domain, locations, competitors, integrations
+/:workspace/:project/settings                        brand name, market, device, time zone,
+                                                     competitors, archive and delete
 /:workspace/research/keywords                        keyword explorer (workspace-level tool)
 /:workspace/research/domains                         domain overview (workspace-level tool)
-/:workspace/settings/...                             general, members, providers, usage, billing (cloud)
+/:workspace/settings                                 general (rename, delete, leave)
+/:workspace/settings/members                         members, roles, invitations
+/:workspace/settings/projects                        all projects incl. archived
+/:workspace/settings/providers                       DataForSEO connection
+/:workspace/settings/usage                           monthly spend and budget
+/:workspace/settings/audit-log                       audit log (admins)
 /design                                              living style guide
+/healthz                                             container health check
 ```
 
-Workspace and project segments are slugs. Reserved top-level names (`login`, `signup`,
-`invite`, `design`, `api`, `settings`, …) cannot be used as workspace slugs.
+Workspace and project segments are slugs. Top-level route names (`account`, `api`,
+`design`, `invite`, `onboarding`, `sign-in`, …) cannot be used as workspace slugs, and
+workspace-level names (`projects`, `research`, `settings`, …) cannot be used as project
+slugs; the lists live in `packages/contracts`.
+
+Signed-out visitors are redirected to `/sign-in?next=…` by `proxy.ts` (an optimistic
+cookie check); pages still verify the session with the api. The browser only talks to the
+web origin: `app/api/[...path]/route.ts` forwards `/api/*` to `API_URL` at request time.
 
 ### Navigation
 
@@ -59,7 +78,8 @@ Sidebar (collapsible to icons), in this order:
 - Footer: usage this month (cost vs budget), user menu
 
 Header: breadcrumbs, command palette (`⌘K`: navigate, switch project, run actions), task
-indicator (running background tasks), locale switch, theme toggle.
+indicator (shown while background tasks run), notifications, theme toggle. The language
+is chosen in the user menu and saved on the profile, which also sets the email language.
 
 ### Page templates
 

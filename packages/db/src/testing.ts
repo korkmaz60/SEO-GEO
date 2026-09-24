@@ -14,10 +14,13 @@ export interface TestDatabase {
 }
 
 /**
- * Creates an empty database next to the one in `serverUrl`, applies every migration and
- * returns its URL. The role in `serverUrl` needs the CREATEDB privilege.
+ * Creates an empty database next to the one in `serverUrl`, applies every migration (unless
+ * `migrate` is false) and returns its URL. The role in `serverUrl` needs CREATEDB.
  */
-export async function createTestDatabase(serverUrl: string): Promise<TestDatabase> {
+export async function createTestDatabase(
+  serverUrl: string,
+  { migrate = true }: { migrate?: boolean } = {},
+): Promise<TestDatabase> {
   const name = `seogeo_test_${randomBytes(6).toString("hex")}`;
   await withClient(serverUrl, (client) => client.query(`CREATE DATABASE "${name}"`));
 
@@ -33,7 +36,7 @@ export async function createTestDatabase(serverUrl: string): Promise<TestDatabas
   };
 
   try {
-    await applyMigrations(database.url);
+    if (migrate) await applyMigrations(database.url);
   } catch (error) {
     await database.drop();
     throw error;

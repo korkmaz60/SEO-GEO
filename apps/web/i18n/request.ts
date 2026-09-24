@@ -3,8 +3,8 @@ import { getRequestConfig } from "next-intl/server";
 
 import { LOCALE_COOKIE, isLocale, localeFromAcceptLanguage } from "./locale";
 
-// Locale order: explicit cookie (user choice), then the browser's Accept-Language.
-// From M1 on the user profile's locale takes precedence.
+// Locale order: explicit cookie (user choice), then the browser's Accept-Language. The user
+// menu and the account page save a choice both here and on the profile (email language).
 export default getRequestConfig(async () => {
   const cookieLocale = (await cookies()).get(LOCALE_COOKIE)?.value;
   const locale = isLocale(cookieLocale)

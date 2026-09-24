@@ -20,12 +20,14 @@ from scratch in a monorepo, reusing the demo's visual language.
 | [security.md](security.md) | Threat model and security controls |
 | [frontend.md](frontend.md) | Information architecture, design system, data display rules, i18n |
 | [roadmap.md](roadmap.md) | Milestones M0–M5 with exit criteria |
+| [self-hosting.md](self-hosting.md) | Installing, configuring, upgrading and backing up with Docker |
 | [research/](research/) | Market and GEO research notes |
 
 ## Decision log
 
-Status: **Accepted** = agreed with the project owner, **Proposed** = recommended default,
-open for change until the milestone that depends on it starts.
+Status: **Accepted** = agreed with the project owner, or a proposed default that the
+milestone depending on it has been built on; **Proposed** = recommended default, open for
+change until the milestone that depends on it starts.
 
 | # | Decision | Status |
 |---|---|---|
@@ -33,11 +35,12 @@ open for change until the milestone that depends on it starts.
 | D2 | Backend: NestJS 12 (ESM), one codebase running in `api` and `worker` modes | Accepted |
 | D3 | Frontend: Next.js 16 (App Router) + Tailwind CSS v4 + shadcn/ui | Accepted |
 | D4 | One codebase for self-hosted and cloud editions (`DEPLOYMENT_MODE`) | Accepted |
-| D5 | PostgreSQL; Supabase-compatible but not Supabase-dependent | Proposed |
-| D6 | Job queue on PostgreSQL with pg-boss (no Redis requirement) | Proposed |
-| D7 | Authentication with Better Auth (organizations, API keys, 2FA) | Proposed |
-| D8 | Shared Zod contracts for validation, OpenAPI and typed clients | Proposed |
+| D5 | PostgreSQL; Supabase-compatible but not Supabase-dependent | Accepted (M1) |
+| D6 | Job queue on PostgreSQL with pg-boss (no Redis requirement) | Accepted (M1) |
+| D7 | Authentication with Better Auth (organizations, API keys, 2FA) | Accepted (M1) |
+| D8 | Shared Zod contracts for validation, OpenAPI and typed clients | Accepted (M1) |
 | D9 | DataForSEO as the first-class data provider, bring-your-own-key | Accepted |
 | D10 | Positioning: GEO/AEO depth + agency workflows, Turkish + English at launch | Proposed |
 | D11 | License: AGPL-3.0 | Proposed — needs the owner's explicit approval before a `LICENSE` file is added |
 | D12 | Cloud billing with Stripe Managed Payments (Stripe is the merchant of record and handles sales tax and VAT) on the owner's company outside Turkey; Paddle as fallback; loaded only in the cloud edition | Accepted |
+| D13 | Self-hosting with Docker: one image for api and worker, one for the web app, Docker Compose with PostgreSQL and optional Caddy for HTTPS; migrations run on api start | Accepted (M1) |

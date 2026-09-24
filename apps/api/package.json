@@ -4,6 +4,9 @@
   "private": true,
   "description": "SEO-GEO backend: REST API and background worker (NestJS)",
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "nest start --watch",

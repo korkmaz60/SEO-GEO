@@ -2,7 +2,7 @@
 
 Each milestone ends with a working, tested, releasable state.
 
-## M0 — Foundation *(this change)*
+## M0 — Foundation *(done)*
 
 - Design documentation (this folder).
 - Monorepo: pnpm workspaces, Turborepo, shared TypeScript and lint configuration.
@@ -18,20 +18,22 @@ Each milestone ends with a working, tested, releasable state.
 **Exit:** `pnpm install && pnpm build && pnpm test` passes locally and in CI; the web shell
 runs against the api health endpoint.
 
-## M1 — Platform core
+## M1 — Platform core *(done, except the demo removal)*
 
-- `packages/db`: Prisma schema for identity, workspaces, projects, brand entities,
+- [x] `packages/db`: Prisma schema for identity, workspaces, projects, brand entities,
   credentials, usage, budgets, tasks, audit log, notifications; RLS lockdown migration.
-- Better Auth: sign-up/sign-in, email verification, password reset, organizations,
+- [x] Better Auth: sign-up/sign-in, email verification, password reset, organizations,
   invitations, roles, API keys, 2FA. Self-hosted first-run admin.
-- Workspaces, members, projects and brand entities (own brand + competitors).
-- Provider credentials: encrypted storage, DataForSEO connection test with balance.
-- Safe fetcher, usage ledger, budgets, task API, pg-boss integration, worker mode.
-- Web: auth pages, onboarding (workspace → project → provider key), settings, task indicator.
-- Web: replace the build-time `/api` rewrite with a runtime proxy route so one image works
+- [x] Workspaces, members, projects and brand entities (own brand + competitors).
+- [x] Provider credentials: encrypted storage, DataForSEO connection test with balance.
+- [x] Safe fetcher, usage ledger, budgets, task API, pg-boss integration, worker mode.
+- [x] Web: auth pages, onboarding (workspace → project → provider key), settings, task indicator.
+- [x] Web: replace the build-time `/api` rewrite with a runtime proxy route so one image works
   with any `API_URL`; load `.env` files in dev for the api.
-- Docker images and `docker compose` for self-hosting.
-- Remove `legacy/demo` once nothing references it.
+- [x] Docker images and `docker compose` for self-hosting ([self-hosting.md](self-hosting.md)).
+- [x] Audit log for workspace, membership, project, credential and budget changes;
+  localized in-app notifications (budget thresholds, rejected provider keys).
+- [ ] Remove `legacy/demo` — waiting for the owner's go-ahead.
 
 **Exit:** a new user can install with Docker, sign up, create a workspace and project,
 connect DataForSEO and see the balance; tenant isolation tests pass.
