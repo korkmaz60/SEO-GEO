@@ -59,17 +59,28 @@ recorded costs. Verified end to end against recorded DataForSEO responses and a 
 API in the integration tests; the first run against live DataForSEO and Google accounts is
 still to be done by the project owner.
 
-## M3 — GEO/AEO and agents
+## M3 — GEO/AEO and agents *(done)*
 
-- Prompt library, schedules and sampling; runs through the DataForSEO AI Optimization API;
-  AI Overview and AI Mode via SERP API.
-- Mentions, citations, share of voice, sentiment, cited sources and pages, visibility score
-  with uncertainty.
-- Page citability score and recommendations from the site audit.
-- Public REST API with API keys and the MCP server.
+- [x] Prompt library with tags and markets; weekly or daily schedules with 1–5 samples;
+  answers from ChatGPT and Gemini (LLM Scraper), Perplexity and Claude (LLM Responses),
+  Google AI Mode and AI Overviews (SERP API); the cost before saving settings or adding
+  prompts, and budget stops.
+- [x] Mention detection (Turkish-aware, ambiguous names need evidence), citations
+  attributed to brands and known pages, optional sentiment.
+- [x] Mention and citation rates with 95% intervals, share of voice, average rank, AI
+  visibility score v1, significant changes, cited domains and pages, competitor comparison
+  and weekly trends.
+- [x] Page citability score v1 in the site audit: nine factors, per-page details and
+  recommendations, low-score filter.
+- [x] Workspace API keys with scopes (`read`, `write`, `run:paid`) and the MCP server with
+  12 tools; paid tools need an explicit cost confirmation.
+- [x] Web: AI visibility summary, prompts with the answer sheet, sources, competitors; API
+  & MCP settings; AI visibility on the project overview.
 
-**Exit:** a project tracks prompts on at least four AI platforms with trends and competitor
-share of voice; an MCP client can query rankings and AI visibility.
+**Exit:** a project tracks prompts on six AI platforms with trends and competitor share of
+voice; an MCP client can query rankings, AI visibility and site audits. Verified against a
+fake DataForSEO server in the integration tests and with seeded data in the web app; the
+first run against live DataForSEO AI endpoints is still to be done by the project owner.
 
 ## M4 — Agency
 

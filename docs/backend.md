@@ -16,7 +16,8 @@ src/
   config/                 Zod-validated environment, .env loading in development, logger
   common/                 validation pipe, problem+json filter, params, serialization
   auth/                   Better Auth instance and hooks, AuthGuard, WorkspaceGuard,
-                          decorators (@Public, @WorkspaceScoped, @RequireRole)
+                          decorators (@Public, @WorkspaceScoped, @RequireRole,
+                          @RequireScope, @SessionOnly)
   mail/                   SMTP or console mailer, TR/EN email templates
   crypto/                 AES-256-GCM secret box for provider credentials
   net/                    SafeFetcherService: the only client for user-supplied URLs
@@ -34,11 +35,14 @@ src/
   rank-tracker/           tracked keywords, SERP checks (post and collect), read model
   site-audit/             audit runs; crawl and analysis run in the worker
   google/                 Google OAuth connections, Search Console and GA4 sources, sync
+  ai-visibility/          prompts, AI settings and cost quotes, answers (dispatch, post,
+                          collect, live answers, sentiment), analysis and read models
+  api-keys/               workspace-bound API keys with scopes
+  mcp/                    MCP server (Streamable HTTP) over the same services
   modules/
     health/               liveness
     account/              GET /instance (sign-up mode), GET /me
     workspaces/           GET /workspaces/:id (membership and role)
-  ai-visibility/ mcp/ llm/                                                    (M3)
   reports/ alerts/ backlinks/ domains/                                        (M4)
   billing/                cloud edition only                                  (M5)
 ```
@@ -60,7 +64,7 @@ handlers call the same services, so logic is written once.
 | Async work | `202 Accepted` + `{ "task": {...} }`; progress at `GET /api/v1/workspaces/:workspaceId/tasks/:taskId` |
 | Idempotency | `Idempotency-Key` header on POSTs that create tasks; replays return the original task |
 | Rate limits | `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset` headers; `429` with problem+json |
-| Auth | session cookie (web) or `x-api-key: <api key>` |
+| Auth | session cookie (web), or an API key as `x-api-key: sg_…` or `Authorization: Bearer sg_…` |
 | Docs | OpenAPI at `/api/v1/openapi.json`, generated from the Zod contracts; Swagger UI at `/api/docs` (can be disabled) |
 
 The web app uses exactly the same API as third parties.
@@ -79,11 +83,23 @@ The web app uses exactly the same API as third parties.
 - **Guards**: a global `AuthGuard` requires a session or API key unless a route is
   `@Public()`; `@WorkspaceScoped()` adds `WorkspaceGuard`, which resolves `:workspaceId`,
   checks membership (non-members get 404, so IDs cannot be probed) and the minimum role set
-  with `@RequireRole()`.
-- **API keys** (`sg_…`, sent as `x-api-key`) are personal: a key acts as its user, with the
-  user's roles in each workspace. Keys can expire and are listed and revoked on the account
-  page. Workspace-bound keys with scopes (`read`, `write`, `run:paid`) arrive with the
-  public API (M3).
+  with `@RequireRole()`. `@RequireScope()` names the scope an API key needs for a route
+  (`read` for reads, `write` for changes, `run:paid` for anything that spends provider
+  money); `@SessionOnly()` routes (key management) refuse API keys.
+- **API keys** (`sg_…`) are Better Auth keys and act as the user who created them, never
+  with more than that user's current role:
+  - *Workspace keys* (workspace settings → API & MCP) are bound to one workspace
+    (`workspace_api_key`) and carry scopes; a request outside a key's scopes gets 403 and
+    one for another workspace 404. Every member can create keys, but the creator's role
+    still applies (a viewer's key can only read, whatever its scopes). Owners and admins see
+    and revoke every key of the workspace, others their own. Expiry: 30, 90 or 365 days, or
+    never.
+  - *Personal keys* (account page, without a workspace binding) act as the user in every
+    workspace with all scopes.
+  - Keys are rejected on `/api/auth/*` (account, session and member endpoints) with 403, so
+    a leaked key cannot change a password, create keys or manage members. Each key is
+    limited to 600 requests per minute; creation and revocation are in the audit log, and
+    actions taken with a key record `actor_api_key_id`.
 - **Audit trail**: project, credential and budget changes are recorded by their services;
   workspace, invitation and membership changes happen inside Better Auth and are recorded
   by its organization hooks. The acting user, IP and user agent come from a request
@@ -113,11 +129,20 @@ The web app uses exactly the same API as third parties.
 | `google.sync` | dispatch, new source, "sync now" | one job per source (`stately`) | |
 | `credentials.reverify` | daily 03:15 UTC | re-checks DataForSEO keys | |
 | `maintenance.provider-cache` | daily 04:25 UTC | deletes expired cache entries | |
-| `ai.*`, `reports.*`, `alerts.*` | M3–M4 | | |
+| `ai.dispatch` | hourly at :23 | queues `ai.check` for projects with active prompts and platforms | |
+| `ai.check` | dispatch, new prompts, "ask now" | one job per project (singleton key); creates the answers due per prompt, platform and sample, then posts the Standard-queue ones | ✓ |
+| `ai.collect` | every minute | polls `tasks_ready` for AI tasks; tasks not listed after 20 minutes are fetched directly; answers missing after 24 hours fail | |
+| `ai.answer` | every minute | live answers (Claude, Perplexity): 4 at a time, passes of up to 4 minutes; each answer is claimed before its request, which has a 180-second timeout and no retries (a timed-out request may have been billed) | ✓ |
+| `ai.sentiment` | every 5 minutes | classifies mentions of the last 48 hours for projects with sentiment enabled | ✓ |
+| `reports.*`, `alerts.*` | M4 | | |
 
 Rules for every handler: idempotent writes (upserts keyed by natural keys), bounded retries
 with exponential backoff, progress reported on the `task` row, provider cost written to
 `usage_entry` in the same transaction as the results.
+
+pg-boss creates a queue once, with the options of whichever process gets there first, so
+every process takes the queue options (policy, retries, expiry) from the task registry
+instead of relying on defaults.
 
 ## DataForSEO integration
 
@@ -141,13 +166,16 @@ usage ledger and checks the budget before paid work.
 | Locations and languages | SERP / Labs locations and languages | cached 30 days |
 | Rank tracking *(M2)* | SERP API Google organic `task_post` → `tasks_ready` → `task_get` (advanced) | Standard queue |
 | On-demand SERP | SERP API Google organic live (advanced) | Live |
-| AI Overview / AI Mode | SERP API AI Overview items; Google AI Mode SERP | Standard / Live |
+| AI Overviews | SERP API Google organic first page with `load_async_ai_overview`; the AI Overview element is the answer | Standard queue |
+| AI Mode | SERP API Google AI Mode `task_post` → `tasks_ready` → `task_get` | Standard queue |
 | Keyword explorer *(M2)* | Labs keyword ideas, keyword suggestions, related keywords; keyword overview for the metrics of tracked keywords | Live, cached |
 | Search volume (bulk) | Keywords Data Google Ads search volume | Standard |
 | Domain overview | Labs domain rank overview, ranked keywords, historical rank overview, competitors, domain intersection | Live, cached |
 | Backlinks | Backlinks summary, referring domains, anchors, backlinks, new/lost time series, spam score | Live, cached |
 | Site audit (optional provider) | On-Page API task-based crawl, pages, links, duplicates, Lighthouse | Standard |
-| AI visibility | AI Optimization API: LLM Responses (ChatGPT, Claude, Gemini, Perplexity), LLM Mentions, AI Keyword Data, LLM Scraper | Standard / Live |
+| AI visibility *(M3)* | AI Optimization API: LLM Scraper for ChatGPT and Gemini (`task_post` → `tasks_ready` → `task_get`); LLM Responses for Claude and Perplexity; LLM Responses models list (cached 1 day) | Standard queue / Live |
+| Sentiment *(M3)* | LLM Responses, the cheapest ChatGPT model, no web search | Live |
+| AI market data | AI Optimization LLM Mentions, AI Keyword Data | not used yet |
 
 Exact paths and response fields are verified against the DataForSEO v3 documentation when
 each integration is built, and pinned with recorded (sanitized) fixtures and Zod schemas.
@@ -165,6 +193,9 @@ estimates (checked 2026-09-24):
 | Each further page of 10 results | 75% of the first page |
 | `load_async_ai_overview` | +0.0006, refunded when the SERP has no asynchronous AI Overview |
 | Labs (ideas, suggestions, related keywords, keyword overview) | 0.012 per request + 0.00012 per returned keyword |
+| Google AI Mode, one answer | 0.0012 Standard · 0.004 Live |
+| LLM Scraper (ChatGPT, Gemini), one answer | 0.0012 Standard · 0.004 Live |
+| LLM Responses (Claude, Perplexity), one answer | 0.0002 Standard · 0.0006 Live task fee, plus what the model provider charges for tokens and searches (reported per answer; estimated per model family for previews, e.g. 0.05 for Claude Haiku, 0.01 for Sonar) |
 
 A daily rank check at depth 30 with AI Overview loading costs at most
 `0.0006 × (1 + 0.75 × 2) + 0.0006 = 0.0021` per keyword, about 6.30 per month for 100
@@ -185,10 +216,10 @@ workspace-specific goes into these tables.
 
 **Cost control.** Paid actions show an estimate first (e.g. the quote when adding keywords
 to the rank tracker). Budgets are checked before posting; a hard-stop budget rejects the
-action with problem code `budget_exceeded`, and scheduled rank checks pause with a
-`rank.budget_blocked` notification to owners and admins. DataForSEO account errors (no
-balance, blocked access) stop posting for the workspace and notify owners and admins with
-`dataforseo.account_blocked`.
+action with problem code `budget_exceeded`, and scheduled rank checks and AI answers pause
+with a `rank.budget_blocked` or `ai.budget_blocked` notification to owners and admins.
+DataForSEO account errors (no balance, blocked access) stop posting for the workspace and
+notify owners and admins with `dataforseo.account_blocked`.
 
 **Postback.** M2 polls `tasks_ready` every minute in both editions. A signed `pingback_url`
 for the cloud edition can replace polling later.
@@ -212,13 +243,30 @@ for the cloud edition can replace polling later.
 - Weekly keywords carry their last position forward for up to 7 days in daily series;
   changes compare with the check 7 and 30 days earlier, within a tolerance of 7 days.
 
+## AI visibility
+
+- A prompt is a question in the project's market (location, language) with tags; up to
+  1,000 per project and 200 per request, 500 characters each. Adding prompts returns a quote
+  first (`POST …/ai-visibility/prompts/quote`: new, duplicate and invalid lines and the cost
+  per period and month).
+- Settings per project (`project_ai_settings`): platforms, weekly or daily, 1–5 samples,
+  the Claude and Perplexity models, sentiment. Saving shows the cost first
+  (`POST …/ai-visibility/settings/quote`).
+- One `ai_run` row per prompt, platform, day and sample; it is claimed (`posted_at`) before
+  the request, so two workers never pay for the same answer. Every completed answer is
+  analyzed at once with the rules in [geo-aeo.md](geo-aeo.md) and stored with its
+  mentions and citations.
+- Read models aggregate answers, mentions and citations in SQL by period, platform and week
+  (`GET …/ai-visibility`, `/prompts`, `/prompts/:id`, `/sources`).
+
 ## LLM providers
 
-Used for classification (sentiment), recommendations and content suggestions — never to
-produce a metric. Implemented with the AI SDK and a provider registry (OpenAI, Anthropic,
-Google, OpenRouter) using the workspace's keys. Every call uses a structured output schema
-(Zod), a versioned prompt template, and writes token usage and cost to the ledger. Model IDs
-are configuration, not code.
+M3 needs no LLM keys of its own: sentiment runs through DataForSEO LLM Responses with a
+versioned prompt, a JSON reply that is parsed and validated, and its cost in the usage
+ledger. LLMs classify and suggest; they never produce a metric. Workspace LLM keys
+(OpenAI, Anthropic, Google, OpenRouter) through a provider registry arrive with generated
+content (content optimizer and rewrite suggestions, M5); model IDs stay configuration, not
+code.
 
 ## Site audit crawler
 
@@ -247,6 +295,10 @@ are configuration, not code.
   `robots.txt`, and `/llms.txt`.
 - Health score v1: `round(100 × (1 − (pages_with_errors + 0.5 × pages_with_only_warnings) / crawled_pages))`,
   over pages that were requested (not blocked by `robots.txt`).
+- Page citability score v1 for every indexable HTML page, from the main content, JSON-LD,
+  dates, links and the AI search crawler rules ([geo-aeo.md](geo-aeo.md)); the run keeps the
+  average and per-factor averages, pages can be sorted and filtered by it, and a page's
+  detail lists its factors and recommendations.
 - Each run is compared with the previous completed run: new and fixed occurrences per
   issue, matched by issue code and URL.
 - One active run per project; runs can be canceled. Pages, links and issues are kept for
@@ -279,12 +331,18 @@ are configuration, not code.
 
 ## Public API and MCP
 
-- Every capability is available through `/v1` with API keys.
-- MCP server at `/v1/mcp` (Streamable HTTP, API-key auth). Tools map to services, e.g.
-  `list_projects`, `get_project_overview`, `get_rankings`, `get_keyword_ideas`,
-  `get_ai_visibility`, `list_ai_citations`, `get_audit_issues`, `run_site_audit`, `get_task`.
-- Tools that spend money require `run:paid` scope, return a cost estimate first, and need an
-  explicit confirmation argument.
+- Every capability of the web app is available through `/api/v1` with API keys; the web app
+  uses the same endpoints.
+- MCP server at `/api/v1/mcp`: Streamable HTTP, stateless (a server per request, JSON
+  responses, no sessions), authenticated with an API key (`Authorization: Bearer sg_…`).
+  Tools call the same services with the same workspace membership, roles and scopes:
+  `list_projects`, `get_rankings`, `get_ai_visibility`, `list_ai_prompts`,
+  `get_ai_answers`, `list_ai_sources`, `get_site_audit`, `list_audit_pages`,
+  `get_audit_page`, `get_keyword_ideas`, `add_ai_prompts` and `run_site_audit`.
+- Tools that spend money (`get_keyword_ideas` when the result is not cached,
+  `add_ai_prompts`) need the `run:paid` scope and return the estimated cost first; they run
+  only when called again with `confirm_cost_usd` of at least that estimate.
+- Workspace settings → API & MCP shows the endpoint and ready-made client configuration.
 
 ## Billing (cloud edition)
 

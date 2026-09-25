@@ -50,6 +50,7 @@ chart components · next-intl · next-themes · lucide-react · cmdk · Geist Sa
 /:workspace/settings/projects                        all projects incl. archived
 /:workspace/settings/providers                       DataForSEO key, connected Google accounts
 /:workspace/settings/usage                           monthly spend and budget
+/:workspace/settings/api                             workspace API keys, MCP client setup
 /:workspace/settings/audit-log                       audit log (admins)
 /design                                              living style guide
 /healthz                                             container health check
