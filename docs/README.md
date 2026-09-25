@@ -52,3 +52,4 @@ change until the milestone that depends on it starts.
 | D18 | AI visibility score v1 and page citability score v1 are deterministic, versioned formulas; rates carry 95% Wilson intervals; LLMs classify (sentiment) but never produce a metric | Accepted (M3) |
 | D19 | Workspace-bound API keys with scopes (`read`, `write`, `run:paid`) built on Better Auth keys; keys act as their creator and are refused on account endpoints | Accepted (M3) |
 | D20 | MCP server inside the api at `/api/v1/mcp` (Streamable HTTP, stateless, API-key auth); paid tools return an estimate and need `confirm_cost_usd` | Accepted (M3) |
+| D21 | Workspaces can enter their own Google OAuth client in the app (checked with Google, secret encrypted); `GOOGLE_CLIENT_ID` stays the installation-wide default | Accepted |

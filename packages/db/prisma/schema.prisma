@@ -130,6 +130,7 @@ model Organization {
   rankChecks          RankCheck[]
   keywordLists        KeywordList[]
   googleConnections   GoogleConnection[]
+  googleOAuthClient   GoogleOAuthClient?
   projectIntegrations ProjectIntegration[]
   auditRuns           AuditRun[]
   prompts             Prompt[]
@@ -694,6 +695,25 @@ enum GoogleConnectionStatus {
 
 /// A Google account connected for Search Console and Analytics. Tokens are AES-256-GCM
 /// encrypted and never returned by the API.
+/// A workspace's own Google OAuth client. Without one, the installation's client
+/// (GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET) is used.
+model GoogleOAuthClient {
+  workspaceId     String   @id @map("workspace_id") @db.Uuid
+  /// Not secret: Google shows it in every consent URL.
+  clientId        String   @map("client_id")
+  /// Encrypted client secret.
+  encryptedSecret Bytes    @map("encrypted_secret")
+  keyVersion      Int      @map("key_version")
+  verifiedAt      DateTime @map("verified_at") @db.Timestamptz(3)
+  createdBy       String?  @map("created_by") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Organization @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("google_oauth_client")
+}
+
 model GoogleConnection {
   id              String                 @id @default(uuid(7)) @db.Uuid
   workspaceId     String                 @map("workspace_id") @db.Uuid
@@ -706,6 +726,9 @@ model GoogleConnection {
   keyVersion      Int                    @map("key_version")
   status          GoogleConnectionStatus @default(ACTIVE)
   lastError       String?                @map("last_error")
+  /// The OAuth client that issued the tokens; they only refresh with that client. `null` for
+  /// connections made before workspaces could bring their own client (the installation's).
+  oauthClientId   String?                @map("oauth_client_id")
   connectedBy     String?                @map("connected_by") @db.Uuid
   createdAt       DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime               @updatedAt @map("updated_at") @db.Timestamptz(3)

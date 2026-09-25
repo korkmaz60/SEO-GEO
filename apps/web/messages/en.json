@@ -16,7 +16,9 @@
     "percentagePoints": "{value} pp",
     "cancel": "Cancel",
     "actionFailed": "That didn't work. Please try again.",
-    "typeToConfirm": "Type <code>{text}</code> to confirm"
+    "typeToConfirm": "Type <code>{text}</code> to confirm",
+    "copy": "Copy",
+    "copied": "Copied"
   },
   "nav": {
     "groups": {
@@ -538,14 +540,14 @@
     "upcoming": {
       "aiPlatforms": {
         "title": "AI platforms",
-        "description": "Your own API keys for ChatGPT, Gemini, Claude and Perplexity."
+        "description": "Your own OpenAI, Anthropic or Google keys for content suggestions. AI visibility already works through DataForSEO."
       }
     },
     "google": {
       "title": "Google (Search Console and Analytics)",
       "description": "Google accounts connected to the workspace. Each project's Search Console and GA4 property is chosen on the project's Search Console page.",
       "empty": "No Google account is connected yet. You can connect one from a project's Search Console page.",
-      "notConfigured": "This server has no Google OAuth client (GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET). See the self-hosting guide for the setup steps.",
+      "notConfigured": "No Google client is set up; add one in the section above before connecting accounts.",
       "openSearchConsole": "Go to Search Console",
       "connectedAt": "Connected {time}",
       "active": "Connected",
@@ -554,6 +556,44 @@
       "disconnectTitle": "Disconnect {email}?",
       "disconnectBody": "The access granted in Google is revoked. The Search Console and GA4 sources of projects that use this account are removed together with their imported data.",
       "removed": "The Google account was disconnected."
+    },
+    "googleClient": {
+      "title": "Google OAuth client",
+      "description": "The app registration in Google Cloud that Search Console and GA4 accounts are connected through. Set it up once.",
+      "sourceWorkspace": "Workspace's own",
+      "sourceInstance": "Installation default",
+      "clientId": "Client ID",
+      "clientIdPlaceholder": "1234567890-abc123.apps.googleusercontent.com",
+      "clientIdHint": "The client's ID in Google Cloud; it ends in .apps.googleusercontent.com.",
+      "clientIdInvalid": "The client ID ends in .apps.googleusercontent.com. Copy it from the client's page in Google Cloud.",
+      "clientSecret": "Client secret",
+      "clientSecretHint": "The client's secret. If you cannot see it, add a new one on the client's page.",
+      "encrypted": "Checked with Google before it is saved. The secret is stored encrypted and never shown again.",
+      "submit": "Check and save",
+      "verifying": "Checking…",
+      "rejected": "Google did not accept this client. Copy the client ID and secret again; the client must be of the Web application type.",
+      "unreachable": "Google cannot be reached right now; nothing was saved. Try again in a moment.",
+      "forbidden": "Only owners and admins can change the Google client.",
+      "saved": "Google client checked and saved.",
+      "removed": "The workspace's Google client was removed.",
+      "verifiedAt": "Checked with Google",
+      "configuredBy": "Set by",
+      "serverSetting": "Server setting (GOOGLE_CLIENT_ID)",
+      "replace": "Replace client",
+      "useOwn": "Use your own client",
+      "remove": "Remove",
+      "removeTitle": "Remove this workspace's Google client?",
+      "removeBody": "Google accounts connected with this client must be connected again. {instance, select, true {The installation's default client is used from now on.} other {Google accounts cannot be connected until a new client is added.}}",
+      "replaceHint": "If you save a different client, accounts connected with the current one must be connected again.",
+      "askAdmin": "No Google client is set up yet. Ask an owner or admin to set one up.",
+      "guide": {
+        "title": "How to create the client (about 10 minutes)",
+        "why": "Google requires every app that reads Search Console and Analytics data to be registered in Google Cloud. This installation is yours, so you register it once.",
+        "step1": "Pick a project in Google Cloud and enable these three APIs: <sc>Search Console API</sc>, <data>Google Analytics Data API</data>, <admin>Google Analytics Admin API</admin>.",
+        "step2": "On <audience>Google Auth Platform → Audience</audience>, choose the External user type. While the app is in testing, only accounts on the Test users list can connect (others see “Error 403: access_denied”); publish the app for lasting use.",
+        "step3": "On <clients>Clients</clients>, create a client of the Web application type and add this address under Authorized redirect URIs:",
+        "step4": "Paste the client ID and secret below and save."
+      }
     }
   },
   "workspaceSettings": {
@@ -746,8 +786,6 @@
       },
       "createdTitle": "Your key is ready",
       "createdBody": "Copy the key now and store it safely; it will not be shown again.",
-      "copy": "Copy",
-      "copied": "Copied.",
       "done": "Done",
       "failed": "The key could not be created.",
       "mcp": {
@@ -1698,9 +1736,10 @@
     },
     "oauth": {
       "connected": "Google account connected. Now choose the project's properties.",
-      "denied": "Google access was not granted; nothing was connected.",
+      "denied": "Google did not grant access. If the app is in testing in Google Cloud, add your account to its Test users.",
       "failed": "The Google account could not be connected. Please try again.",
-      "forbidden": "Only owners and admins can connect Google accounts."
+      "forbidden": "Only owners and admins can connect Google accounts.",
+      "client_changed": "The Google client changed while you were connecting. Please connect again."
     },
     "status": {
       "type": {
@@ -1740,12 +1779,10 @@
       "connectAnother": "Connect another Google account"
     },
     "notConfigured": {
-      "title": "Google sign-in is not configured on this server",
-      "body": "Search Console and GA4 data need a Google OAuth client on the server. Whoever runs the installation does the steps below once.",
-      "step1": "Create a project in Google Cloud Console and enable the Search Console API, the Google Analytics Data API and the Google Analytics Admin API.",
-      "step2": "Create an OAuth client of type \"Web application\" and add this authorized redirect URI:",
-      "step3": "Add the client ID and secret to the api and worker environment:",
-      "step4": "Restart the services. A \"Connect Google account\" button will appear on this page."
+      "title": "Google needs a one-time setup",
+      "body": "Google requires every app that reads Search Console and Analytics data to have an OAuth client registered in Google Cloud. This installation is yours, so you create the client once; the settings page walks you through it.",
+      "setUp": "Set up the Google client",
+      "askAdmin": "Ask an owner or admin to set up the Google client."
     },
     "sources": {
       "title": "Data sources",

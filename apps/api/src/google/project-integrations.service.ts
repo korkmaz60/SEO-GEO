@@ -19,6 +19,7 @@ import { ProblemException } from "../common/problem.exception.js";
 import { PrismaService } from "../database/prisma.service.js";
 import { GoogleApi } from "./google-api.js";
 import { GoogleConnectionsService, googleProblem } from "./google-connections.service.js";
+import { GoogleOAuthClientsService } from "./google-oauth-clients.service.js";
 import { GoogleSyncService } from "./google-sync.service.js";
 import { deleteImportedFacts } from "./imported-facts.js";
 
@@ -66,6 +67,7 @@ export class ProjectIntegrationsService {
     private readonly prisma: PrismaService,
     private readonly google: GoogleApi,
     private readonly connections: GoogleConnectionsService,
+    private readonly clients: GoogleOAuthClientsService,
     private readonly sync: GoogleSyncService,
   ) {}
 
@@ -156,11 +158,14 @@ export class ProjectIntegrationsService {
     projectId: string,
     days: number,
   ): Promise<PerformanceData> {
-    const integrations = await this.list(workspaceId, projectId);
+    const [integrations, client] = await Promise.all([
+      this.list(workspaceId, projectId),
+      this.clients.forWorkspace(workspaceId),
+    ]);
     const gscEnd = integrations.gsc?.syncedThrough;
     const ga4End = integrations.ga4?.syncedThrough;
     return {
-      googleConfigured: this.google.configured,
+      googleConfigured: client !== null,
       integrations,
       searchConsole: gscEnd ? await this.searchConsole(projectId, gscEnd, days) : null,
       analytics: ga4End ? await this.analytics(projectId, ga4End, days) : null,

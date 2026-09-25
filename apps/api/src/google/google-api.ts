@@ -1,8 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { z } from "zod";
 
-import { APP_CONFIG } from "../config/config.module.js";
-import type { AppConfig, GoogleOAuthConfig } from "../config/env.js";
+import type { GoogleOAuthConfig } from "../config/env.js";
 
 /** Endpoints and transport for Google APIs; replaced in tests. */
 export interface GoogleApiOptions {
@@ -46,9 +45,12 @@ export class GoogleApiError extends Error {
     this.name = "GoogleApiError";
   }
 
-  /** The refresh token no longer works: access was revoked or expired. */
+  /**
+   * The refresh token no longer works: access was revoked or expired, or the token belongs to
+   * another OAuth client.
+   */
   get revoked(): boolean {
-    return this.code === "invalid_grant";
+    return this.code === "invalid_grant" || this.code === "unauthorized_client";
   }
 }
 
@@ -154,36 +156,34 @@ function decodeJwtPayload(token: string): unknown {
   return JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
 }
 
-/** OAuth 2.0 (authorization code with PKCE), Search Console and GA4 over plain HTTPS. */
+/** A failed client check: Google's error code and description. */
+export interface GoogleClientRejection {
+  code: string;
+  message: string;
+}
+
+/**
+ * OAuth 2.0 (authorization code with PKCE), Search Console and GA4 over plain HTTPS. OAuth calls
+ * take the client to use: a workspace's own or the installation's.
+ */
 @Injectable()
 export class GoogleApi {
   private readonly endpoints: typeof ENDPOINTS;
   private readonly fetchImpl: typeof globalThis.fetch;
 
-  constructor(
-    @Inject(APP_CONFIG) private readonly config: AppConfig,
-    @Inject(GOOGLE_API_OPTIONS) options: GoogleApiOptions,
-  ) {
+  constructor(@Inject(GOOGLE_API_OPTIONS) options: GoogleApiOptions) {
     this.endpoints = { ...ENDPOINTS, ...stripUndefined(options) };
     this.fetchImpl = options.fetch ?? globalThis.fetch;
   }
 
-  get configured(): boolean {
-    return this.config.google !== null;
-  }
-
-  private get oauth(): GoogleOAuthConfig {
-    if (!this.config.google) {
-      throw new GoogleApiError(503, "not_configured", "Google OAuth is not configured");
-    }
-    return this.config.google;
-  }
-
-  authorizationUrl(input: { state: string; codeChallenge: string; loginHint?: string }): string {
+  authorizationUrl(
+    client: GoogleOAuthConfig,
+    input: { state: string; codeChallenge: string; loginHint?: string },
+  ): string {
     const url = new URL(this.endpoints.authorizeUrl);
     url.search = new URLSearchParams({
-      client_id: this.oauth.clientId,
-      redirect_uri: this.oauth.redirectUri,
+      client_id: client.clientId,
+      redirect_uri: client.redirectUri,
       response_type: "code",
       scope: GOOGLE_SCOPES.join(" "),
       access_type: "offline",
@@ -198,7 +198,33 @@ export class GoogleApi {
     return url.toString();
   }
 
+  /**
+   * Checks a client ID and secret with Google's token endpoint, without creating anything: a
+   * made-up authorization code is refused as `invalid_grant` once the client has authenticated,
+   * while a wrong ID or secret is refused as `invalid_client`. Returns `null` when the client
+   * works; throws when Google cannot be reached.
+   */
+  async checkClient(client: GoogleOAuthConfig): Promise<GoogleClientRejection | null> {
+    try {
+      await this.form(this.endpoints.tokenUrl, {
+        code: "seo-geo-client-check",
+        client_id: client.clientId,
+        client_secret: client.clientSecret,
+        redirect_uri: client.redirectUri,
+        grant_type: "authorization_code",
+      });
+    } catch (error) {
+      if (!(error instanceof GoogleApiError)) throw error;
+      if (error.code === "invalid_grant") return null;
+      if (error.status >= 500 || error.code === "unreachable") throw error;
+      return { code: error.code, message: error.message };
+    }
+    // Google never accepts a made-up code; were it to, the client evidently works.
+    return null;
+  }
+
   async exchangeCode(
+    client: GoogleOAuthConfig,
     code: string,
     codeVerifier: string,
   ): Promise<{ tokens: GoogleTokens; identity: GoogleIdentity }> {
@@ -206,9 +232,9 @@ export class GoogleApi {
       await this.form(this.endpoints.tokenUrl, {
         code,
         code_verifier: codeVerifier,
-        client_id: this.oauth.clientId,
-        client_secret: this.oauth.clientSecret,
-        redirect_uri: this.oauth.redirectUri,
+        client_id: client.clientId,
+        client_secret: client.clientSecret,
+        redirect_uri: client.redirectUri,
         grant_type: "authorization_code",
       }),
     );
@@ -224,12 +250,13 @@ export class GoogleApi {
     };
   }
 
-  async refresh(refreshToken: string): Promise<GoogleTokens> {
+  /** New access tokens; only the client that issued the refresh token can use it. */
+  async refresh(client: GoogleOAuthConfig, refreshToken: string): Promise<GoogleTokens> {
     const response = TokenResponseSchema.parse(
       await this.form(this.endpoints.tokenUrl, {
         refresh_token: refreshToken,
-        client_id: this.oauth.clientId,
-        client_secret: this.oauth.clientSecret,
+        client_id: client.clientId,
+        client_secret: client.clientSecret,
         grant_type: "refresh_token",
       }),
     );

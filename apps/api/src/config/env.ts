@@ -114,8 +114,18 @@ export interface AppConfig {
   outboundAllowedPorts: number[];
   /** `null` when no SMTP server is configured. */
   smtp: SmtpConfig | null;
-  /** `null` when Google OAuth is not configured (Search Console and GA4 unavailable). */
+  /**
+   * The installation's Google OAuth client; `null` when GOOGLE_CLIENT_ID is unset, in which
+   * case only workspaces with their own client can connect Google accounts.
+   */
   google: GoogleOAuthConfig | null;
+  /** Where Google sends people back after consent; the same for every OAuth client. */
+  googleRedirectUri: string;
+}
+
+/** The OAuth callback on the web origin (the web app forwards `/api` to the api). */
+export function googleRedirectUri(webUrl: string): string {
+  return `${new URL(webUrl).origin}/api/v1/integrations/google/callback`;
 }
 
 export class ConfigError extends Error {
@@ -172,9 +182,10 @@ export function loadConfig(source: Record<string, string | undefined> = process.
         ? {
             clientId: env.GOOGLE_CLIENT_ID,
             clientSecret: env.GOOGLE_CLIENT_SECRET,
-            redirectUri: `${new URL(env.WEB_URL).origin}/api/v1/integrations/google/callback`,
+            redirectUri: googleRedirectUri(env.WEB_URL),
           }
         : null,
+    googleRedirectUri: googleRedirectUri(env.WEB_URL),
   };
 }
 

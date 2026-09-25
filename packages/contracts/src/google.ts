@@ -14,12 +14,46 @@ export const GoogleConnectionSchema = z.object({
 });
 export type GoogleConnection = z.infer<typeof GoogleConnectionSchema>;
 
+/**
+ * Google OAuth client IDs end in `.apps.googleusercontent.com`; a lenient check that catches a
+ * secret or a URL pasted into the wrong field. Google itself checks the client before it is
+ * saved.
+ */
+export const GOOGLE_CLIENT_ID_PATTERN = /^[0-9a-z][0-9a-z._-]*\.apps\.googleusercontent\.com$/i;
+
+/** Where the client new connections use comes from. */
+export const GoogleOAuthClientSourceSchema = z.enum(["WORKSPACE", "INSTANCE"]);
+export type GoogleOAuthClientSource = z.infer<typeof GoogleOAuthClientSourceSchema>;
+
+/** A Google OAuth client; the secret is never returned. */
+export const GoogleOAuthClientSchema = z.object({
+  source: GoogleOAuthClientSourceSchema,
+  /** Not secret: Google shows it in every consent URL. */
+  clientId: z.string(),
+  /** When the workspace's client was saved and checked with Google; `null` for the installation's. */
+  verifiedAt: z.iso.datetime().nullable(),
+});
+export type GoogleOAuthClient = z.infer<typeof GoogleOAuthClientSchema>;
+
 export const GoogleIntegrationsSchema = z.object({
-  /** Whether the instance has a Google OAuth client (GOOGLE_CLIENT_ID/SECRET). */
+  /** Whether Google accounts can be connected: the workspace or the installation has a client. */
   configured: z.boolean(),
+  /** The client new connections use: the workspace's own, else the installation's. */
+  client: GoogleOAuthClientSchema.nullable(),
+  /** Whether the installation has a client to fall back on (GOOGLE_CLIENT_ID/SECRET). */
+  instanceClient: z.boolean(),
+  /** The redirect URI to register on the client in Google Cloud (derived from WEB_URL). */
+  redirectUri: z.string(),
   connections: z.array(GoogleConnectionSchema),
 });
 export type GoogleIntegrations = z.infer<typeof GoogleIntegrationsSchema>;
+
+/** A workspace's own Google OAuth client (web application type). */
+export const SaveGoogleOAuthClientSchema = z.strictObject({
+  clientId: z.string().trim().max(200).regex(GOOGLE_CLIENT_ID_PATTERN),
+  clientSecret: z.string().trim().min(10).max(200).regex(/^\S+$/u),
+});
+export type SaveGoogleOAuthClient = z.infer<typeof SaveGoogleOAuthClientSchema>;
 
 export const GoogleAuthorizeSchema = z.strictObject({
   /** The project whose Search Console page started the flow; the user returns there. */
