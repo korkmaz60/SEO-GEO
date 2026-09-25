@@ -34,9 +34,8 @@ import { ProviderCacheService } from "../providers/provider-cache.service.js";
 import { providerProblem } from "../providers/provider-errors.js";
 import { UsageService } from "../usage/usage.service.js";
 
-/** Labs data is updated monthly; backlink data daily. */
-const LABS_TTL_DAYS = 7;
-const BACKLINKS_TTL_DAYS = 1;
+/** Labs data is updated monthly and backlink profiles change slowly (D23). */
+const TTL_DAYS = 7;
 
 /** The requests an overview is made of, each cached on its own. */
 const PARTS = ["rank", "history", "keywords", "competitors", "backlinks"] as const;
@@ -188,7 +187,7 @@ export class DomainOverviewService {
             params: params[part],
             value: result.value.value,
             costUsd: result.value.cost,
-            ttlDays: part === "backlinks" ? BACKLINKS_TTL_DAYS : LABS_TTL_DAYS,
+            ttlDays: TTL_DAYS,
           },
           now,
         );

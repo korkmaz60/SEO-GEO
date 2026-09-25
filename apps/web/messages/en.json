@@ -1258,7 +1258,7 @@
     "yourProjects": "Your projects",
     "confirm": {
       "title": "{domain} has not been analyzed in this market recently",
-      "body": "Analyzing it in {market} costs up to {cost}. The result is kept for 7 days (backlinks for 1 day); opening it again in that time is free.",
+      "body": "Analyzing it in {market} costs up to {cost}. The result is kept for 7 days; opening it again in that time is free.",
       "run": "Analyze · {cost}"
     },
     "loading": "Fetching {domain} from DataForSEO…",

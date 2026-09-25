@@ -150,7 +150,7 @@ detection rules and metric formulas.
 ## Backlinks and domains (M4)
 
 No tables of their own: domain and backlink data is public market data, cached for all
-workspaces in `provider_cache` (Labs responses for 7 days, Backlinks responses for 1 day).
+workspaces in `provider_cache` for 7 days; a refresh replaces an entry early (D23).
 Trends come from DataForSEO's monthly history and new/lost series, never from differences
 between stored totals. See [backend.md](backend.md#domain-overview-and-backlinks-m4).
 
