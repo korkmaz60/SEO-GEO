@@ -5,6 +5,7 @@ import { WorkspaceApiKeysController } from "../api-keys/workspace-api-keys.contr
 import { WorkspaceApiKeysService } from "../api-keys/workspace-api-keys.service.js";
 import { AuditController } from "../audit/audit.controller.js";
 import { CredentialsController } from "../credentials/credentials.controller.js";
+import { DomainOverviewController } from "../domains/domain-overview.controller.js";
 import {
   GoogleCallbackController,
   GoogleConnectionsController,
@@ -36,6 +37,7 @@ import { UsageController } from "../usage/usage.controller.js";
     RankTrackerController,
     KeywordResearchController,
     KeywordListsController,
+    DomainOverviewController,
     SiteAuditController,
     GoogleCallbackController,
     GoogleConnectionsController,

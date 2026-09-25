@@ -179,6 +179,10 @@ Charts follow the data-viz method: form first, color by job, palette validated.
 - Query keys are scoped by workspace and project; mutations invalidate the related keys.
 - `useTask(taskId)` follows background tasks and refreshes affected queries on completion.
 - URL state (filters, sort, tab, date range) through search params.
+- Paid research follows its URL: the domain overview keeps the domain and market in
+  `?domain=&market=`, so an overview can be shared and competitors opened with the back
+  button working. A cached result opens right away; anything else shows its cost and runs
+  only when confirmed.
 
 ## Internationalization
 

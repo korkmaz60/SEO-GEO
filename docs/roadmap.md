@@ -84,12 +84,19 @@ first run against live DataForSEO AI endpoints is still to be done by the projec
 
 ## M4 — Agency
 
-- Reports: templates, white-label branding, server-rendered PDF, schedules, email delivery.
-- Alerts: rank drops, new critical audit issues, AI visibility changes, budget thresholds;
+In this order, each shipped on its own:
+
+- [x] Domain overview for any domain: organic keywords, estimated traffic and its value,
+  12-month history, keywords by position, the 100 keywords with the most traffic (track or
+  save them), competitors and the backlink summary; a quote before paid loads, a cache shared
+  across workspaces, shareable URLs and the `get_domain_overview` MCP tool.
+- [ ] Project backlinks: profile, history, new and lost links, referring domains, backlinks,
+  anchors, competitors' profiles and the link gap.
+- [ ] Alerts: rank drops, new critical audit issues, AI visibility changes, budget thresholds;
   email, Slack and signed webhooks.
-- Client viewer access per project and read-only share links.
-- Backlinks and domain overview; competitor keyword and backlink gaps.
-- OpenTelemetry traces and metrics.
+- [ ] Reports: templates, white-label branding, server-rendered PDF, schedules, email delivery.
+- [ ] Client viewer access per project and read-only share links.
+- [ ] OpenTelemetry traces and metrics.
 
 ## M5 — Content and growth
 

@@ -2,10 +2,7 @@
 
 import type { Locale, RankChange, TrackedKeyword } from "@seo-geo/contracts";
 import {
-  ArrowDown,
   ArrowDownRight,
-  ArrowUp,
-  ArrowUpDown,
   ArrowUpRight,
   CircleAlert,
   Clock,
@@ -18,6 +15,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { Sparkline } from "@/components/charts/sparkline";
+import { SortHeader } from "@/components/data/sort-header";
 import { Difficulty, IntentBadge } from "@/components/keywords/keyword-metrics";
 import { SerpFeatureIcons } from "@/components/keywords/serp-features";
 import { Badge } from "@/components/ui/badge";
@@ -115,38 +113,6 @@ export function PositionCell({ keyword }: { keyword: TrackedKeyword }) {
     );
   }
   return <span className="text-base font-semibold tabular-nums">{latest.position}</span>;
-}
-
-function SortHeader({
-  label,
-  column,
-  sort,
-  onSort,
-  className,
-}: {
-  label: string;
-  column: SortKey;
-  sort: { key: SortKey; direction: 1 | -1 };
-  onSort: (key: SortKey) => void;
-  className?: string;
-}) {
-  const active = sort.key === column;
-  const Icon = !active ? ArrowUpDown : sort.direction === 1 ? ArrowUp : ArrowDown;
-  return (
-    <TableHead
-      className={className}
-      aria-sort={active ? (sort.direction === 1 ? "ascending" : "descending") : "none"}
-    >
-      <button
-        type="button"
-        onClick={() => onSort(column)}
-        className="inline-flex items-center gap-1 hover:text-foreground"
-      >
-        {label}
-        <Icon className={cn("size-3", !active && "opacity-40")} aria-hidden />
-      </button>
-    </TableHead>
-  );
 }
 
 interface KeywordTableProps {
