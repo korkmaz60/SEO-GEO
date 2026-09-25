@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { AiVisibilityModule } from "../ai-visibility/ai-visibility.module.js";
 import { AuditModule } from "../audit/audit.module.js";
 import { CredentialsModule } from "../credentials/credentials.module.js";
 import { CryptoModule } from "../crypto/crypto.module.js";
@@ -26,6 +27,7 @@ import { UsageModule } from "../usage/usage.module.js";
     RankTrackerModule,
     SiteAuditModule,
     GoogleModule,
+    AiVisibilityModule,
   ],
 })
 export class PlatformServicesModule {}

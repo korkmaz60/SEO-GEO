@@ -65,35 +65,51 @@ export function aiVisibilityScore(mentionRate: number, citationRate: number, pro
   return Math.round(score * 10) / 10;
 }
 
-/**
- * Mention rate, citation rate, share of voice, average rank, prominence and the AI
- * visibility score of every brand over a set of answers (one platform and period, or any
- * other grouping the caller chooses).
- */
-export function brandVisibility(
+/** Totals of one brand over a set of answers; they add up across sets. */
+export interface BrandCounts {
+  entityId: string;
+  /** Answers that mention the brand. */
+  mentioned: number;
+  /** Answers that cite a source on the brand's domains. */
+  cited: number;
+  /** Sum of the first-mention ranks over the answers that mention the brand. */
+  rankSum: number;
+  /** Sum of 1 / first rank over the answers that mention the brand. */
+  prominenceSum: number;
+}
+
+/** The totals of every brand over a set of answers; see {@link visibilityFromCounts}. */
+export function countBrands(
   runs: readonly RunOutcome[],
   entityIds: readonly string[],
-): BrandVisibility[] {
-  const total = runs.length;
-  const stats = entityIds.map((entityId) => {
-    let mentioned = 0;
-    let cited = 0;
-    let rankSum = 0;
-    let prominenceSum = 0;
+): BrandCounts[] {
+  return entityIds.map((entityId) => {
+    const counts: BrandCounts = { entityId, mentioned: 0, cited: 0, rankSum: 0, prominenceSum: 0 };
     for (const run of runs) {
       const rank = run.mentions.get(entityId);
       if (rank !== undefined) {
-        mentioned++;
-        rankSum += rank;
-        prominenceSum += 1 / Math.max(1, rank);
+        counts.mentioned++;
+        counts.rankSum += rank;
+        counts.prominenceSum += 1 / Math.max(1, rank);
       }
-      if (run.cited.has(entityId)) cited++;
+      if (run.cited.has(entityId)) counts.cited++;
     }
-    return { entityId, mentioned, cited, rankSum, prominenceSum };
+    return counts;
   });
-  const allMentions = stats.reduce((sum, entry) => sum + entry.mentioned, 0);
+}
 
-  return stats.map((entry) => {
+/**
+ * Mention rate, citation rate, share of voice, average rank, prominence and the AI
+ * visibility score of every brand, from its totals over `total` answers (one platform and
+ * period, or any other grouping the caller chooses). Totals can come from a database
+ * aggregate; {@link brandVisibility} computes them from the answers.
+ */
+export function visibilityFromCounts(
+  total: number,
+  counts: readonly BrandCounts[],
+): BrandVisibility[] {
+  const allMentions = counts.reduce((sum, entry) => sum + entry.mentioned, 0);
+  return counts.map((entry) => {
     const mentionRate = wilsonInterval(entry.mentioned, total);
     const citationRate = wilsonInterval(entry.cited, total);
     const prominence = total > 0 ? entry.prominenceSum / total : null;
@@ -114,6 +130,14 @@ export function brandVisibility(
       lowSample: total < LOW_SAMPLE_RUNS,
     };
   });
+}
+
+/** {@link visibilityFromCounts} over a set of answers. */
+export function brandVisibility(
+  runs: readonly RunOutcome[],
+  entityIds: readonly string[],
+): BrandVisibility[] {
+  return visibilityFromCounts(runs.length, countBrands(runs, entityIds));
 }
 
 export interface SourceShare {

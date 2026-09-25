@@ -45,6 +45,8 @@ export const BrandEntitySchema = z.object({
   /** Registrable domains that count as this brand. */
   domains: z.array(z.string()),
   aliases: z.array(z.string()),
+  /** Names that are also ordinary words; they count only with stronger evidence. */
+  ambiguousAliases: z.array(z.string()),
   /** Categorical chart slot, 1–8. */
   colorSlot: z.int().min(1).max(MAX_BRAND_SLOTS),
 });
@@ -77,6 +79,7 @@ export const CompetitorInputSchema = z.strictObject({
   name: NameSchema,
   domains: z.array(DomainInputSchema).min(1).max(10),
   aliases: AliasesSchema.default([]),
+  ambiguousAliases: AliasesSchema.default([]),
 });
 export type CompetitorInput = z.input<typeof CompetitorInputSchema>;
 
@@ -118,6 +121,7 @@ export const UpdateBrandSchema = z
     name: NameSchema,
     domains: z.array(DomainInputSchema).min(1).max(10),
     aliases: AliasesSchema,
+    ambiguousAliases: AliasesSchema,
   })
   .partial()
   .refine((value) => Object.keys(value).length > 0, "Nothing to update");

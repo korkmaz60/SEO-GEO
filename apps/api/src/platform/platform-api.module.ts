@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { AiVisibilityController } from "../ai-visibility/ai-visibility.controller.js";
 import { AuditController } from "../audit/audit.controller.js";
 import { CredentialsController } from "../credentials/credentials.controller.js";
 import {
@@ -35,6 +36,7 @@ import { UsageController } from "../usage/usage.controller.js";
     GoogleCallbackController,
     GoogleConnectionsController,
     ProjectIntegrationsController,
+    AiVisibilityController,
   ],
   providers: [ProjectsService],
   exports: [ProjectsService],

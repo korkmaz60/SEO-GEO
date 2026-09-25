@@ -15,17 +15,6 @@ export const ProviderSchema = z.enum([
 ]);
 export type Provider = z.infer<typeof ProviderSchema>;
 
-/** AI answer surfaces measured by the AI visibility module. */
-export const AiPlatformSchema = z.enum([
-  "CHATGPT",
-  "CLAUDE",
-  "GEMINI",
-  "PERPLEXITY",
-  "GOOGLE_AI_OVERVIEW",
-  "GOOGLE_AI_MODE",
-]);
-export type AiPlatform = z.infer<typeof AiPlatformSchema>;
-
 export const DeviceSchema = z.enum(["DESKTOP", "MOBILE"]);
 export type Device = z.infer<typeof DeviceSchema>;
 

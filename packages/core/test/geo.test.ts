@@ -5,6 +5,7 @@ import {
   attributeCitations,
   brandVisibility,
   canonicalAnswerText,
+  countBrands,
   detectMentions,
   foldText,
   isSignificantChange,
@@ -13,6 +14,7 @@ import {
   parseSentiment,
   sentimentPrompt,
   sourceShare,
+  visibilityFromCounts,
   wilsonInterval,
   type BrandToDetect,
   type RunOutcome,
@@ -205,6 +207,29 @@ describe("visibility metrics", () => {
     expect(rivalStats).toMatchObject({ mentionedRuns: 3, shareOfVoice: 3 / 5, averageRank: 4 / 3 });
     expect(aiVisibilityScore(1, 1, 1)).toBe(100);
     expect(brandVisibility([], ["own"])[0]).toMatchObject({ score: null, shareOfVoice: null });
+  });
+
+  it("gives the same result from totals that were added up in parts", () => {
+    const runs: RunOutcome[] = [
+      { mentions: new Map([["own", 2]]), cited: new Set(["own"]) },
+      { mentions: new Map([["rival", 1]]), cited: new Set() },
+      { mentions: new Map([["own", 1]]), cited: new Set() },
+    ];
+    const first = countBrands(runs.slice(0, 1), ["own", "rival"]);
+    const rest = countBrands(runs.slice(1), ["own", "rival"]);
+    const added = first.map((entry, index) => {
+      const other = rest[index]!;
+      return {
+        entityId: entry.entityId,
+        mentioned: entry.mentioned + other.mentioned,
+        cited: entry.cited + other.cited,
+        rankSum: entry.rankSum + other.rankSum,
+        prominenceSum: entry.prominenceSum + other.prominenceSum,
+      };
+    });
+    expect(visibilityFromCounts(runs.length, added)).toEqual(
+      brandVisibility(runs, ["own", "rival"]),
+    );
   });
 
   it("measures source share over all citations", () => {
