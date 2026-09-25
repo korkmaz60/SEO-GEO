@@ -3,6 +3,7 @@ import { PgBoss, type Queue, type SendOptions } from "pg-boss";
 
 import { APP_CONFIG } from "../config/config.module.js";
 import type { AppConfig } from "../config/env.js";
+import { TaskRegistry } from "./task-registry.js";
 
 export type QueueOptions = Omit<Queue, "name">;
 
@@ -16,17 +17,20 @@ export class QueueService implements OnApplicationShutdown {
   private boss: Promise<PgBoss> | null = null;
   private readonly queues = new Set<string>();
 
-  constructor(@Inject(APP_CONFIG) private readonly config: AppConfig) {}
+  constructor(
+    @Inject(APP_CONFIG) private readonly config: AppConfig,
+    private readonly registry: TaskRegistry,
+  ) {}
 
   instance(): Promise<PgBoss> {
     this.boss ??= this.start();
     return this.boss;
   }
 
-  /** Creates the queue if needed (idempotent). */
-  async ensureQueue(name: string, options: QueueOptions = {}): Promise<void> {
+  /** Creates the queue with its registered options if needed (idempotent). */
+  async ensureQueue(name: string): Promise<void> {
     if (this.queues.has(name)) return;
-    await (await this.instance()).createQueue(name, options);
+    await (await this.instance()).createQueue(name, this.registry.queueOptions(name));
     this.queues.add(name);
   }
 

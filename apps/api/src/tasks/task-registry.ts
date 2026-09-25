@@ -47,6 +47,22 @@ export interface BackgroundJob<TData extends object = object> {
   queue?: QueueOptions;
 }
 
+const DEFAULT_TASK_QUEUE: QueueOptions = {
+  retryLimit: 2,
+  retryDelay: 30,
+  retryBackoff: true,
+  expireInSeconds: 60 * 60,
+};
+
+const DEFAULT_JOB_QUEUE: QueueOptions = {
+  retryLimit: 3,
+  retryDelay: 60,
+  retryBackoff: true,
+  expireInSeconds: 30 * 60,
+};
+
+const DEFAULT_SCHEDULED_QUEUE: QueueOptions = { retryLimit: 1, expireInSeconds: 60 * 60 };
+
 /**
  * Task types, background jobs and scheduled jobs, registered by feature modules in
  * `onModuleInit`. The worker subscribes to all of them; the api only enqueues.
@@ -70,5 +86,19 @@ export class TaskRegistry {
   registerJob<TData extends object>(job: BackgroundJob<TData>): void {
     if (this.jobs.has(job.name)) throw new Error(`Job ${job.name} is registered twice`);
     this.jobs.set(job.name, job as unknown as BackgroundJob);
+  }
+
+  /**
+   * Options of a queue. A queue keeps the options it was created with, so every process
+   * creates it with these, whether the worker subscribes first or the api enqueues first.
+   */
+  queueOptions(name: string): QueueOptions {
+    const task = this.tasks.get(name);
+    if (task) return { ...DEFAULT_TASK_QUEUE, ...task.queue };
+    const job = this.jobs.get(name);
+    if (job) return { ...DEFAULT_JOB_QUEUE, ...job.queue };
+    const scheduled = this.scheduled.get(name);
+    if (scheduled) return { ...DEFAULT_SCHEDULED_QUEUE, ...scheduled.queue };
+    return {};
   }
 }

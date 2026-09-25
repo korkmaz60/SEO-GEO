@@ -9,20 +9,6 @@ import { TaskRegistry, type TaskDefinition } from "./task-registry.js";
 /** How often idle workers look for jobs, in seconds (pg-boss minimum: 0.5). */
 export const TASK_POLLING_SECONDS = Symbol("TASK_POLLING_SECONDS");
 
-const DEFAULT_TASK_QUEUE = {
-  retryLimit: 2,
-  retryDelay: 30,
-  retryBackoff: true,
-  expireInSeconds: 60 * 60,
-} as const;
-
-const DEFAULT_JOB_QUEUE = {
-  retryLimit: 3,
-  retryDelay: 60,
-  retryBackoff: true,
-  expireInSeconds: 30 * 60,
-} as const;
-
 interface TaskJobData {
   taskId: string;
 }
@@ -46,7 +32,7 @@ export class TaskRunner implements OnApplicationBootstrap {
     const boss = await this.queue.instance();
 
     for (const [type, definition] of this.registry.tasks) {
-      await this.queue.ensureQueue(type, { ...DEFAULT_TASK_QUEUE, ...definition.queue });
+      await this.queue.ensureQueue(type);
       await boss.work(
         type,
         { includeMetadata: true, pollingIntervalSeconds: this.pollingIntervalSeconds },
@@ -57,7 +43,7 @@ export class TaskRunner implements OnApplicationBootstrap {
     }
 
     for (const job of this.registry.jobs.values()) {
-      await this.queue.ensureQueue(job.name, { ...DEFAULT_JOB_QUEUE, ...job.queue });
+      await this.queue.ensureQueue(job.name);
       await boss.work(
         job.name,
         { pollingIntervalSeconds: this.pollingIntervalSeconds },
@@ -68,11 +54,7 @@ export class TaskRunner implements OnApplicationBootstrap {
     }
 
     for (const job of this.registry.scheduled.values()) {
-      await this.queue.ensureQueue(job.name, {
-        retryLimit: 1,
-        expireInSeconds: 60 * 60,
-        ...job.queue,
-      });
+      await this.queue.ensureQueue(job.name);
       await boss.schedule(job.name, job.cron, null, { tz: "UTC" });
       await boss.work(
         job.name,
