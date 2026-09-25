@@ -44,6 +44,13 @@ export interface FakeDomain {
   /** `[domain, common keywords, average position]`; may include the domain itself. */
   competitors?: [domain: string, common: number, avgPosition: number][];
   backlinks?: { rank: number; backlinks: number; referringDomains: number };
+  /**
+   * Domains linking to this one: `[domain, rank, backlinks]`. They make up the referring
+   * domains, one backlink each, and the link gap against other domains.
+   */
+  referringDomains?: [domain: string, rank: number, backlinks: number][];
+  /** Anchor texts: `[anchor, referring domains, backlinks]`. */
+  anchors?: [anchor: string, referringDomains: number, backlinks: number][];
 }
 
 export interface FakeDataForSeoState {
@@ -92,6 +99,17 @@ export const FAKE_LABS_COST = 0.0125;
 export const UNSUPPORTED_LOCATION = 1;
 /** Cost DataForSEO reports per Backlinks summary (request and one row). */
 export const FAKE_BACKLINKS_COST = 0.024036;
+/** What DataForSEO charges for a Backlinks API request returning `rows` rows. */
+export function fakeBacklinksCost(rows: number): number {
+  return Math.round((0.024 + rows * 0.000036) * 1e6) / 1e6;
+}
+/** New and lost referring domains and backlinks the fake API reports for every day. */
+export const FAKE_DAILY_NEW_LOST = {
+  newReferringDomains: 2,
+  lostReferringDomains: 1,
+  newBacklinks: 5,
+  lostBacklinks: 3,
+};
 /** Cost DataForSEO reports per posted LLM Scraper or AI Mode task. */
 export const FAKE_AI_TASK_COST = 0.0012;
 /** Cost DataForSEO reports per live LLM Responses answer (task fee and provider tokens). */
@@ -320,6 +338,226 @@ function backlinksSummary(target: string, backlinks: FakeDomain["backlinks"]) {
     referring_links_platform_types: {},
     referring_links_semantic_locations: {},
     referring_links_countries: {},
+  };
+}
+
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/** First days of the months from the month of `from` to the current one, newest first. */
+function monthsSince(from: string): string[] {
+  const now = new Date();
+  const first = `${from.slice(0, 7)}-01`;
+  const months: string[] = [];
+  for (let offset = 0; offset < 240; offset++) {
+    const month = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - offset, 1))
+      .toISOString()
+      .slice(0, 10);
+    if (month < first) break;
+    months.push(month);
+  }
+  return months;
+}
+
+/** Days from `from` to `to` (YYYY-MM-DD), both included, oldest first. */
+function daysBetween(from: string, to: string): string[] {
+  const days: string[] = [];
+  const end = Date.parse(`${to}T00:00:00Z`);
+  for (let time = Date.parse(`${from}T00:00:00Z`); time <= end; time += 86_400_000) {
+    days.push(new Date(time).toISOString().slice(0, 10));
+  }
+  return days;
+}
+
+/** A month of backlink history; `monthsAgo` months back the site had fewer links. */
+function historyItem(
+  month: string,
+  backlinks: NonNullable<FakeDomain["backlinks"]>,
+  monthsAgo: number,
+) {
+  const domains = backlinks.referringDomains - 5 * monthsAgo;
+  return {
+    type: "backlinks_history",
+    date: `${month} 00:00:00 +00:00`,
+    rank: backlinks.rank,
+    backlinks: backlinks.backlinks - 100 * monthsAgo,
+    new_backlinks: 120,
+    lost_backlinks: 80,
+    new_referring_domains: 12,
+    lost_referring_domains: 7,
+    crawled_pages: 3120,
+    info: null,
+    internal_links_count: 9000,
+    external_links_count: 420,
+    broken_backlinks: 14,
+    broken_pages: 2,
+    referring_domains: domains,
+    referring_domains_nofollow: Math.round(domains / 10),
+    referring_main_domains: Math.round(domains * 0.9),
+    referring_main_domains_nofollow: Math.round(domains / 12),
+    referring_ips: Math.round(domains * 0.8),
+    referring_subnets: Math.round(domains * 0.7),
+    referring_pages: Math.round(backlinks.backlinks * 0.8),
+    referring_pages_nofollow: 100,
+    referring_links_tld: {},
+    referring_links_types: {},
+    referring_links_attributes: {},
+    referring_links_platform_types: {},
+    referring_links_semantic_locations: {},
+    referring_links_countries: {},
+  };
+}
+
+function newLostItem(day: string, daily: typeof FAKE_DAILY_NEW_LOST | null) {
+  return {
+    type: "backlinks_timeseries_new_lost_summary",
+    date: `${day} 00:00:00 +00:00`,
+    new_backlinks: daily?.newBacklinks ?? 0,
+    lost_backlinks: daily?.lostBacklinks ?? 0,
+    new_referring_domains: daily?.newReferringDomains ?? 0,
+    lost_referring_domains: daily?.lostReferringDomains ?? 0,
+    new_referring_main_domains: daily?.newReferringDomains ?? 0,
+    lost_referring_main_domains: daily?.lostReferringDomains ?? 0,
+  };
+}
+
+type FakeReferringDomain = NonNullable<FakeDomain["referringDomains"]>[number];
+
+function referringDomainItem([domain, rank, backlinks]: FakeReferringDomain) {
+  return {
+    type: "backlinks_referring_domain",
+    domain,
+    rank,
+    backlinks,
+    first_seen: "2024-03-01 10:00:00 +00:00",
+    lost_date: null,
+    backlinks_spam_score: 4,
+    broken_backlinks: 0,
+    broken_pages: 0,
+    referring_domains: 1,
+    referring_domains_nofollow: 0,
+    referring_main_domains: 1,
+    referring_main_domains_nofollow: 0,
+    referring_ips: 1,
+    referring_subnets: 1,
+    referring_pages: backlinks,
+    referring_pages_nofollow: 0,
+    referring_links_tld: {},
+    referring_links_types: { anchor: backlinks },
+    referring_links_attributes: null,
+    referring_links_platform_types: {},
+    referring_links_semantic_locations: {},
+    referring_links_countries: {},
+  };
+}
+
+/** The strongest link of a referring domain (one per domain); weak domains link nofollow. */
+function backlinkItem(target: string, [domain, rank, backlinks]: FakeReferringDomain) {
+  return {
+    type: "backlink",
+    domain_from: domain,
+    url_from: `https://${domain}/yazi`,
+    url_from_https: true,
+    domain_to: target,
+    url_to: `https://${target}/`,
+    url_to_https: true,
+    tld_from: domain.split(".").at(-1),
+    is_new: false,
+    is_lost: false,
+    backlink_spam_score: 4,
+    rank: Math.round(rank / 2),
+    page_from_rank: Math.round(rank * 0.7),
+    domain_from_rank: rank,
+    domain_from_platform_type: ["blogs"],
+    domain_from_is_ip: false,
+    domain_from_ip: "192.0.2.80",
+    domain_from_country: "TR",
+    page_from_external_links: 12,
+    page_from_internal_links: 80,
+    page_from_size: 64000,
+    page_from_encoding: "utf-8",
+    page_from_language: "tr",
+    page_from_title: `${domain} yazısı`,
+    page_from_status_code: 200,
+    first_seen: "2024-03-01 10:00:00 +00:00",
+    prev_seen: "2026-09-01 10:00:00 +00:00",
+    last_seen: providerTime(60 * 24),
+    item_type: "anchor",
+    attributes: rank >= 30 ? null : ["nofollow"],
+    dofollow: rank >= 30,
+    original: true,
+    alt: null,
+    image_url: null,
+    anchor: target,
+    text_pre: null,
+    text_post: null,
+    semantic_location: "article",
+    links_count: 1,
+    group_count: backlinks,
+    is_broken: false,
+    url_to_status_code: 200,
+    url_to_spam_score: 0,
+    url_to_redirect_target: null,
+    ranked_keywords_info: null,
+    is_indirect_link: false,
+    indirect_link_path: null,
+  };
+}
+
+function anchorItem([anchor, domains, backlinks]: NonNullable<FakeDomain["anchors"]>[number]) {
+  return {
+    type: "backlinks_anchor",
+    anchor,
+    rank: 20,
+    backlinks,
+    first_seen: "2023-05-10 08:00:00 +00:00",
+    lost_date: null,
+    backlinks_spam_score: 3,
+    broken_backlinks: 0,
+    broken_pages: 0,
+    referring_domains: domains,
+    referring_domains_nofollow: Math.round(domains / 10),
+    referring_main_domains: domains,
+    referring_main_domains_nofollow: Math.round(domains / 10),
+    referring_ips: domains,
+    referring_subnets: domains,
+    referring_pages: backlinks,
+    referring_pages_nofollow: 0,
+    referring_links_tld: {},
+    referring_links_types: {},
+    referring_links_attributes: null,
+    referring_links_platform_types: {},
+    referring_links_semantic_locations: {},
+    referring_links_countries: {},
+  };
+}
+
+function intersectionEntry(domain: string, rank: number, backlinks: number) {
+  return {
+    type: "backlinks_domain_intersection",
+    target: domain,
+    rank,
+    backlinks,
+    first_seen: "2025-06-01 12:00:00 +00:00",
+    lost_date: null,
+    backlinks_spam_score: 2,
+    broken_backlinks: 0,
+    broken_pages: 0,
+    referring_domains: 1,
+    referring_domains_nofollow: 0,
+    referring_main_domains: 1,
+    referring_main_domains_nofollow: 0,
+    referring_ips: 1,
+    referring_subnets: 1,
+    referring_pages: backlinks,
+    referring_pages_nofollow: 0,
+    referring_links_tld: {},
+    referring_links_types: {},
+    referring_links_attributes: null,
+    referring_links_platform_types: {},
+    referring_links_semantic_locations: {},
+    referring_links_countries: null,
   };
 }
 
@@ -655,6 +893,108 @@ export function fakeDataForSeo(state: FakeDataForSeoState = { balance: 42.5 }) {
       return Response.json(
         envelope([task("backlinks", [result], FAKE_BACKLINKS_COST)], FAKE_BACKLINKS_COST),
       );
+    }
+
+    const backlinksList =
+      /^\/backlinks\/(history|timeseries_new_lost_summary|referring_domains|backlinks|anchors)\/live$/.exec(
+        path,
+      );
+    if (backlinksList) {
+      const [request] = body as {
+        target: string;
+        limit?: number;
+        date_from?: string;
+        date_to?: string;
+      }[];
+      const target = request?.target ?? "";
+      const domain = state.domains?.[target];
+      const referring = [...(domain?.referringDomains ?? [])].sort((a, b) => b[1] - a[1]);
+      const limit = request?.limit ?? 100;
+      let result: Record<string, unknown> = { target };
+      let items: object[] = [];
+      switch (backlinksList[1]) {
+        case "history": {
+          const known = domain?.backlinks;
+          items = known
+            ? monthsSince(request?.date_from ?? "2019-01-01").map((month, index) =>
+                historyItem(month, known, index),
+              )
+            : [];
+          result = { ...result, date_from: request?.date_from, date_to: today() };
+          break;
+        }
+        case "timeseries_new_lost_summary": {
+          const to = request?.date_to ?? today();
+          const daily = domain?.backlinks ? FAKE_DAILY_NEW_LOST : null;
+          // Newest first, so the client has to sort.
+          items = daysBetween(request?.date_from ?? to, to)
+            .map((day) => newLostItem(day, daily))
+            .reverse();
+          result = { ...result, date_from: request?.date_from, date_to: to, group_range: "day" };
+          break;
+        }
+        case "referring_domains":
+          items = referring.slice(0, limit).map((entry) => referringDomainItem(entry));
+          result = { ...result, total_count: domain?.backlinks?.referringDomains ?? 0 };
+          break;
+        case "backlinks":
+          items = referring.slice(0, limit).map((entry) => backlinkItem(target, entry));
+          result = { ...result, mode: "one_per_domain", total_count: referring.length };
+          break;
+        case "anchors":
+          items = (domain?.anchors ?? []).slice(0, limit).map((entry) => anchorItem(entry));
+          result = { ...result, total_count: domain?.anchors?.length ?? 0 };
+          break;
+      }
+      const cost = fakeBacklinksCost(items.length);
+      return Response.json(
+        envelope(
+          [task("backlinks", [{ ...result, items_count: items.length, items }], cost)],
+          cost,
+        ),
+      );
+    }
+
+    if (path === "/backlinks/domain_intersection/live") {
+      const [request] = body as {
+        targets: Record<string, string>;
+        exclude_targets?: string[];
+        limit?: number;
+      }[];
+      const targets = Object.entries(request?.targets ?? {})
+        .sort(([a], [b]) => Number(a) - Number(b))
+        .map(([, target]) => target);
+      const linking = targets.map(
+        (target) =>
+          new Map((state.domains?.[target]?.referringDomains ?? []).map((row) => [row[0], row])),
+      );
+      const excluded = new Set(
+        (request?.exclude_targets ?? []).flatMap((target) =>
+          (state.domains?.[target]?.referringDomains ?? []).map(([name]) => name),
+        ),
+      );
+      // Domains linking to every target, as DataForSEO intersects by default.
+      const first = linking[0] ?? new Map();
+      const names = [...first.keys()]
+        .filter((name) => !excluded.has(name) && linking.every((map) => map.has(name)))
+        .sort((a, b) => (first.get(b)?.[1] ?? 0) - (first.get(a)?.[1] ?? 0));
+      const items = names.slice(0, request?.limit ?? 100).map((name) => ({
+        domain_intersection: Object.fromEntries(
+          linking.map((map, index) => {
+            const [, rank, links] = map.get(name) ?? [name, 0, 0];
+            return [String(index + 1), intersectionEntry(name, rank, links)];
+          }),
+        ),
+        summary: { intersections_count: targets.length },
+      }));
+      const cost = fakeBacklinksCost(items.length);
+      const result = {
+        targets: request?.targets ?? {},
+        total_count: names.length,
+        items_count: items.length,
+        items,
+      };
+      return Response.json(envelope([task("intersection", [result], cost)], cost));
     }
 
     const aiPost =

@@ -17,6 +17,7 @@ import { z } from "zod";
 import { AiReadModelService } from "../ai-visibility/ai-read-model.service.js";
 import { PromptsService } from "../ai-visibility/prompts.service.js";
 import type { Principal } from "../auth/principal.js";
+import { BacklinksService } from "../backlinks/backlinks.service.js";
 import { APP_CONFIG } from "../config/config.module.js";
 import type { AppConfig } from "../config/env.js";
 import { PrismaService } from "../database/prisma.service.js";
@@ -40,14 +41,22 @@ const ConfirmCost = z
   .describe(
     "Set to the estimated cost in USD from a previous call to confirm a paid request. Without it the tool only returns the estimate.",
   );
+const Refresh = z
+  .boolean()
+  .default(false)
+  .describe("Load the data again although it is cached (paid). Cached data is at most 7 days old.");
 
 const READ_ONLY = { readOnlyHint: true, openWorldHint: false } as const;
 /** Top keywords a domain overview returns to agents (the web app shows all). */
 const MCP_DOMAIN_KEYWORDS = 50;
 
-const INSTRUCTIONS = `SEO-GEO: rankings, keyword research, site audits and visibility in AI answers (ChatGPT, Gemini, Perplexity, Claude, Google AI Mode and AI Overviews) for the projects of a workspace.
+const INSTRUCTIONS = `SEO-GEO: rankings, keyword research, site audits, backlinks and visibility in AI answers (ChatGPT, Gemini, Perplexity, Claude, Google AI Mode and AI Overviews) for the projects of a workspace.
 Start with list_projects. Rates come with 95% intervals; "lowSample" means fewer than 20 answers, so read changes with care.
-Paid tools (get_keyword_ideas and get_domain_overview when not cached, add_ai_prompts) first return an estimate; call them again with confirm_cost_usd to proceed.`;
+Paid tools (get_keyword_ideas, get_domain_overview, get_backlinks and get_link_gap when not cached, add_ai_prompts) first return an estimate; call them again with confirm_cost_usd to proceed.`;
+
+function total<T>(rows: readonly T[], value: (row: T) => number): number {
+  return rows.reduce((sum, row) => sum + value(row), 0);
+}
 
 function text(value: unknown): CallToolResult {
   return { content: [{ type: "text", text: JSON.stringify(value) }] };
@@ -80,6 +89,7 @@ export class McpService {
     private readonly siteAudit: SiteAuditService,
     private readonly research: KeywordResearchService,
     private readonly domains: DomainOverviewService,
+    private readonly backlinks: BacklinksService,
   ) {}
 
   createServer(principal: Principal): McpServer {
@@ -414,17 +424,19 @@ export class McpService {
             .max(2048)
             .optional()
             .describe("A domain such as example.com; the project's own domain when omitted."),
+          refresh: Refresh,
           confirm_cost_usd: ConfirmCost,
         },
         annotations: { readOnlyHint: true, openWorldHint: true },
       },
-      ({ project_id, domain, confirm_cost_usd }) =>
+      ({ project_id, domain, refresh, confirm_cost_usd }) =>
         run(async () => {
           const project = await access.project(project_id, "member", "read");
           const input = DomainOverviewRequestSchema.parse({
             domain: domain ?? project.domain,
             locationCode: project.defaultLocationCode,
             languageCode: project.defaultLanguageCode,
+            refresh,
           });
           const quote = await this.domains.quote(input);
           if (quote.estimatedCostUsd > 0) {
@@ -456,6 +468,140 @@ export class McpService {
             dataAsOf: {
               labs: overview.sources.labs.fetchedAt,
               backlinks: overview.sources.backlinks.fetchedAt,
+            },
+          };
+        }),
+    );
+
+    server.registerTool(
+      "get_backlinks",
+      {
+        title: "Get backlinks",
+        description:
+          "The project's backlink profile: domain rank (0–100), backlinks and referring domains, the last 12 months, links gained and lost day by day over 30 days, and the strongest referring domains, backlinks and anchors. Paid unless loaded in the last 7 days: returns the estimate first.",
+        inputSchema: {
+          project_id: ProjectId,
+          limit: z
+            .int()
+            .min(1)
+            .max(100)
+            .default(20)
+            .describe("Referring domains, backlinks and anchors to return."),
+          refresh: Refresh,
+          confirm_cost_usd: ConfirmCost,
+        },
+        annotations: { readOnlyHint: true, openWorldHint: true },
+      },
+      ({ project_id, limit, refresh, confirm_cost_usd }) =>
+        run(async () => {
+          const project = await access.project(project_id, "viewer", "read");
+          const state = await this.backlinks.state(project.workspaceId, project.id);
+          let report = refresh ? null : state.report;
+          if (!report) {
+            await access.project(project_id, "member", "run:paid");
+            const estimate = refresh ? state.refreshCostUsd : state.estimatedCostUsd;
+            if (!confirmed(confirm_cost_usd, estimate)) return confirmation(estimate);
+            report = await this.backlinks.load(project.workspaceId, project.id, { refresh });
+          }
+          const days = report.newLost;
+          return {
+            target: report.target,
+            includeSubdomains: report.includeSubdomains,
+            costUsd: report.costUsd,
+            dataAsOf: report.source.fetchedAt,
+            profile: report.profile,
+            history: report.history,
+            newLost: {
+              from: days[0]?.date ?? null,
+              to: days.at(-1)?.date ?? null,
+              newReferringDomains: total(days, (day) => day.newReferringDomains),
+              lostReferringDomains: total(days, (day) => day.lostReferringDomains),
+              newBacklinks: total(days, (day) => day.newBacklinks),
+              lostBacklinks: total(days, (day) => day.lostBacklinks),
+              daily: days,
+            },
+            referringDomains: {
+              total: report.referringDomains.total,
+              top: report.referringDomains.items.slice(0, limit),
+            },
+            backlinks: {
+              total: report.backlinks.total,
+              top: report.backlinks.items.slice(0, limit).map((link) => ({
+                from: link.urlFrom,
+                to: link.urlTo,
+                anchor: link.anchor,
+                type: link.type,
+                dofollow: link.dofollow,
+                domainRank: link.domainRank,
+                firstSeen: link.firstSeen,
+                isNew: link.isNew,
+                isBroken: link.isBroken,
+              })),
+            },
+            anchors: {
+              total: report.anchors.total,
+              top: report.anchors.items.slice(0, limit),
+            },
+          };
+        }),
+    );
+
+    server.registerTool(
+      "get_link_gap",
+      {
+        title: "Get link gap",
+        description:
+          "Backlink profiles of the project and its competitors (from the project settings), and the link gap: strong domains that link to competitors but not to the project, those linking to the most competitors first. Paid unless loaded in the last 7 days: returns the estimate first.",
+        inputSchema: {
+          project_id: ProjectId,
+          limit: z.int().min(1).max(200).default(50).describe("Link gap domains to return."),
+          refresh: Refresh,
+          confirm_cost_usd: ConfirmCost,
+        },
+        annotations: { readOnlyHint: true, openWorldHint: true },
+      },
+      ({ project_id, limit, refresh, confirm_cost_usd }) =>
+        run(async () => {
+          const project = await access.project(project_id, "viewer", "read");
+          const state = await this.backlinks.competitorsState(project.workspaceId, project.id);
+          if (state.brands.length < 2) {
+            throw new ToolError(
+              "The project has no competitors; add them in the project settings.",
+            );
+          }
+          let report = refresh ? null : state.report;
+          if (!report) {
+            await access.project(project_id, "member", "run:paid");
+            const estimate = refresh ? state.refreshCostUsd : state.estimatedCostUsd;
+            if (!confirmed(confirm_cost_usd, estimate)) return confirmation(estimate);
+            report = await this.backlinks.loadCompetitors(project.workspaceId, project.id, {
+              refresh,
+            });
+          }
+          const brands = new Map(report.brands.map((brand) => [brand.brandId, brand]));
+          return {
+            target: report.target,
+            costUsd: report.costUsd,
+            dataAsOf: report.source.fetchedAt,
+            brands: report.brands.map((brand) => ({
+              name: brand.name,
+              kind: brand.kind,
+              domain: brand.domain,
+              profile: brand.profile,
+            })),
+            linkGap: {
+              total: report.linkGap.length,
+              top: report.linkGap.slice(0, limit).map((entry) => ({
+                domain: entry.domain,
+                rank: entry.rank,
+                linksTo: entry.links.map((link) => ({
+                  competitor: brands.get(link.brandId)?.name ?? null,
+                  domain: brands.get(link.brandId)?.domain ?? null,
+                  rank: link.rank,
+                  backlinks: link.backlinks,
+                  firstSeen: link.firstSeen,
+                })),
+              })),
             },
           };
         }),
