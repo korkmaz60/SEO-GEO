@@ -8,7 +8,7 @@ import {
 } from "@seo-geo/contracts";
 import { z } from "zod";
 
-import { CurrentWorkspace, RequireRole, WorkspaceScoped } from "../auth/decorators.js";
+import { CurrentWorkspace, RequireRole, SessionOnly, WorkspaceScoped } from "../auth/decorators.js";
 import type { WorkspaceContext } from "../auth/principal.js";
 import { toOpenApiSchema } from "../common/openapi.js";
 import { IdParam } from "../common/params.js";
@@ -32,6 +32,7 @@ export class CredentialsController {
   }
 
   @Put("dataforseo")
+  @SessionOnly()
   @RequireRole("admin")
   @ApiOperation({
     summary: "Connect DataForSEO: the credentials are verified first and stored encrypted",
@@ -46,6 +47,7 @@ export class CredentialsController {
   }
 
   @Post(":credentialId/verify")
+  @SessionOnly()
   @HttpCode(200)
   @RequireRole("admin")
   @ApiOperation({ summary: "Check the stored credentials again and refresh the balance" })
@@ -58,6 +60,7 @@ export class CredentialsController {
   }
 
   @Delete(":credentialId")
+  @SessionOnly()
   @HttpCode(204)
   @RequireRole("admin")
   @ApiOperation({ summary: "Remove a provider connection" })

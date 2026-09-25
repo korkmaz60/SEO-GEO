@@ -39,16 +39,27 @@
   cannot pick its own address with `X-Forwarded-For`. Internet-facing installs put the web
   app behind a reverse proxy that sets the header (the bundled Caddy does).
 - Invalid, expired or revoked API keys are rejected with `401`.
+- API keys are refused on `/api/auth/*` (`403`): a key cannot change a password or email,
+  create or list keys, or manage sessions, workspaces and members. Key management in the
+  versioned API is session-only (`@SessionOnly()`).
 
 ### Authorization
 - Role matrix and API-key scopes are defined in [backend.md](backend.md); enforced by
   decorators on every controller method, default deny.
+- A key acts as the user who created it and never exceeds that user's current role;
+  removing the member stops their keys working in that workspace. Workspace keys are bound
+  to one workspace (other workspaces answer `404`) and to scopes: `read`, `write` and
+  `run:paid`, the scope needed for anything that spends provider money.
+- MCP tools apply the same membership, role and scope checks on every call. Paid tools
+  return the estimated cost first and run only when called again with `confirm_cost_usd` of
+  at least that estimate, so an agent cannot spend money without an explicit step.
 
 ### Input validation and limits
 - Every body, query, path parameter and header is parsed with Zod; unknown fields are
   rejected.
-- Hard limits: JSON body 1 MB, page size ≤ 200, keywords per request ≤ 1,000, prompts,
-  platforms and samples per project capped by plan.
+- Hard limits: JSON body 1 MB, page size ≤ 200, keywords per request ≤ 1,000, prompts
+  ≤ 200 per request and 1,000 per project (500 characters each), samples ≤ 5 per prompt and
+  platform; plans can lower these in the cloud edition.
 
 ### Outbound requests (SSRF policy)
 All server-side fetches of user-influenced URLs — crawler, sitemaps, `robots.txt`,
@@ -106,7 +117,7 @@ addresses cannot be allowed by configuration. In the api the client is
   explicitly configured public API origins.
 
 ### Cost abuse and denial of service
-- Rate limits per IP (auth endpoints) and per user or API key (API).
+- Rate limits per IP (auth endpoints) and per API key (600 requests per minute).
 - Concurrent job limits per workspace, budgets with hard stops, cost estimates before paid
   actions, idempotency keys on task-creating requests.
 
@@ -118,17 +129,23 @@ addresses cannot be allowed by configuration. In the api the client is
 - Email templates escape every user-provided value.
 - CSV exports quote fields and neutralize formula injection (cells starting with `=`, `+`,
   `-` or `@`).
-- Content fetched from crawled sites is shown as text, never rendered as HTML. URLs from
-  crawled sites and providers become links only when they are absolute `http(s)` URLs, and
-  open with `rel="noopener noreferrer nofollow"`.
+- Content fetched from crawled sites is shown as text, never rendered as HTML. AI answers
+  are shown as plain text too (never as Markdown or HTML); brand mentions are highlighted
+  from stored offsets. URLs from crawled sites, AI answers and providers become links only
+  when they are absolute `http(s)` URLs, and open with `rel="noopener noreferrer nofollow"`.
+- Answers and search results can contain text written to manipulate an AI (prompt
+  injection). They are data: they are never used as instructions, and the sentiment
+  classifier sees only the sentence around a mention and must answer with JSON that is
+  validated before it is stored.
 - Outgoing webhooks are signed with HMAC (`X-SEO-GEO-Signature`, timestamped).
 
 ### Logging and audit
 - Structured logs with request IDs; `Authorization`, cookies and secrets are redacted.
 - `audit_log` records workspace creation and changes, invitations, joins, role changes,
   removals and departures, project creation, archiving and deletion, provider credential
-  changes and budget changes — with the acting user, IP and user agent, never secrets.
-  API key creation, exports and deletions are added as those features land.
+  changes, budget changes, AI visibility settings changes, and workspace API key creation
+  and revocation — with the acting user, IP and user agent (and the API key, when a key
+  was used), never secrets. Exports and deletions are added as those features land.
 
 ### Supply chain and releases
 - The lockfile resolves from `registry.npmjs.org`; automated dependency updates; CodeQL and

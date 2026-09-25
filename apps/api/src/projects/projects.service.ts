@@ -46,6 +46,7 @@ export function toBrand(row: BrandRow): BrandEntity {
     name: row.name,
     domains: row.domains,
     aliases: row.aliases,
+    ambiguousAliases: row.ambiguousAliases,
     colorSlot: row.colorSlot,
   };
 }
@@ -238,6 +239,7 @@ export class ProjectsService {
       data: {
         name: input.name,
         aliases: input.aliases,
+        ambiguousAliases: input.ambiguousAliases,
         domains: input.domains?.map((domain, index) => brandDomain(domain, `domains.${index}`)),
       },
     });
@@ -338,6 +340,7 @@ function competitorData(input: CompetitorInput, pathPrefix: string) {
       ),
     ],
     aliases: input.aliases ?? [],
+    ambiguousAliases: input.ambiguousAliases ?? [],
   };
 }
 

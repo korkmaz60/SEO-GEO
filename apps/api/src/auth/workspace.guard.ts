@@ -33,6 +33,11 @@ export class WorkspaceGuard implements CanActivate {
 
     const workspaceId = WorkspaceIdSchema.safeParse(request.params.workspaceId);
     if (!workspaceId.success) throw ProblemException.notFound("Workspace not found.");
+    // A workspace API key sees no other workspace.
+    const boundTo = principal.apiKey?.workspaceId;
+    if (boundTo && boundTo !== workspaceId.data) {
+      throw ProblemException.notFound("Workspace not found.");
+    }
 
     const member = await this.prisma.member.findUnique({
       where: {

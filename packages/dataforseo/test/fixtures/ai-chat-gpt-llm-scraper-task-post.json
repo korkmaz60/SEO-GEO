@@ -1,0 +1,53 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "0.2311 sec.",
+  "cost": 0.0024,
+  "tasks_count": 2,
+  "tasks_error": 1,
+  "tasks": [
+    {
+      "id": "09241100-1535-0600-0000-c0ffee000001",
+      "status_code": 20100,
+      "status_message": "Task Created.",
+      "time": "0.0052 sec.",
+      "cost": 0.0012,
+      "result_count": 0,
+      "path": ["v3", "ai_optimization", "chat_gpt", "llm_scraper", "task_post"],
+      "data": {
+        "api": "ai_optimization",
+        "function": "task_post",
+        "se": "chat_gpt",
+        "se_type": "llm_scraper",
+        "keyword": "Türkiye'de en iyi kahve makinesi markaları hangileri?",
+        "location_code": 2792,
+        "language_code": "tr",
+        "tag": "01926f3e-0000-7c11-9d2e-00000000a001",
+        "device": "desktop",
+        "os": "windows"
+      },
+      "result": null
+    },
+    {
+      "id": "09241100-1535-0600-0000-c0ffee000002",
+      "status_code": 40501,
+      "status_message": "Invalid Field: 'location_code'.",
+      "time": "0 sec.",
+      "cost": 0,
+      "result_count": 0,
+      "path": ["v3", "ai_optimization", "chat_gpt", "llm_scraper", "task_post"],
+      "data": {
+        "api": "ai_optimization",
+        "function": "task_post",
+        "se": "chat_gpt",
+        "se_type": "llm_scraper",
+        "keyword": "x",
+        "location_code": 1,
+        "language_code": "tr",
+        "tag": "01926f3e-0000-7c11-9d2e-00000000a002"
+      },
+      "result": null
+    }
+  ]
+}

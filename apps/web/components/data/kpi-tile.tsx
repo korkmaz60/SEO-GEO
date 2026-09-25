@@ -19,10 +19,20 @@ interface KpiTileProps {
   value: string | null;
   emptyLabel: string;
   delta?: { delta: Delta; label: string } | null;
+  /** A second line under the value, e.g. an interval or the sample size. */
+  detail?: string | null;
   provenance?: MetricProvenance & { labels: { source: string; method: string; updated: string } };
 }
 
-export function KpiTile({ label, icon: Icon, value, emptyLabel, delta, provenance }: KpiTileProps) {
+export function KpiTile({
+  label,
+  icon: Icon,
+  value,
+  emptyLabel,
+  delta,
+  detail,
+  provenance,
+}: KpiTileProps) {
   return (
     <Card className="gap-3 p-4">
       <div className="flex items-start gap-2 text-sm text-muted-foreground">
@@ -62,9 +72,12 @@ export function KpiTile({ label, icon: Icon, value, emptyLabel, delta, provenanc
           <p className="text-xs text-muted-foreground">{emptyLabel}</p>
         </div>
       ) : (
-        <div className="flex items-baseline gap-2">
-          <p className="text-2xl font-semibold tracking-tight">{value}</p>
-          {delta && <DeltaBadge delta={delta.delta} label={delta.label} />}
+        <div>
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-semibold tracking-tight">{value}</p>
+            {delta && <DeltaBadge delta={delta.delta} label={delta.label} />}
+          </div>
+          {detail && <p className="mt-0.5 text-xs text-muted-foreground">{detail}</p>}
         </div>
       )}
     </Card>

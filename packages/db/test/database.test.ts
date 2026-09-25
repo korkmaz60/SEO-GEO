@@ -237,6 +237,102 @@ describe.skipIf(!serverUrl)("database schema", () => {
     expect(await prisma.auditIssue.count({ where: { runId: run.id } })).toBe(0);
     expect(await prisma.auditLink.count({ where: { runId: run.id } })).toBe(0);
   });
+
+  it("keeps one AI answer per prompt, platform, day and sample, with mentions and citations", async () => {
+    const workspace = await prisma.organization.create({ data: { name: "Geo", slug: "geo" } });
+    const project = await prisma.project.create({
+      data: {
+        workspaceId: workspace.id,
+        name: "Geo",
+        slug: "geo",
+        domain: "geo.com",
+        defaultLocationCode: 2792,
+        defaultLanguageCode: "tr",
+      },
+    });
+    const [own, rival] = await Promise.all(
+      [
+        { kind: "OWN" as const, name: "Geo", domains: ["geo.com"], colorSlot: 1 },
+        { kind: "COMPETITOR" as const, name: "Rival", domains: ["rival.com"], colorSlot: 2 },
+      ].map((brand) =>
+        prisma.brandEntity.create({
+          data: { workspaceId: workspace.id, projectId: project.id, aliases: [], ...brand },
+        }),
+      ),
+    );
+    const prompt = await prisma.prompt.create({
+      data: {
+        workspaceId: workspace.id,
+        projectId: project.id,
+        text: "en iyi kahve makinesi markaları",
+        locationCode: 2792,
+        languageCode: "tr",
+      },
+    });
+    await prisma.projectAiSettings.create({
+      data: {
+        projectId: project.id,
+        workspaceId: workspace.id,
+        platforms: ["CHATGPT", "GOOGLE_AI_MODE"],
+        models: { CLAUDE: "claude-haiku-4-5" },
+      },
+    });
+    const run = {
+      workspaceId: workspace.id,
+      projectId: project.id,
+      promptId: prompt.id,
+      platform: "CHATGPT" as const,
+      method: "llm_scraper",
+      runOn: new Date("2026-09-25"),
+    };
+    const created = await prisma.aiRun.create({
+      data: {
+        ...run,
+        status: "COMPLETED",
+        answer: "Geo ve Rival öne çıkar.",
+        costUsd: "0.0012",
+        mentions: {
+          create: [
+            { entityId: own!.id, firstRank: 1, firstOffset: 0, mentionCount: 1 },
+            { entityId: rival!.id, firstRank: 2, firstOffset: 7, mentionCount: 1 },
+          ],
+        },
+        citations: {
+          create: [
+            {
+              rank: 1,
+              url: "https://www.geo.com/",
+              host: "www.geo.com",
+              domain: "geo.com",
+              entityId: own!.id,
+            },
+            {
+              rank: 2,
+              url: "https://rival.com/x",
+              host: "rival.com",
+              domain: "rival.com",
+              entityId: rival!.id,
+            },
+          ],
+        },
+      },
+    });
+    await expect(prisma.aiRun.create({ data: run })).rejects.toBeInstanceOf(
+      Prisma.PrismaClientKnownRequestError,
+    );
+    await prisma.aiRun.create({ data: { ...run, sampleIndex: 1 } });
+
+    // A competitor removed later leaves its citations unattributed and its mentions gone.
+    await prisma.brandEntity.delete({ where: { id: rival!.id } });
+    expect(await prisma.aiMention.count({ where: { runId: created.id } })).toBe(1);
+    expect(
+      await prisma.aiCitation.findFirst({ where: { runId: created.id, rank: 2 } }),
+    ).toMatchObject({ domain: "rival.com", entityId: null });
+
+    await prisma.prompt.delete({ where: { id: prompt.id } });
+    expect(await prisma.aiRun.count({ where: { projectId: project.id } })).toBe(0);
+    expect(await prisma.aiCitation.count({ where: { runId: created.id } })).toBe(0);
+  });
 });
 
 describe.skipIf(!serverUrl)("migrateDeploy", () => {

@@ -11,7 +11,7 @@ import { Prisma } from "@seo-geo/db";
 import { z } from "zod";
 
 import { AuditService } from "../audit/audit.service.js";
-import { CurrentWorkspace, RequireRole, WorkspaceScoped } from "../auth/decorators.js";
+import { CurrentWorkspace, RequireRole, SessionOnly, WorkspaceScoped } from "../auth/decorators.js";
 import type { WorkspaceContext } from "../auth/principal.js";
 import { toOpenApiSchema } from "../common/openapi.js";
 import { Meta, type RequestMeta } from "../common/request-meta.js";
@@ -42,6 +42,7 @@ export class UsageController {
   }
 
   @Put("budget")
+  @SessionOnly()
   @RequireRole("admin")
   @ApiOperation({ summary: "Set the monthly provider budget" })
   async setBudget(
@@ -69,6 +70,7 @@ export class UsageController {
   }
 
   @Delete("budget")
+  @SessionOnly()
   @HttpCode(204)
   @RequireRole("admin")
   @ApiOperation({ summary: "Remove the monthly provider budget" })

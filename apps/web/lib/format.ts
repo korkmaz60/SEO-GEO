@@ -6,8 +6,17 @@ export function intlLocale(locale: Locale): string {
   return INTL_LOCALE[locale];
 }
 
-export function formatNumber(value: number, locale: Locale, maximumFractionDigits = 0): string {
-  return new Intl.NumberFormat(intlLocale(locale), { maximumFractionDigits }).format(value);
+/** `minimumFractionDigits` keeps decimals aligned in table columns ("41,0" beside "47,4"). */
+export function formatNumber(
+  value: number,
+  locale: Locale,
+  maximumFractionDigits = 0,
+  minimumFractionDigits = 0,
+): string {
+  return new Intl.NumberFormat(intlLocale(locale), {
+    maximumFractionDigits,
+    minimumFractionDigits,
+  }).format(value);
 }
 
 /** Compact notation for KPI tiles: 12.400 → "12,4 B" (tr) / "12.4K" (en). */
@@ -19,10 +28,16 @@ export function formatCompact(value: number, locale: Locale): string {
 }
 
 /** `ratio` is 0–1. */
-export function formatPercent(ratio: number, locale: Locale, maximumFractionDigits = 1): string {
+export function formatPercent(
+  ratio: number,
+  locale: Locale,
+  maximumFractionDigits = 1,
+  minimumFractionDigits = 0,
+): string {
   return new Intl.NumberFormat(intlLocale(locale), {
     style: "percent",
     maximumFractionDigits,
+    minimumFractionDigits,
   }).format(ratio);
 }
 

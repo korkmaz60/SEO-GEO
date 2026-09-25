@@ -2,6 +2,7 @@ import { Body, Controller, Get, HttpCode, Param, Post, Query } from "@nestjs/com
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import {
   AuditIssueOccurrenceSchema,
+  AuditPageDetailSchema,
   AuditPageListSchema,
   AuditPagesQuerySchema,
   AuditRunDetailSchema,
@@ -9,6 +10,7 @@ import {
   SiteAuditOverviewSchema,
   StartAuditSchema,
   type AuditIssueOccurrence,
+  type AuditPageDetail,
   type AuditPageList,
   type AuditPagesQuery,
   type AuditRun,
@@ -101,6 +103,18 @@ export class SiteAuditController {
     @Query(new ZodValidationPipe(AuditPagesQuerySchema)) query: AuditPagesQuery,
   ): Promise<AuditPageList> {
     return this.audits.pages(workspace.id, projectId, runId, query);
+  }
+
+  @Get("runs/:runId/pages/:pageId")
+  @ApiOperation({ summary: "A crawled page with its issues and citability factors" })
+  @ApiOkResponse({ schema: toOpenApiSchema(AuditPageDetailSchema) })
+  page(
+    @CurrentWorkspace() workspace: WorkspaceContext,
+    @IdParam("projectId", "Project") projectId: string,
+    @IdParam("runId", "Audit") runId: string,
+    @IdParam("pageId", "Page") pageId: string,
+  ): Promise<AuditPageDetail> {
+    return this.audits.page(workspace.id, projectId, runId, pageId);
   }
 
   @Get("runs/:runId/issues/:code")

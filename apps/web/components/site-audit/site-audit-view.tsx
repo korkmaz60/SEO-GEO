@@ -6,6 +6,7 @@ import {
   SiteAuditOverviewSchema,
   isIssueCode,
   type AuditIssueSummary,
+  type AuditPageFilter,
   type AuditRun,
   type AuditRunDetail,
   type IssueCategory,
@@ -68,9 +69,11 @@ import { computeDelta, formatDateTime, formatDay, formatNumber, formatPercent } 
 import { cn } from "@/lib/utils";
 import { useCan, useCurrentProject, useWorkspace } from "@/lib/workspace-context";
 
-import { AuditPages } from "./audit-pages";
+import { AuditPages, type AuditPageSort } from "./audit-pages";
+import { CitabilityOverview } from "./citability";
 import { SeverityIcon } from "./issue-severity";
 import { IssueSheet } from "./issue-sheet";
+import { PageSheet } from "./page-sheet";
 import { StartAuditDialog } from "./start-audit-dialog";
 
 const CATEGORIES: IssueCategory[] = [
@@ -92,6 +95,12 @@ export function SiteAuditView() {
   const canEdit = useCan("member");
   const queryClient = useQueryClient();
   const [openIssue, setOpenIssue] = useState<string | null>(null);
+  const [openPage, setOpenPage] = useState<string | null>(null);
+  const [tab, setTab] = useState("issues");
+  const [pagesView, setPagesView] = useState<{ filter: AuditPageFilter; sort: AuditPageSort }>({
+    filter: "all",
+    sort: "url",
+  });
   const overview = useQuery({
     queryKey: ["site-audit", project?.id],
     queryFn: ({ signal }) =>
@@ -155,7 +164,14 @@ export function SiteAuditView() {
       ) : (
         <>
           <Summary run={latest} locale={locale} />
-          <Tabs defaultValue="issues">
+          <CitabilityOverview
+            run={latest}
+            onShowPages={() => {
+              setPagesView({ filter: "low_citability", sort: "citability" });
+              setTab("pages");
+            }}
+          />
+          <Tabs value={tab} onValueChange={(value) => setTab(String(value))}>
             <TabsList>
               <TabsTrigger value="issues">{t("tabs.issues")}</TabsTrigger>
               <TabsTrigger value="pages">{t("tabs.pages")}</TabsTrigger>
@@ -165,7 +181,14 @@ export function SiteAuditView() {
               <IssueList run={latest} onOpen={setOpenIssue} />
             </TabsContent>
             <TabsContent value="pages" className="mt-4">
-              <AuditPages projectId={project.id} runId={latest.id} />
+              <AuditPages
+                key={`${pagesView.filter}-${pagesView.sort}`}
+                projectId={project.id}
+                runId={latest.id}
+                initialFilter={pagesView.filter}
+                initialSort={pagesView.sort}
+                onOpen={setOpenPage}
+              />
             </TabsContent>
             <TabsContent value="history" className="mt-4">
               <History runs={data.runs} locale={locale} />
@@ -176,6 +199,12 @@ export function SiteAuditView() {
             runId={latest.id}
             code={openIssue}
             onClose={() => setOpenIssue(null)}
+          />
+          <PageSheet
+            projectId={project.id}
+            runId={latest.id}
+            pageId={openPage}
+            onClose={() => setOpenPage(null)}
           />
         </>
       )}

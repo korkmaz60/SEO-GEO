@@ -1,0 +1,146 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "2.1344 sec.",
+  "cost": 0,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "09241100-1535-0600-0000-c0ffee000001",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "time": "2.0815 sec.",
+      "cost": 0,
+      "result_count": 1,
+      "path": [
+        "v3",
+        "ai_optimization",
+        "chat_gpt",
+        "llm_scraper",
+        "task_get",
+        "advanced",
+        "09241100-1535-0600-0000-c0ffee000001"
+      ],
+      "data": {
+        "api": "ai_optimization",
+        "function": "task_get",
+        "se": "chat_gpt",
+        "se_type": "llm_scraper",
+        "keyword": "Türkiye'de en iyi kahve makinesi markaları hangileri?",
+        "location_code": 2792,
+        "language_code": "tr",
+        "device": "desktop",
+        "os": "windows",
+        "tag": "01926f3e-0000-7c11-9d2e-00000000a001"
+      },
+      "result": [
+        {
+          "keyword": "Türkiye'de en iyi kahve makinesi markaları hangileri?",
+          "location_code": 2792,
+          "language_code": "tr",
+          "model": "gpt-5",
+          "check_url": "https://chatgpt.com/?q=T%C3%BCrkiye%27de+en+iyi+kahve+makinesi+markalar%C4%B1+hangileri%3F&hints=search",
+          "datetime": "2026-09-24 10:12:31 +00:00",
+          "markdown": "Türkiye'de öne çıkan kahve makinesi markaları şunlar:\n\n1. **Example Store** – geniş espresso ve filtre kahve makinesi seçkisiyle bilinir ([example.com](https://www.example.com/kahve-makineleri)).\n2. **Rakip A** – uygun fiyatlı tam otomatik modeller sunar.\n3. **De'Longhi** ve **Philips** – dünya genelinde yaygın markalar.\n\nSeçim yaparken bütçenizi, kahve tercihinizi ve bakım kolaylığını göz önünde bulundurun.",
+          "search_results": [
+            {
+              "type": "chatgpt_search_result",
+              "url": "https://www.example.com/kahve-makineleri",
+              "domain": "www.example.com",
+              "title": "Kahve Makineleri | Example Store",
+              "description": "Espresso ve filtre kahve makineleri",
+              "breadcrumb": null
+            },
+            {
+              "type": "chatgpt_search_result",
+              "url": "https://tr.wikipedia.org/wiki/Kahve_makinesi",
+              "domain": "tr.wikipedia.org",
+              "title": "Kahve makinesi - Vikipedi",
+              "description": null,
+              "breadcrumb": null
+            },
+            {
+              "type": "chatgpt_search_result",
+              "url": "https://www.rakip-a.com/blog/en-iyi-kahve-makineleri",
+              "domain": "www.rakip-a.com",
+              "title": "En iyi kahve makineleri 2026",
+              "description": "Karşılaştırma",
+              "breadcrumb": null
+            }
+          ],
+          "sources": [
+            {
+              "type": "chatgpt_source",
+              "title": "Kahve Makineleri | Example Store",
+              "snippet": "Espresso ve filtre kahve makineleri",
+              "domain": "www.example.com",
+              "url": "https://www.example.com/kahve-makineleri",
+              "thumbnail": null,
+              "source_name": "Example Store",
+              "publication_date": null,
+              "markdown": null
+            },
+            {
+              "type": "chatgpt_source",
+              "title": "En iyi kahve makineleri 2026",
+              "snippet": null,
+              "domain": "www.rakip-a.com",
+              "url": "https://www.rakip-a.com/blog/en-iyi-kahve-makineleri",
+              "thumbnail": null,
+              "source_name": "Rakip A",
+              "publication_date": "2026-08-01 00:00:00 +00:00",
+              "markdown": null
+            },
+            {
+              "type": "chatgpt_source",
+              "title": "Kahve Makineleri | Example Store",
+              "snippet": null,
+              "domain": "www.example.com",
+              "url": "https://www.example.com/kahve-makineleri",
+              "thumbnail": null,
+              "source_name": "Example Store",
+              "publication_date": null,
+              "markdown": null
+            }
+          ],
+          "fan_out_queries": [
+            "en iyi kahve makinesi markaları 2026",
+            "kahve makinesi marka karşılaştırma"
+          ],
+          "brand_entities": [
+            {
+              "type": "chat_gpt_brand_entity",
+              "title": "Example Store",
+              "category": "Retailer",
+              "markdown": "**Example Store**",
+              "urls": [
+                {
+                  "url": "https://www.example.com/",
+                  "domain": "www.example.com"
+                }
+              ]
+            },
+            {
+              "type": "chat_gpt_brand_entity",
+              "title": "Rakip A",
+              "category": null,
+              "markdown": "**Rakip A**",
+              "urls": null
+            }
+          ],
+          "se_results_count": 0,
+          "item_types": ["chat_gpt_text"],
+          "items_count": 1,
+          "items": [
+            {
+              "type": "chat_gpt_text",
+              "markdown": "Türkiye'de öne çıkan kahve makinesi markaları şunlar:\n\n1. **Example Store** – geniş espresso ve filtre kahve makinesi seçkisiyle bilinir ([example.com](https://www.example.com/kahve-makineleri)).\n2. **Rakip A** – uygun fiyatlı tam otomatik modeller sunar.\n3. **De'Longhi** ve **Philips** – dünya genelinde yaygın markalar.\n\nSeçim yaparken bütçenizi, kahve tercihinizi ve bakım kolaylığını göz önünde bulundurun."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

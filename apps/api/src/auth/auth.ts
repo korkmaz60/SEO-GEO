@@ -16,6 +16,7 @@ import { twoFactor } from "better-auth/plugins/two-factor";
 import { uuidv7 } from "uuidv7";
 
 import type { AuditService } from "../audit/audit.service.js";
+import { API_KEY_PREFIX, apiKeyOf } from "./api-key-header.js";
 import { authRequestContext } from "./auth-request-context.js";
 import type { AppConfig } from "../config/env.js";
 import type { Mailer } from "../mail/mailer.js";
@@ -217,7 +218,17 @@ export function createAuth({ config, prisma, mailer, audit }: AuthDependencies) 
         },
       }),
       twoFactor({ issuer: "SEO-GEO" }),
-      apiKey({ enableSessionForAPIKeys: true, defaultPrefix: "sg_", requireName: true }),
+      apiKey({
+        enableSessionForAPIKeys: true,
+        defaultPrefix: API_KEY_PREFIX,
+        requireName: true,
+        // Workspace keys note their workspace for the account page; access comes from
+        // `workspace_api_key`, never from metadata.
+        enableMetadata: true,
+        customAPIKeyGetter: (ctx) => apiKeyOf((name) => ctx.headers?.get(name)),
+        // The plugin's default is 10 requests a day.
+        rateLimit: { enabled: true, timeWindow: 60_000, maxRequests: 600 },
+      }),
     ],
     hooks: {
       before: createAuthMiddleware(async (ctx) => {

@@ -1,4 +1,5 @@
 import {
+  AiVisibilitySummarySchema,
   PerformanceDataSchema,
   RankTrackerDataSchema,
   SiteAuditOverviewSchema,
@@ -14,6 +15,7 @@ import {
   BarChart3,
   Check,
   KeyRound,
+  MessageSquareText,
   ScanSearch,
   Search,
   Sparkles,
@@ -27,6 +29,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { ScoreTrend } from "@/components/ai-visibility/ai-summary-view";
 import { DeltaBadge } from "@/components/data/delta-badge";
 import { EmptyState } from "@/components/data/empty-state";
 import { KpiTile } from "@/components/data/kpi-tile";
@@ -68,7 +71,7 @@ export async function generateMetadata({
 }
 
 interface SetupStep {
-  key: "provider" | "brand" | "keywords" | "audit" | "gsc";
+  key: "provider" | "brand" | "keywords" | "prompts" | "audit" | "gsc";
   icon: LucideIcon;
   done: boolean;
   /** Where to complete the step; hidden for people who cannot do it. */
@@ -102,12 +105,13 @@ export default async function OverviewPage({
   ]);
   const project = await getProject(workspace.id, projectSlug);
   const api = `/workspaces/${workspace.id}/projects/${project.id}`;
-  const [credentials, usage, rank, audit, performance] = await Promise.all([
+  const [credentials, usage, rank, audit, performance, ai] = await Promise.all([
     getCredentials(workspace.id),
     getUsage(workspace.id),
     optional(serverGet(`${api}/rank-tracker?days=30`, RankTrackerDataSchema)),
     optional(serverGet(`${api}/site-audit`, SiteAuditOverviewSchema)),
     optional(serverGet(`${api}/performance?days=28`, PerformanceDataSchema)),
+    optional(serverGet(`${api}/ai-visibility?days=30`, AiVisibilitySummarySchema)),
   ]);
   const isAdmin = hasWorkspaceRole(workspace.role, "admin");
   const market = findMarket(project.locationCode);
@@ -137,6 +141,12 @@ export default async function OverviewPage({
       href: `${base}/rank-tracker`,
     },
     {
+      key: "prompts",
+      icon: MessageSquareText,
+      done: (ai?.prompts.total ?? 0) > 0,
+      href: `${base}/ai-visibility/prompts`,
+    },
+    {
       key: "audit",
       icon: ScanSearch,
       done: Boolean(audit && (audit.latest || audit.active)),
@@ -161,6 +171,10 @@ export default async function OverviewPage({
     method: t("common.method"),
     updated: t("common.updated"),
   };
+  const ownBrand = ai?.brands.find((brand) => brand.kind === "OWN");
+  const aiOwn = ai?.overall.find((entry) => entry.entityId === ownBrand?.entityId);
+  const aiScore = aiOwn && aiOwn.runs > 0 ? aiOwn.score : null;
+  const aiDelta = aiOwn ? computeDelta(aiOwn.previous?.score ?? null, aiOwn.score) : null;
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
@@ -189,8 +203,22 @@ export default async function OverviewPage({
         <KpiTile
           label={t("kpi.aiVisibility")}
           icon={Sparkles}
-          value={null}
-          emptyLabel={t("common.comingIn", { milestone: "M3" })}
+          value={aiScore !== null ? formatNumber(aiScore, locale, 1) : null}
+          emptyLabel={
+            (ai?.prompts.total ?? 0) > 0 ? t("overview.ai.collecting") : t("overview.ai.noPrompts")
+          }
+          delta={
+            aiDelta ? { delta: aiDelta, label: formatNumber(aiDelta.amount, locale, 1) } : null
+          }
+          provenance={
+            aiScore !== null && aiOwn
+              ? {
+                  source: t("overview.sources.aiVisibility"),
+                  method: t("overview.ai.method", { runs: aiOwn.runs }),
+                  labels,
+                }
+              : undefined
+          }
         />
         <KpiTile
           label={t("kpi.shareOfVoice")}
@@ -423,14 +451,45 @@ export default async function OverviewPage({
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>{t("overview.aiTrendTitle")}</CardTitle>
+            {ai && aiOwn && aiOwn.runs > 0 && (
+              <>
+                <CardDescription>
+                  {t("overview.ai.description", {
+                    mentioned: formatPercent(aiOwn.mentionRate?.value ?? 0, locale, 0),
+                    cited: formatPercent(aiOwn.citationRate?.value ?? 0, locale, 0),
+                    runs: aiOwn.runs,
+                  })}
+                </CardDescription>
+                <CardAction>
+                  <OpenLink href={`${base}/ai-visibility`} label={t("overview.open")} />
+                </CardAction>
+              </>
+            )}
           </CardHeader>
           <CardContent>
-            <EmptyState
-              size="compact"
-              icon={Sparkles}
-              title={t("pages.aiSummary.emptyTitle")}
-              description={t("overview.aiTrendEmpty")}
-            />
+            {ai && aiOwn && aiOwn.runs > 0 ? (
+              <ScoreTrend summary={ai} locale={locale} />
+            ) : (
+              <EmptyState
+                size="compact"
+                icon={Sparkles}
+                title={
+                  (ai?.prompts.total ?? 0) > 0
+                    ? t("overview.ai.collectingTitle")
+                    : t("pages.aiSummary.emptyTitle")
+                }
+                description={t("overview.aiTrendEmpty")}
+              >
+                <Button
+                  size="sm"
+                  variant="outline"
+                  nativeButton={false}
+                  render={<Link href={`${base}/ai-visibility/prompts`} />}
+                >
+                  {t("overview.ai.action")}
+                </Button>
+              </EmptyState>
+            )}
           </CardContent>
         </Card>
 

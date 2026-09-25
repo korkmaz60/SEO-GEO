@@ -43,9 +43,13 @@ export class AccountController {
   @Get("me")
   @ApiOperation({ summary: "The signed-in user and their workspaces" })
   @ApiOkResponse({ schema: toOpenApiSchema(MeResponseSchema) })
-  async me(@CurrentPrincipal() { user }: Principal): Promise<MeResponse> {
+  async me(@CurrentPrincipal() { user, apiKey }: Principal): Promise<MeResponse> {
     const memberships = await this.prisma.member.findMany({
-      where: { userId: user.id },
+      // A workspace API key sees only its workspace.
+      where: {
+        userId: user.id,
+        ...(apiKey?.workspaceId ? { organizationId: apiKey.workspaceId } : {}),
+      },
       orderBy: { createdAt: "asc" },
       select: {
         role: true,

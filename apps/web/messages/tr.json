@@ -123,6 +123,10 @@
         "googleRevoked": {
           "title": "Google erişimi iptal edildi",
           "body": "Search Console ve Analytics verilerinin güncel kalması için {email} hesabını yeniden bağlayın."
+        },
+        "aiBudgetBlocked": {
+          "title": "AI görünürlük kontrolleri duraklatıldı",
+          "body": "{project} projesinin prompt'larını sormak aylık bütçeyi ({limit}) aşacaktı. Devam etmek için bütçeyi artırın."
         }
       }
     }
@@ -235,7 +239,8 @@
       "brand": "Markanızı ve rakiplerinizi tanımlayın",
       "keywords": "Takip edilecek kelimeleri ekleyin",
       "audit": "İlk site denetimini başlatın",
-      "gsc": "Search Console'u bağlayın"
+      "gsc": "Search Console'u bağlayın",
+      "prompts": "AI asistanlarına sorulacak prompt'ları ekleyin"
     },
     "progress": "{done}/{total}",
     "done": "Tamamlandı"
@@ -293,7 +298,8 @@
     "ownBrand": "Siz",
     "open": "Aç",
     "sources": {
-      "rankTracker": "Sıralama takibi"
+      "rankTracker": "Sıralama takibi",
+      "aiVisibility": "AI görünürlük (prompt takibi)"
     },
     "shareMethod": "CTR ağırlıklı görünürlüğünüzün, takip edilen tüm markaların toplam görünürlüğüne oranı.",
     "rankDescription": "Görünürlük {visibility} · son kontrolde {improved} kelime yükseldi, {declined} kelime düştü",
@@ -318,6 +324,14 @@
       "emptyBody": "İlk denetim teknik sorunları ve AI tarayıcı erişimini kontrol eder.",
       "running": "İlk denetim sürüyor; tamamlandığında sonuçlar burada görünür.",
       "action": "Site denetimine git"
+    },
+    "ai": {
+      "noPrompts": "Prompt ekleyin",
+      "collecting": "Yanıtlar toplanıyor",
+      "collectingTitle": "Yanıtlar toplanıyor",
+      "method": "Son 30 gündeki {runs} yanıttan, skor v1",
+      "description": "Son 30 gün · yanıtların {mentioned} kadarında anıldınız, {cited} kadarında kaynak oldunuz · {runs} yanıt",
+      "action": "Prompt'lara git"
     }
   },
   "auth": {
@@ -551,7 +565,8 @@
       "projects": "Projeler",
       "providers": "Sağlayıcılar",
       "usage": "Kullanım ve bütçe",
-      "auditLog": "Denetim kaydı"
+      "auditLog": "Denetim kaydı",
+      "api": "API ve MCP"
     },
     "general": {
       "title": "Çalışma alanı",
@@ -688,6 +703,63 @@
         "budgetUpdated": "Bütçeyi güncelledi",
         "budgetRemoved": "Bütçeyi kaldırdı"
       }
+    },
+    "apiKeys": {
+      "title": "Çalışma alanı API anahtarları",
+      "description": "Betikler ve MCP istemcileri için yalnızca bu çalışma alanında geçerli, kapsamı sınırlı anahtarlar. Anahtar, oluşturan kişinin rolünü asla aşmaz; x-api-key başlığıyla veya Authorization: Bearer olarak gönderin.",
+      "empty": "Henüz anahtar yok.",
+      "created": "{date} oluşturuldu",
+      "expires": "{date} tarihinde sona erer",
+      "neverExpires": "süresiz",
+      "lastUsed": "son kullanım {when}",
+      "scopes": {
+        "read": "Okuma",
+        "write": "Yazma",
+        "paid": "Ücretli işler"
+      },
+      "revoke": "İptal et",
+      "revokeTitle": "{name} iptal edilsin mi?",
+      "revokeBody": "Bu anahtarı kullanan betikler ve MCP istemcileri hemen erişimini kaybeder.",
+      "revoked": "Anahtar iptal edildi.",
+      "create": "Anahtar oluştur",
+      "createTitle": "Yeni API anahtarı",
+      "createBody": "Anahtar yalnızca {workspace} çalışma alanında geçerlidir ve bir kez gösterilir.",
+      "name": "Ad",
+      "namePlaceholder": "Örn. Claude Desktop",
+      "level": "Erişim",
+      "levels": {
+        "read": "Yalnızca okuma",
+        "write": "Okuma ve yazma",
+        "paid": "Okuma, yazma ve ücretli işler"
+      },
+      "levelHints": {
+        "read": "Raporları, sıralamaları ve AI görünürlüğünü okur; hiçbir şeyi değiştirmez.",
+        "write": "Ayrıca proje, prompt ve kelime ayarlarını değiştirir ve denetim başlatır; ücretli işleri başlatamaz.",
+        "paid": "Ayrıca kelime araştırması, prompt ekleme ve sıralama kontrolü gibi DataForSEO'ya ücret ödenen işleri başlatır."
+      },
+      "expiryLabel": "Geçerlilik",
+      "expiry": {
+        "30": "30 gün",
+        "90": "90 gün",
+        "365": "1 yıl",
+        "never": "Süresiz"
+      },
+      "createdTitle": "Anahtarınız hazır",
+      "createdBody": "Bu anahtarı şimdi kopyalayıp güvenli bir yere kaydedin; bir daha gösterilmeyecek.",
+      "copy": "Kopyala",
+      "copied": "Kopyalandı.",
+      "done": "Tamam",
+      "failed": "Anahtar oluşturulamadı.",
+      "mcp": {
+        "title": "MCP sunucusu",
+        "description": "Claude, Cursor ve diğer MCP istemcileri bu kurulumun verilerini araç olarak kullanabilir. Bağlanmak için yukarıdaki anahtarlardan birini kullanın.",
+        "endpoint": "Uç nokta (Streamable HTTP)",
+        "claudeCode": "Claude Code",
+        "config": "HTTP destekleyen istemciler için yapılandırma",
+        "tools": "Araçlar: projeler, sıralamalar, AI görünürlüğü, prompt'lar ve yanıtlar, alıntılanan kaynaklar, site denetimi ve sayfa alıntılanabilirliği, kelime fikirleri, prompt ekleme ve denetim başlatma.",
+        "paid": "Ücretli araçlar önce tahmini maliyeti döndürür; yalnızca bu tutarı onaylayarak yeniden çağrıldıklarında çalışır.",
+        "scopes": "Her araç anahtarın kapsamını ve çalışma alanını kontrol eder: okuma anahtarı yalnızca okur."
+      }
     }
   },
   "projectSettings": {
@@ -737,7 +809,11 @@
       "aliasesPlaceholder": "Örn. Ornek, ORNEK A.Ş.",
       "aliasesHint": "Markanın yazıldığı diğer biçimler; virgülle ayırın.",
       "save": "Kaydet",
-      "limitReached": "Bir projede en fazla 7 rakip olabilir."
+      "limitReached": "Bir projede en fazla 7 rakip olabilir.",
+      "ambiguousAliases": "Belirsiz adlar",
+      "ambiguousPlaceholder": "Örn. Mango, Apple",
+      "ambiguousHint": "Günlük dilde de geçen adlar. Yanıtta markanın alan adı, belirsiz olmayan bir adı ya da kaynağı da varsa anılma sayılır.",
+      "ambiguousShort": "Belirsiz adlar"
     },
     "danger": {
       "title": "Tehlikeli bölge",
@@ -810,7 +886,7 @@
     },
     "apiKeys": {
       "title": "API anahtarları",
-      "description": "Betikler ve entegrasyonlar için kişisel anahtarlar. Anahtar sizin yetkilerinizle çalışır; isteklerde x-api-key başlığıyla gönderin.",
+      "description": "Tüm çalışma alanlarınızda sizin yetkilerinizle çalışan kişisel anahtarlar; x-api-key başlığıyla veya Authorization: Bearer olarak gönderin. Tek çalışma alanıyla ve kapsamla sınırlı anahtarlar için çalışma alanı ayarlarındaki API ve MCP sayfasını kullanın.",
       "empty": "Henüz API anahtarınız yok.",
       "unnamed": "Adsız anahtar",
       "created": "{date} oluşturuldu",
@@ -1243,7 +1319,8 @@
         "warnings": "Uyarılı sayfalar",
         "broken": "Bozuk (4xx/5xx)",
         "redirects": "Yönlendirmeler",
-        "noindex": "Dizine eklenemeyenler"
+        "noindex": "Dizine eklenemeyenler",
+        "low_citability": "Düşük alıntılanabilirlik (<50)"
       },
       "search": "URL veya başlık ara",
       "filter": "Sayfa filtresi",
@@ -1266,7 +1343,13 @@
       "no": "Hayır",
       "range": "{from}–{to} / {total}",
       "previous": "Önceki",
-      "next": "Sonraki"
+      "next": "Sonraki",
+      "sort": "Sıralama",
+      "sorts": {
+        "url": "URL'ye göre",
+        "citability": "En düşük alıntılanabilirlik"
+      },
+      "citability": "Alıntılanabilirlik"
     },
     "history": {
       "scoreTitle": "Sağlık skoru geçmişi",
@@ -1501,6 +1584,95 @@
         "description": "Sitede /llms.txt yok. Bu, dil modellerine sitenizin en önemli sayfalarını özetleyen yeni ortaya çıkan bir öneridir; henüz yaygın olarak kullanılmıyor.",
         "fix": "Sitenizi kısaca tanıtan ve en önemli sayfalarınıza bağlantılar içeren bir Markdown dosyasını /llms.txt adresinde yayınlayın."
       }
+    },
+    "citability": {
+      "title": "AI alıntılanabilirliği",
+      "description": "Dizine eklenebilir sayfaların AI yanıtlarında kaynak gösterilmeye ne kadar hazır olduğu (skor v1).",
+      "average": "Ortalama skor",
+      "pageScore": "Sayfa skoru",
+      "scored": "{count} sayfa puanlandı",
+      "factorsTitle": "Faktörler",
+      "toImprove": "{count} sayfada iyileştirilebilir",
+      "showLowPages": "Düşük skorlu sayfalar",
+      "notScored": "Bu denetim alıntılanabilirlik skorundan önce yapıldı. Skoru görmek için yeni bir denetim başlatın.",
+      "notJudged": "Değerlendirilmedi",
+      "weight": "ağırlık {weight}",
+      "recommendation": "Öneri",
+      "factors": {
+        "answer_first": {
+          "title": "Önce yanıt veren giriş",
+          "recommendation": "Sayfayı sorunun doğrudan yanıtını veren 30–80 kelimelik bir paragrafla açın ve başlıktaki konu terimlerini bu paragrafta kullanın."
+        },
+        "question_headings": {
+          "title": "Soru biçiminde alt başlıklar",
+          "recommendation": "H2/H3 başlıklarının en az üçte birini kullanıcıların sorduğu sorular olarak yazın ve hemen altında kısa bir yanıt verin."
+        },
+        "structured_content": {
+          "title": "Liste ve tablolar",
+          "recommendation": "Adımları, karşılaştırmaları ve özellikleri liste veya tabloyla verin; yaklaşık her 600 kelimeye bir yapı hedefleyin."
+        },
+        "structured_data": {
+          "title": "Yapılandırılmış veri",
+          "recommendation": "Sayfaya uygun JSON-LD ekleyin (Article, FAQPage, HowTo, Product, Organization, BreadcrumbList) ve geçersiz blokları düzeltin."
+        },
+        "authorship": {
+          "title": "Yazar ve kurum bilgisi",
+          "recommendation": "Yazarı Person şeması veya görünür bir imzayla belirtin; hakkımızda ve iletişim sayfalarına bağlantı verin."
+        },
+        "freshness": {
+          "title": "Güncellik",
+          "recommendation": "Sayfayı düzenli güncelleyin ve dateModified/datePublished bilgisini JSON-LD veya article meta etiketleriyle belirtin."
+        },
+        "evidence": {
+          "title": "Kanıt",
+          "recommendation": "İddiaları güvenilir kaynaklara verilen bağlantılarla ve somut rakamlarla (oran, istatistik, fiyat) destekleyin."
+        },
+        "readability": {
+          "title": "Okunabilirlik",
+          "recommendation": "Cümleleri kısaltın ve sade kelimeler seçin; Ateşman veya Flesch skorunda en az 50'yi hedefleyin."
+        },
+        "ai_crawler_access": {
+          "title": "AI arama botu erişimi",
+          "recommendation": "robots.txt'de OAI-SearchBot, ChatGPT-User, PerplexityBot, Perplexity-User, Claude-SearchBot ve Claude-User için sayfaya izin verin."
+        }
+      },
+      "details": {
+        "noIntro": "En az sekiz kelimelik bir paragraf bulunamadı.",
+        "introWords": "İlk paragraf {words} kelime.",
+        "intro": "İlk paragraf {words} kelime; H1'in konu terimlerinin {share} kadarını içeriyor.",
+        "noHeadings": "Alt başlık (H2/H3) yok.",
+        "questions": "{headings} alt başlığın {questions} tanesi soru.",
+        "structures": "{lists} liste ve {tables} tablo; {words} kelimelik metin.",
+        "types": "Bulunan türler: {types}.",
+        "noTypes": "Alıntıya uygun JSON-LD türü yok.",
+        "invalid": "{count} geçersiz JSON-LD bloğu var.",
+        "authorship": "Yazar: {author, select, true {belirtilmiş} other {yok}} · Hakkımızda/iletişim bağlantısı: {about, select, true {var} other {yok}}",
+        "dated": "Son tarih {date} ({days} gün önce).",
+        "noDate": "Sayfada tarih bilgisi bulunamadı.",
+        "evidence": "{links} dış bağlantı ve {figures} rakam.",
+        "readability": "{formula, select, atesman {Ateşman} other {Flesch}} skoru {score}.",
+        "readabilityNotJudged": "Değerlendirilmedi: metin 100 kelimeden kısa ya da dilin bir formülü yok.",
+        "blocked": "Engellenen botlar: {bots}.",
+        "allowed": "Tüm AI arama botları sayfaya erişebilir."
+      }
+    },
+    "pageDetail": {
+      "open": "Sayfayı yeni sekmede aç",
+      "status": "Durum",
+      "indexable": "Dizine eklenebilir",
+      "yes": "Evet",
+      "no": "Hayır",
+      "words": "Kelime",
+      "inlinks": "Gelen iç bağlantı",
+      "outlinks": "Giden iç bağlantı",
+      "externalLinks": "Dış bağlantı",
+      "size": "Boyut",
+      "lang": "Dil",
+      "h1": "H1",
+      "schema": "Yapılandırılmış veri türleri",
+      "notScored": "Yalnızca dizine eklenebilir sayfalar puanlanır.",
+      "issues": "Sorunlar ({count})",
+      "noIssues": "Bu sayfada sorun bulunmadı."
     }
   },
   "searchConsole": {
@@ -1659,6 +1831,217 @@
       "noRows": "Bu dönemde veri yok.",
       "showAll": "{count} satırın tümünü göster",
       "showFewer": "Daha az göster"
+    }
+  },
+  "aiVisibility": {
+    "rangeLabel": "Dönem",
+    "range": "{days} gün",
+    "rateWithInterval": "{value} (%95 aralık: {low}–{high})",
+    "interval": "%95 aralık: {low}–{high}",
+    "lowSample": "Az örnek",
+    "lowSampleHint": "Yalnızca {runs} yanıt var; 20 yanıtın altındaki oranları dikkatle okuyun.",
+    "runNow": "Şimdi sor",
+    "runQueued": "Sırası gelen prompt'lar soruluyor; yanıtlar birkaç dakika içinde gelir.",
+    "runFailed": "Prompt'lar sorulamadı.",
+    "actionFailed": "İşlem tamamlanamadı.",
+    "addPrompts": "Prompt ekle",
+    "settingsAction": "Ayarlar",
+    "pendingNotice": "{count} yanıt toplanıyor; sayfa kendiliğinden yenilenir.",
+    "settingsLine": "{frequency, select, DAILY {Her gün} other {Her hafta}} · {platforms} platform · prompt başına {samples} yanıt · {prompts} aktif prompt",
+    "trendTitle": "AI görünürlük skoru",
+    "trendDescription": "Tüm platformlarda haftalık skor; her marka kendi renginde.",
+    "trendPending": "Trend, en az iki haftalık yanıt toplandığında görünür.",
+    "weekOf": "{date} haftası",
+    "week": "Hafta",
+    "tableView": "Tablo olarak göster",
+    "shareTitle": "Görünürlük payı",
+    "shareDescription": "Takip edilen markaların anılmaları içindeki payı.",
+    "noMentions": "Bu dönemde takip edilen markalardan hiçbiri anılmadı.",
+    "platformsTitle": "Platformlara göre markanız",
+    "platformsDescription": "Anılma ve atıf oranları %95 güven aralığıyla; çubuk ne kadar genişse sonuç o kadar belirsiz.",
+    "sourcesTitle": "En çok alıntılanan kaynaklar",
+    "sourcesDescription": "Yanıtların kaynak gösterdiği alan adları ve tüm alıntılar içindeki payları.",
+    "allSources": "Tüm kaynaklar",
+    "noSources": "Bu dönemde yanıtlar kaynak göstermedi.",
+    "methodNote": "AI görünürlük skoru v{version} = 100 × (0,45 × anılma oranı + 0,35 × atıf oranı + 0,20 × öne çıkma). Yanıtlar kişiselleştirilmemiş API ve arayüz çağrılarıyla toplanır; oturum açmış bir kullanıcının gördüğünden farklı olabilir.",
+    "providerMissing": {
+      "title": "DataForSEO bağlı değil",
+      "body": "Prompt'ları AI platformlarına sormak için çalışma alanına bir DataForSEO hesabı bağlayın.",
+      "action": "Sağlayıcıları aç"
+    },
+    "kpi": {
+      "score": "AI görünürlük skoru",
+      "mentionRate": "Anılma oranı",
+      "citationRate": "Atıf oranı",
+      "shareOfVoice": "Görünürlük payı",
+      "averageRank": "Ortalama anılma sırası",
+      "notMentioned": "Henüz anılmadı",
+      "answers": "İncelenen yanıt"
+    },
+    "table": {
+      "platform": "Platform",
+      "answers": "Yanıt",
+      "mentionRate": "Anılma",
+      "citationRate": "Atıf",
+      "shareOfVoice": "Pay",
+      "averageRank": "Ort. sıra",
+      "score": "Skor",
+      "paused": "sorulmuyor"
+    },
+    "settings": {
+      "title": "AI görünürlük ayarları",
+      "description": "Prompt'ların hangi platformlara, ne sıklıkla ve kaç kez sorulacağını seçin. Maliyet kaydetmeden önce hesaplanır.",
+      "platforms": "Platformlar",
+      "methods": {
+        "CHATGPT": "Kullanıcıların gördüğü ChatGPT arayüzü (LLM Scraper, kuyrukta)",
+        "GEMINI": "Kullanıcıların gördüğü Gemini arayüzü (LLM Scraper, kuyrukta)",
+        "PERPLEXITY": "Sonar modelleri, her zaman web aramalı (LLM Responses, canlı)",
+        "CLAUDE": "Claude API, web aramalı (LLM Responses, canlı); en pahalı seçenek",
+        "GOOGLE_AI_MODE": "Google AI Modu yanıtı (SERP API, kuyrukta)",
+        "GOOGLE_AI_OVERVIEW": "Prompt Google'da aratıldığında çıkan AI Özeti (SERP API)"
+      },
+      "frequency": "Sıklık",
+      "frequencies": {
+        "WEEKLY": "Haftalık",
+        "DAILY": "Günlük"
+      },
+      "samples": "Prompt başına yanıt",
+      "samplesHint": "Yanıtlar çalıştırmadan çalıştırmaya değişir; daha fazla örnek oranları daha güvenilir yapar ama maliyeti katlar.",
+      "model": "{platform} modeli",
+      "defaultModel": "Varsayılan (web aramalı en ucuz model)",
+      "defaultModelNamed": "Varsayılan ({model})",
+      "perAnswer": "yanıt başına ~{cost}",
+      "sentiment": "Duygu analizi",
+      "sentimentHint": "Her anılmanın tonunu (olumlu, nötr, olumsuz) küçük bir modelle sınıflandırır; anılma başına küçük bir ek maliyet.",
+      "answersPerPeriod": "{frequency, select, DAILY {Günlük} other {Haftalık}} yanıt sayısı",
+      "sentimentCost": "Duygu analizi",
+      "perPeriod": "{frequency, select, DAILY {Günlük} other {Haftalık}} tahmini maliyet",
+      "perMonth": "30 günlük tahmini maliyet",
+      "costNote": "{prompts} aktif prompt için liste fiyatlarıyla üst sınır; gerçek tutar her yanıtla birlikte kaydedilir.",
+      "save": "Kaydet",
+      "saved": "Ayarlar kaydedildi. Yeni platformlar bir sonraki saatlik kontrolde sorulur.",
+      "failed": "Ayarlar kaydedilemedi."
+    },
+    "add": {
+      "title": "Prompt ekle",
+      "description": "Müşterilerinizin AI asistanlarına sorduğu soruları yazın. Hemen ve sonra planlandığı sıklıkta sorulurlar.",
+      "prompts": "Prompt'lar",
+      "placeholder": "Türkiye'de en iyi kahve makinesi markaları hangileri?\nEspresso makinesi alırken nelere dikkat etmeliyim?",
+      "promptsHint": "Her satıra bir prompt; en fazla 500 karakter.",
+      "tooLong": "{count} prompt {max} karakterden uzun; bunlar eklenmez.",
+      "market": "Pazar",
+      "tags": "Etiketler",
+      "tagsPlaceholder": "marka, karşılaştırma",
+      "newPrompts": "Yeni prompt",
+      "duplicates": "Zaten var",
+      "invalid": "Geçersiz",
+      "perPeriod": "{frequency, select, DAILY {Günlük} other {Haftalık}} tahmini maliyet",
+      "perMonth": "30 günlük tahmini maliyet",
+      "costNote": "Mevcut ayarlarla liste fiyatlarından üst sınır.",
+      "submit": "{count, plural, =0 {Prompt ekle} other {# prompt ekle}}",
+      "added": "{count} prompt eklendi; yanıtlar birkaç dakika içinde gelir.",
+      "budgetExceeded": "Bu işlem aylık bütçeyi aşar. Bütçeyi çalışma alanı ayarlarından yükseltin.",
+      "failed": "Prompt'lar eklenemedi."
+    },
+    "prompts": {
+      "search": "Prompt ara",
+      "tag": "Etiket",
+      "allTags": "Tüm etiketler",
+      "count": "{count} prompt",
+      "prompt": "Prompt",
+      "mentioned": "Anılma",
+      "cited": "Atıf",
+      "latest": "Son yanıtlar",
+      "lastRun": "Son çalışma",
+      "noMatches": "Aramaya uyan prompt yok.",
+      "noAnswers": "Henüz yanıt yok",
+      "collecting": "Toplanıyor",
+      "pause": "Duraklat",
+      "resume": "Sürdür",
+      "paused": "Prompt duraklatıldı; geçmişi korunur.",
+      "resumed": "Prompt bir sonraki saatlik kontrolde sorulacak.",
+      "pausedBadge": "Duraklatıldı",
+      "delete": "Sil",
+      "deleteTitle": "Prompt silinsin mi?",
+      "deleteDescription": "\"{prompt}\" ve tüm yanıtları kalıcı olarak silinecek.",
+      "deleted": "Prompt silindi.",
+      "pageRange": "{from}–{to} / {total}",
+      "previous": "Önceki",
+      "next": "Sonraki",
+      "mentionedAt": "{rank}. sırada anıldı",
+      "notMentioned": "anılmadı",
+      "citedSite": "siteniz kaynak gösterildi",
+      "competitorsMentioned": "{count} rakip anıldı"
+    },
+    "answer": {
+      "mentionRate": "Anılma oranı",
+      "citationRate": "Atıf oranı",
+      "answers": "Yanıt",
+      "lastRun": "Son çalışma",
+      "collecting": "Yanıt toplanıyor.",
+      "noAnswers": "Bu dönemde yanıt yok.",
+      "history": "Yanıt geçmişi",
+      "failed": "Yanıt alınamadı.",
+      "methods": {
+        "llm_scraper": "Arayüz",
+        "llm_responses": "API",
+        "google_ai_mode": "SERP API",
+        "google_ai_overview": "SERP API · AI Özeti"
+      },
+      "searchedWeb": "web'de aradı",
+      "mentions": "Anılan markalar",
+      "removedBrand": "Silinmiş marka",
+      "mentionSummary": "{rank}. sıra · {count} kez",
+      "sentiments": {
+        "positive": "Olumlu",
+        "neutral": "Nötr",
+        "negative": "Olumsuz"
+      },
+      "noOverview": "Google bu arama için AI Özeti göstermedi.",
+      "empty": "Platform bu prompt için yanıt vermedi.",
+      "citations": "Kaynaklar ({count})",
+      "knownPage": "Sitenizin sayfası",
+      "openSource": "Kaynağı yeni sekmede aç",
+      "searches": "Modelin yaptığı aramalar",
+      "answerText": "Yanıt metni"
+    },
+    "sources": {
+      "citations": "Alıntı",
+      "domains": "Alan adı",
+      "topHundred": "En çok alıntılanan 100 alan adı",
+      "ownShare": "Sitenizin payı",
+      "ownCitations": "{count} alıntı",
+      "domainsTitle": "Alıntılanan alan adları",
+      "domainsDescription": "Yanıtların kaynak gösterdiği siteler; iş birliği ve içerik fırsatları için başlangıç listesi.",
+      "pagesTitle": "Alıntılanan sayfalarınız",
+      "pagesDescription": "Yanıtlarda kaynak gösterilen kendi sayfalarınız.",
+      "noOwnPages": "Bu dönemde sayfalarınız kaynak gösterilmedi.",
+      "domain": "Alan adı",
+      "share": "Pay",
+      "prompts": "Prompt",
+      "platforms": "Platformlar",
+      "you": "Siz",
+      "page": "Sayfa",
+      "known": "Bilinen sayfa",
+      "knownYes": "Denetim veya Search Console'da",
+      "knownNo": "Bilinmiyor",
+      "openPage": "Sayfayı yeni sekmede aç"
+    },
+    "competitors": {
+      "manage": "Rakipleri yönet",
+      "add": "Rakip ekle",
+      "noAnswersTitle": "Henüz karşılaştırılacak yanıt yok",
+      "noAnswersBody": "Prompt'lar sorulup yanıtlar toplandığında markanız rakiplerinizle burada karşılaştırılır.",
+      "comparisonTitle": "Markalar",
+      "comparisonDescription": "Aynı yanıtlarda her markanın skoru, anılma ve atıf oranları, payı ve ortalama anılma sırası.",
+      "shareTrendTitle": "Haftalık görünürlük payı",
+      "shareTrendDescription": "Anılmalar içindeki payın haftadan haftaya değişimi.",
+      "platformsTitle": "Platformlara göre anılma oranı",
+      "platformsDescription": "Her markanın her platformdaki anılma oranı.",
+      "brand": "Marka",
+      "you": "Siz",
+      "significant": "Anlamlı değişim",
+      "significantHint": "Anılma oranı önceki döneme göre güven aralıklarının ötesinde değişti."
     }
   }
 }

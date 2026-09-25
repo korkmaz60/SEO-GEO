@@ -83,6 +83,33 @@ and chooses the Search Console property (and optionally a GA4 property). The las
 are imported right away and new days every morning (05:40 UTC). Connected accounts are
 listed, and can be disconnected, in *Workspace settings → Providers*.
 
+### AI visibility
+
+AI visibility needs nothing beyond the DataForSEO credentials: prompts are asked on
+ChatGPT, Gemini, Perplexity, Claude, Google AI Mode and Google AI Overviews through
+DataForSEO, and you pay DataForSEO per answer. In a project, open *AI visibility → Settings*
+to choose the platforms, the schedule (weekly by default) and the number of samples; the
+dialog shows the cost per period and month before you save, and adding prompts shows it
+again. The worker asks the prompts that are due every hour, and budgets in *Workspace
+settings → Usage* stop scheduled answers before they would be exceeded.
+
+### API and MCP clients
+
+Scripts and AI assistants use the REST API (`/api/v1`) and the MCP server
+(`/api/v1/mcp`, Streamable HTTP) with a workspace API key:
+
+1. Create a key in *Workspace settings → API & MCP* with the access it needs: read only,
+   read and write, or also paid actions (asking AI platforms, keyword research). The key is
+   shown once.
+2. Connect the MCP client to `<WEB_URL>/api/v1/mcp` with the header
+   `Authorization: Bearer <key>`, for example with Claude Code:
+   `claude mcp add --transport http seo-geo https://seo.example.com/api/v1/mcp --header "Authorization: Bearer sg_…"`.
+   The settings page shows the address of your installation and a JSON configuration for
+   other clients.
+
+Paid tools return the estimated cost first and run only after the client confirms it. Keys
+can be revoked on the same page; each key is limited to 600 requests per minute.
+
 ### HTTPS
 
 The bundled Caddy obtains and renews certificates from Let's Encrypt:
@@ -147,3 +174,6 @@ while the api and worker are stopped.
 | Google shows `redirect_uri_mismatch` | The OAuth client's redirect URI must be exactly `<origin of WEB_URL>/api/v1/integrations/google/callback`. |
 | Search Console stops updating after a week | The OAuth consent screen is in *Testing*; publish it and reconnect the account. |
 | A site audit finds only a few pages | The site blocks `SEO-GEO-Bot` in `robots.txt`, or its pages are only linked through JavaScript (not rendered in this version). |
+| AI visibility shows no answers | DataForSEO is not connected, no platform is enabled in *AI visibility → Settings*, the budget stopped scheduled answers (see the notifications), or the worker is not running. Queued answers usually arrive within minutes. |
+| An MCP client gets `401` | The key is wrong, expired or revoked; create a new one in *Workspace settings → API & MCP*. |
+| An MCP tool answers that the key lacks a scope | Create a key with more access; paid tools need a key that allows paid actions. |

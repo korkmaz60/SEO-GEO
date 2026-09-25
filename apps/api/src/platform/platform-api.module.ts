@@ -1,5 +1,8 @@
 import { Module } from "@nestjs/common";
 
+import { AiVisibilityController } from "../ai-visibility/ai-visibility.controller.js";
+import { WorkspaceApiKeysController } from "../api-keys/workspace-api-keys.controller.js";
+import { WorkspaceApiKeysService } from "../api-keys/workspace-api-keys.service.js";
 import { AuditController } from "../audit/audit.controller.js";
 import { CredentialsController } from "../credentials/credentials.controller.js";
 import {
@@ -11,6 +14,8 @@ import {
   KeywordListsController,
   KeywordResearchController,
 } from "../keywords/keyword-research.controller.js";
+import { McpController } from "../mcp/mcp.controller.js";
+import { McpService } from "../mcp/mcp.service.js";
 import { NotificationsController } from "../notifications/notifications.controller.js";
 import { ProjectsController } from "../projects/projects.controller.js";
 import { ProjectsService } from "../projects/projects.service.js";
@@ -35,8 +40,11 @@ import { UsageController } from "../usage/usage.controller.js";
     GoogleCallbackController,
     GoogleConnectionsController,
     ProjectIntegrationsController,
+    AiVisibilityController,
+    WorkspaceApiKeysController,
+    McpController,
   ],
-  providers: [ProjectsService],
+  providers: [ProjectsService, WorkspaceApiKeysService, McpService],
   exports: [ProjectsService],
 })
 export class PlatformApiModule {}

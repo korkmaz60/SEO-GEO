@@ -2,8 +2,11 @@ import { HttpStatus, Injectable, type OnModuleInit } from "@nestjs/common";
 import {
   AUDIT_RUNS_KEPT,
   AuditStatsSchema,
+  CITABILITY_FACTORS,
   ErrorCode,
+  LOW_CITABILITY_SCORE,
   type AuditIssueOccurrence,
+  type AuditPageDetail,
   type AuditIssueSummary,
   type AuditPageList,
   type AuditPagesQuery,
@@ -14,15 +17,18 @@ import {
 } from "@seo-geo/contracts";
 import { hostMatchesDomain } from "@seo-geo/core";
 import {
+  CITABILITY_WEIGHTS,
   HEALTH_SCORE_VERSION,
   ISSUE_CATALOG,
   analyzeCrawl,
+  citabilityRecommendations,
   crawlSite,
   diffIssues,
   isIndexable,
   isIssueCode,
   issueSeverity,
   type AuditAnalysis,
+  type CitabilityResult,
   type CrawlResult,
 } from "@seo-geo/core/audit";
 import { SafeFetchError } from "@seo-geo/core/net";
@@ -45,6 +51,14 @@ const RunConfigSchema = z.object({
   maxDepth: z.int(),
 });
 const TaskInputSchema = z.object({ runId: z.uuid() });
+/** `audit_page.citability` as stored. */
+const StoredCitabilitySchema = z.object({
+  version: z.int(),
+  factors: z.record(
+    z.string(),
+    z.object({ value: z.number().nullable(), data: z.record(z.string(), z.unknown()) }),
+  ),
+});
 
 /** Rows per insert statement when a run is stored. */
 const INSERT_CHUNK = 1000;
@@ -63,12 +77,32 @@ export function toAuditRun(row: AuditRunRow): AuditRun {
     pagesCrawled: row.pagesCrawled,
     healthScore: row.healthScore,
     scoreVersion: row.scoreVersion,
+    citabilityScore: row.citabilityScore,
     stats: stats.success ? stats.data : null,
     error: row.error,
     taskId: row.taskId,
     createdAt: row.createdAt.toISOString(),
     startedAt: iso(row.startedAt),
     finishedAt: iso(row.finishedAt),
+  };
+}
+
+function storedCitability(result: CitabilityResult | undefined): {
+  citabilityScore: number | null;
+  citability: Prisma.InputJsonValue | typeof Prisma.DbNull;
+} {
+  if (!result) return { citabilityScore: null, citability: Prisma.DbNull };
+  return {
+    citabilityScore: result.score,
+    citability: {
+      version: result.version,
+      factors: Object.fromEntries(
+        Object.entries(result.factors).map(([factor, entry]) => [
+          factor,
+          { value: entry.value, data: { ...entry.data } },
+        ]),
+      ),
+    },
   };
 }
 
@@ -233,6 +267,7 @@ export class SiteAuditService implements OnModuleInit {
       },
       redirects: { statusCode: { gte: 300, lt: 400 } },
       noindex: { robotsMeta: { contains: "noindex" } },
+      low_citability: { citabilityScore: { lt: LOW_CITABILITY_SCORE } },
     };
     const where: Prisma.AuditPageWhereInput = {
       runId: run.id,
@@ -242,7 +277,10 @@ export class SiteAuditService implements OnModuleInit {
     const [rows, total] = await Promise.all([
       this.prisma.auditPage.findMany({
         where,
-        orderBy: [{ url: "asc" }],
+        orderBy:
+          query.sort === "citability"
+            ? [{ citabilityScore: { sort: "asc", nulls: "last" } }, { url: "asc" }]
+            : [{ url: "asc" }],
         take: query.limit,
         skip: query.offset,
       }),
@@ -278,8 +316,91 @@ export class SiteAuditService implements OnModuleInit {
         loadMs: row.loadMs,
         inlinks: row.inlinks,
         schemaTypes: row.schemaTypes,
+        citabilityScore: row.citabilityScore,
         issues: byPage.get(row.id) ?? { errors: 0, warnings: 0, notices: 0 },
       })),
+    };
+  }
+
+  /** A crawled page with its issues and citability factors. */
+  async page(
+    workspaceId: string,
+    projectId: string,
+    runId: string,
+    pageId: string,
+  ): Promise<AuditPageDetail> {
+    const run = await this.run(workspaceId, projectId, runId);
+    const row = await this.prisma.auditPage.findFirst({
+      where: { id: pageId, runId: run.id },
+      include: { issues: { orderBy: [{ severity: "asc" }, { code: "asc" }] } },
+    });
+    if (!row) throw ProblemException.notFound("Page not found.");
+    const counts = { errors: 0, warnings: 0, notices: 0 };
+    const issues: AuditPageDetail["issues"] = [];
+    for (const issue of row.issues) {
+      if (!isIssueCode(issue.code)) continue;
+      if (issue.severity === "ERROR") counts.errors++;
+      else if (issue.severity === "WARNING") counts.warnings++;
+      else counts.notices++;
+      issues.push({
+        code: issue.code,
+        severity: issue.severity,
+        category: ISSUE_CATALOG[issue.code].category,
+        data: (issue.data ?? {}) as Record<string, unknown>,
+      });
+    }
+    return {
+      page: {
+        id: row.id,
+        url: row.url,
+        depth: row.depth,
+        statusCode: row.statusCode,
+        fetchError: row.fetchError,
+        contentType: row.contentType,
+        redirectTarget: row.redirectTarget,
+        title: row.title,
+        indexable: row.indexable,
+        wordCount: row.wordCount,
+        loadMs: row.loadMs,
+        inlinks: row.inlinks,
+        schemaTypes: row.schemaTypes,
+        citabilityScore: row.citabilityScore,
+        issues: counts,
+        metaDescription: row.metaDescription,
+        h1: row.h1,
+        h1Count: row.h1Count,
+        canonical: row.canonical,
+        robotsMeta: row.robotsMeta,
+        lang: row.lang,
+        inSitemap: row.inSitemap,
+        outlinks: row.outlinks,
+        externalLinks: row.externalLinks,
+        bytes: row.bytes,
+      },
+      issues,
+      citability: this.citabilityOf(row.citabilityScore, row.citability),
+    };
+  }
+
+  private citabilityOf(score: number | null, stored: unknown): AuditPageDetail["citability"] {
+    const parsed = StoredCitabilitySchema.safeParse(stored);
+    if (score === null || !parsed.success) return null;
+    const factors = CITABILITY_FACTORS.map((factor) => {
+      const entry = parsed.data.factors[factor];
+      return {
+        factor,
+        weight: CITABILITY_WEIGHTS[factor],
+        value: entry?.value ?? null,
+        data: entry?.data ?? {},
+      };
+    });
+    return {
+      version: parsed.data.version,
+      score,
+      factors,
+      recommendations: citabilityRecommendations(
+        Object.fromEntries(factors.map((entry) => [entry.factor, entry])),
+      ),
     };
   }
 
@@ -333,7 +454,13 @@ export class SiteAuditService implements OnModuleInit {
       if (status?.status === "CANCELED") return { result: { runId, canceled: true } };
       if (crawl.stoppedBy === "aborted") throw new Error("The audit was interrupted.");
 
-      const analysis = analyzeCrawl(crawl);
+      const analysis = analyzeCrawl(crawl, {
+        isInternal: (url) =>
+          hostMatchesDomain(url, run.project.domain, {
+            includeSubdomains: run.project.includeSubdomains,
+          }),
+        defaultLanguage: run.project.defaultLanguageCode,
+      });
       await this.store(run, { ...config, startUrl }, crawl, analysis);
       await this.prune(run.projectId);
       return {
@@ -423,6 +550,7 @@ export class SiteAuditService implements OnModuleInit {
                 lang: trim(facts?.lang, 35),
                 hreflang: facts?.hreflang.slice(0, 100) ?? [],
                 inSitemap: page.inSitemap,
+                ...storedCitability(analysis.citability.get(page.url)),
               };
             }),
           });
@@ -463,8 +591,13 @@ export class SiteAuditService implements OnModuleInit {
             pagesCrawled: crawl.pages.length,
             healthScore: analysis.healthScore,
             scoreVersion: HEALTH_SCORE_VERSION,
+            citabilityScore: analysis.stats.citability.average,
             stats: {
               ...analysis.stats,
+              citability: {
+                ...analysis.stats.citability,
+                factors: { ...analysis.stats.citability.factors },
+              },
               stoppedBy: crawl.stoppedBy,
               robots: {
                 found: crawl.robots.found,

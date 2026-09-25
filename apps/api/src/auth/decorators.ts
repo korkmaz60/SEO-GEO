@@ -5,9 +5,9 @@ import {
   createParamDecorator,
   type ExecutionContext,
 } from "@nestjs/common";
-import type { WorkspaceRole } from "@seo-geo/contracts";
+import type { ApiScope, WorkspaceRole } from "@seo-geo/contracts";
 
-import { IS_PUBLIC, REQUIRED_ROLE } from "./metadata.js";
+import { IS_PUBLIC, REQUIRED_ROLE, REQUIRED_SCOPE, SESSION_ONLY } from "./metadata.js";
 import type { AuthenticatedRequest, Principal, WorkspaceContext } from "./principal.js";
 import { WorkspaceGuard } from "./workspace.guard.js";
 
@@ -23,6 +23,19 @@ export const WorkspaceScoped = () => applyDecorators(UseGuards(WorkspaceGuard));
 
 /** Minimum workspace role for a route: owner > admin > member > viewer. */
 export const RequireRole = (role: WorkspaceRole) => SetMetadata(REQUIRED_ROLE, role);
+
+/**
+ * The API key scope a route needs. Without it, reads (`GET`) need `read` and everything else
+ * `write`; routes that start paid provider work need `run:paid`, and read-only `POST`s
+ * (quotes) `read`. Session cookies are not limited by scopes.
+ */
+export const RequireScope = (scope: ApiScope) => SetMetadata(REQUIRED_SCOPE, scope);
+
+/**
+ * Only for signed-in users, never API keys: provider credentials, budgets, Google
+ * connections and API keys themselves.
+ */
+export const SessionOnly = () => SetMetadata(SESSION_ONLY, true);
 
 export const CurrentPrincipal = createParamDecorator(
   (_data: unknown, context: ExecutionContext): Principal => {

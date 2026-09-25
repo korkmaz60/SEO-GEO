@@ -1,9 +1,22 @@
 import { z } from "zod";
 
-import type { DataForSeoClient, TaskOutcome } from "../client.js";
+import type { DataForSeoClient } from "../client.js";
 import { STATUS_NO_SEARCH_RESULTS, STATUS_TASK_HANDED, STATUS_TASK_IN_QUEUE } from "../envelope.js";
-import { DataForSeoError } from "../errors.js";
-import { compact, parseResponse, toIsoDateTime } from "./shared.js";
+import {
+  MAX_TASKS_PER_POST,
+  compact,
+  firstTask,
+  getReadyTaskList,
+  hostOf,
+  parseResponse,
+  postTaskBatch,
+  tagOf,
+  toIsoDateTime,
+  type PostedTask,
+  type ReadyTask,
+} from "./shared.js";
+
+export { MAX_TASKS_PER_POST, type PostedTask, type ReadyTask } from "./shared.js";
 
 // SERP API, Google organic. Field names follow the official DataForSEO client
 // (dataforseo-client 2.x: SerpGoogleOrganicTaskPostRequestInfo, …TaskGetAdvancedResultInfo,
@@ -16,8 +29,6 @@ export const GOOGLE_ORGANIC_LIVE_ADVANCED_PATH = `${BASE}/live/advanced`;
 export const googleOrganicTaskGetAdvancedPath = (id: string) =>
   `${BASE}/task_get/advanced/${encodeURIComponent(id)}`;
 
-/** DataForSEO accepts at most this many tasks per `task_post` request. */
-export const MAX_TASKS_PER_POST = 100;
 /** Deepest Google organic SERP DataForSEO returns. */
 export const MAX_SERP_DEPTH = 700;
 const MAX_KEYWORD_LENGTH = 700;
@@ -112,6 +123,7 @@ const AiOverviewItemSchema = z.looseObject({
   rank_group: count,
   rank_absolute: count,
   asynchronous_ai_overview: z.boolean().nullish(),
+  markdown: text,
   references: z.array(AiOverviewReferenceSchema).nullish(),
   items: z
     .array(z.looseObject({ references: z.array(AiOverviewReferenceSchema).nullish() }))
@@ -130,12 +142,6 @@ const SerpResultSchema = z.looseObject({
   se_results_count: count,
   pages_count: count,
   items: z.array(SerpItemSchema).nullish(),
-});
-
-const ReadyTaskSchema = z.looseObject({
-  id: z.string(),
-  tag: text,
-  date_posted: text,
 });
 
 // ── Normalized results ──────────────────────────────────────────────────────────────
@@ -174,6 +180,8 @@ export interface SerpAiOverview {
   rankAbsolute: number | null;
   /** `true` when the overview loads asynchronously (collected with `loadAsyncAiOverview`). */
   asynchronous: boolean | null;
+  /** The overview's text in Markdown, when DataForSEO returns it. */
+  markdown: string | null;
   /** Pages the overview cites, deduplicated by URL. */
   references: SerpAiOverviewReference[];
 }
@@ -220,15 +228,6 @@ function collectLinks(value: unknown, links: Map<string, SerpLink>, depth = 0): 
   for (const [key, child] of Object.entries(record)) {
     if (key === "rectangle" || key === "images") continue;
     if (child !== null && typeof child === "object") collectLinks(child, links, depth + 1);
-  }
-}
-
-function hostOf(url: string | null): string | null {
-  if (!url) return null;
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return null;
   }
 }
 
@@ -291,6 +290,7 @@ export function parseGoogleOrganicSerp(
       aiOverview = {
         rankAbsolute: overview.rank_absolute ?? null,
         asynchronous: overview.asynchronous_ai_overview ?? null,
+        markdown: overview.markdown ?? null,
         references: [...references.values()],
       };
     }
@@ -316,10 +316,6 @@ export function parseGoogleOrganicSerp(
 
 // ── Endpoints ───────────────────────────────────────────────────────────────────────
 
-export type PostedTask =
-  | { ok: true; id: string; tag: string | null; cost: number }
-  | { ok: false; id: string; tag: string | null; error: DataForSeoError };
-
 /**
  * Queues SERP tasks (Standard queue). Results are collected later with
  * {@link getReadyGoogleOrganicTasks} and {@link getGoogleOrganicTaskAdvanced}. DataForSEO
@@ -332,55 +328,21 @@ export async function postGoogleOrganicTasks(
   client: DataForSeoClient,
   inputs: readonly GoogleOrganicTaskInput[],
 ): Promise<{ cost: number; tasks: PostedTask[] }> {
-  if (inputs.length === 0) return { cost: 0, tasks: [] };
   if (inputs.length > MAX_TASKS_PER_POST) {
     throw new RangeError(`At most ${MAX_TASKS_PER_POST} tasks can be posted at once`);
   }
-  const bodies = inputs.map((input) => toRequestBody(input, "task"));
-  const response = await client.post<unknown>(GOOGLE_ORGANIC_TASK_POST_PATH, bodies);
-  if (response.tasks.length !== inputs.length) {
-    throw new DataForSeoError({
-      kind: "invalid_response",
-      message: `Posted ${inputs.length} tasks but received ${response.tasks.length}`,
-      path: GOOGLE_ORGANIC_TASK_POST_PATH,
-      retryable: false,
-    });
-  }
-  return {
-    cost: response.cost,
-    tasks: response.tasks.map((task, index) => {
-      const tag = tagOf(task) ?? inputs[index]?.tag ?? null;
-      return task.ok
-        ? { ok: true, id: task.id, tag, cost: task.cost }
-        : { ok: false, id: task.id, tag, error: task.error };
-    }),
-  };
+  return postTaskBatch(
+    client,
+    GOOGLE_ORGANIC_TASK_POST_PATH,
+    inputs.map((input) => toRequestBody(input, "task")),
+  );
 }
 
-export interface ReadyTask {
-  id: string;
-  tag: string | null;
-  postedAt: string | null;
-}
-
-/**
- * Completed Standard-queue tasks whose results have not been collected yet (up to 1000 per
- * call). Free. The list covers every task of the DataForSEO account, including tasks posted
- * by other software, so callers only collect the IDs they know.
- */
-export async function getReadyGoogleOrganicTasks(
+/** Completed Standard-queue organic SERP tasks not collected yet; see {@link getReadyTaskList}. */
+export function getReadyGoogleOrganicTasks(
   client: DataForSeoClient,
 ): Promise<{ cost: number; tasks: ReadyTask[] }> {
-  const { result, cost } = await client.getOne<unknown>(GOOGLE_ORGANIC_TASKS_READY_PATH);
-  const tasks = parseResponse(z.array(ReadyTaskSchema), result, GOOGLE_ORGANIC_TASKS_READY_PATH);
-  return {
-    cost,
-    tasks: tasks.map((task) => ({
-      id: task.id,
-      tag: task.tag ?? null,
-      postedAt: toIsoDateTime(task.date_posted),
-    })),
-  };
+  return getReadyTaskList(client, GOOGLE_ORGANIC_TASKS_READY_PATH);
 }
 
 export type GoogleOrganicTaskResult =
@@ -437,22 +399,4 @@ export async function getGoogleOrganicLiveAdvanced(
     serp: first === undefined || first === null ? null : parseGoogleOrganicSerp(first, path),
     cost: response.cost,
   };
-}
-
-function firstTask<T>(response: { tasks: TaskOutcome<T>[] }, path: string): TaskOutcome<T> {
-  const task = response.tasks[0];
-  if (!task) {
-    throw new DataForSeoError({
-      kind: "invalid_response",
-      message: "DataForSEO response contained no tasks",
-      path,
-      retryable: false,
-    });
-  }
-  return task;
-}
-
-function tagOf(task: TaskOutcome<unknown>): string | null {
-  const tag = task.data.tag;
-  return typeof tag === "string" && tag.length > 0 ? tag : null;
 }

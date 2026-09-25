@@ -16,8 +16,9 @@ rules every table follows, and how large time series are stored.
 5. **JSON.** `jsonb` is used for flexible payloads and is validated with Zod at the boundary.
 6. **Shared market data.** Keyword metrics, domain metrics and DataForSEO locations are public
    market data, cached once per instance and shared by all workspaces.
-7. **Large payloads** (raw SERP responses, full AI answers, crawl snapshots, PDFs) go to
-   object storage; tables keep a storage key and a hash.
+7. **Large payloads.** Report PDFs (M4) and other large files go to object storage; tables
+   keep a storage key and a hash. AI answers (a few kilobytes each) and the organic results
+   of SERP snapshots are stored in the database.
 8. **Naming.** Tables and columns are `snake_case` in PostgreSQL, mapped to `camelCase` in Prisma.
 
 ## Core relationships
@@ -30,10 +31,13 @@ erDiagram
     WORKSPACE ||--o{ PROVIDER_CREDENTIAL : stores
     WORKSPACE ||--o{ USAGE_ENTRY : records
     WORKSPACE ||--o{ TASK : runs
+    WORKSPACE ||--o{ WORKSPACE_API_KEY : binds
+    APIKEY ||--o| WORKSPACE_API_KEY : "workspace and scopes"
     PROJECT ||--o{ BRAND_ENTITY : "own brand + competitors"
     PROJECT ||--o{ TRACKED_KEYWORD : tracks
     TRACKED_KEYWORD ||--o{ RANK_CHECK : "daily result"
     SERP_SNAPSHOT ||--o{ RANK_CHECK : "shared SERP"
+    PROJECT ||--o| PROJECT_AI_SETTINGS : configures
     PROJECT ||--o{ PROMPT : monitors
     PROMPT ||--o{ AI_RUN : "per platform, per sample"
     AI_RUN ||--o{ AI_MENTION : detects
@@ -59,7 +63,8 @@ Managed by Better Auth; our extra fields are added through its schema options.
 | `organization` | id, name, slug, logo, metadata, **plan**, **settings** | shown in the product as **workspace** |
 | `member` | id, organization_id, user_id, role | roles: `owner`, `admin`, `member`, `viewer` |
 | `invitation` | id, organization_id, email, role, status, expires_at, inviter_id | |
-| `apikey` | id, user_id, organization_id, prefix, hashed key, permissions, rate limits, expires_at | public API and MCP |
+| `apikey` | id, reference_id (user), name, start, prefix, key (hash), enabled, rate limit (600 per minute), request_count, last_request, expires_at, metadata | Better Auth API keys; a key acts as its user |
+| `workspace_api_key` | key_id (PK → `apikey`), workspace_id, scopes[] (`read`, `write`, `run:paid`), created_at | binds a key to one workspace with scopes; keys without a row are personal keys |
 
 ## Workspace-level entities
 
@@ -83,7 +88,7 @@ Managed by Better Auth; our extra fields are added through its schema options.
 | Table | Key columns | Notes |
 |---|---|---|
 | `project` | id, workspace_id, name, slug, domain, include_subdomains, default_location_code, default_language_code, timezone, archived_at | `domain` is a normalized host; unique (workspace_id, slug) |
-| `brand_entity` | id, workspace_id, project_id, kind (`OWN`/`COMPETITOR`), name, domains[], aliases[], color | one `OWN` entity per project; competitors are entities too, so rank tracking, AI mentions and share of voice use one definition |
+| `brand_entity` | id, workspace_id, project_id, kind (`OWN`/`COMPETITOR`), name, domains[], aliases[], ambiguous_aliases[], color_slot | one `OWN` entity per project; competitors are entities too, so rank tracking, AI mentions and share of voice use one definition. Ambiguous names count only with supporting evidence ([geo-aeo.md](geo-aeo.md)); the color slot keeps a brand's color the same in every chart |
 | `project_member` | project_id, user_id, role | M4: restrict client viewers to specific projects |
 | `project_integration` | id, workspace_id, project_id, type (`GSC`/`GA4`), connection_id, external_id, display_name, settings, last_synced_at, synced_through, last_error | selected Search Console site (`sc-domain:example.com` or a URL prefix) or GA4 property (`properties/123`); unique (project_id, type) |
 | `google_connection` | id, workspace_id, google_user_id, email, scopes[], encrypted_tokens (bytea), key_version, status (`ACTIVE`/`REVOKED`), last_error, connected_by | refresh and access tokens, AES-256-GCM encrypted; unique (workspace_id, google_user_id) |
@@ -119,8 +124,8 @@ deletes them.
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `audit_run` | id, workspace_id, project_id, status, trigger, config (start URL, max pages, max depth), stats (jsonb: status classes, severities, crawl outcome, robots.txt, sitemaps, llms.txt), pages_crawled, health_score, score_version, task_id, error, created_by, started_at, finished_at | |
-| `audit_page` | id, run_id, url (normalized), depth, status_code, fetch_error, content_type, redirect_target, title, meta_description, h1, h1_count, canonical, robots_meta, indexable, word_count, content_hash, load_ms, bytes, inlinks, outlinks, external_links, schema_types[], lang, hreflang (jsonb), in_sitemap | unique (run_id, url) |
+| `audit_run` | id, workspace_id, project_id, status, trigger, config (start URL, max pages, max depth), stats (jsonb: status classes, severities, crawl outcome, robots.txt, sitemaps, llms.txt, citability averages per factor), pages_crawled, health_score, score_version, citability_score, task_id, error, created_by, started_at, finished_at | `citability_score` is the average page citability |
+| `audit_page` | id, run_id, url (normalized), depth, status_code, fetch_error, content_type, redirect_target, title, meta_description, h1, h1_count, canonical, robots_meta, indexable, word_count, content_hash, load_ms, bytes, inlinks, outlinks, external_links, schema_types[], lang, hreflang (jsonb), in_sitemap, citability_score, citability (jsonb: version, value and data per factor) | unique (run_id, url); citability only for indexable HTML pages |
 | `audit_link` | run_id, from_page_id, to_url, anchor, nofollow | internal links only |
 | `audit_issue` | id, run_id, page_id?, code, severity, data (jsonb) | `code` points to the issue catalog in `packages/contracts`; site-wide issues have no page |
 
@@ -131,13 +136,15 @@ are translated in the web app's message catalogs, not stored in the database.
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `prompt` | id, workspace_id, project_id, text, language_code, location_code?, tags[], active | the prompt library |
-| `ai_run` | id, workspace_id, project_id, prompt_id, platform, model, sample_index, run_at, status, answer_key, answer_hash, sources_count, cost_usd, task_id | partitioned by month; platforms: `CHATGPT`, `CLAUDE`, `GEMINI`, `PERPLEXITY`, `GOOGLE_AI_OVERVIEW`, `GOOGLE_AI_MODE` |
-| `ai_mention` | id, run_id, entity_id, first_rank, mention_count, sentiment, sentiment_confidence, classifier_version | one row per detected brand entity |
-| `ai_citation` | id, run_id, rank, url, domain, title, entity_id?, page_url? | every cited source; `domain` is the registrable domain |
-| `ai_visibility_daily` | project_id, date, platform, entity_id, runs, mentions, citations, mention_rate, citation_rate, share_of_voice, avg_rank, metric_version | rollup used by dashboards |
+| `project_ai_settings` | project_id (PK), workspace_id, platforms[], frequency (`WEEKLY`/`DAILY`), samples (1–5), models (jsonb: Claude and Perplexity model, `null` = default), sentiment | defaults (all platforms but Claude, weekly, one sample) apply until saved |
+| `prompt` | id, workspace_id, project_id, text, location_code, language_code, tags[], active, created_by | the prompt library; unique (project_id, text, location_code, language_code) |
+| `ai_run` | id, workspace_id, project_id, prompt_id, platform, method, model, sample_index, run_on, status (`PENDING`/`COMPLETED`/`FAILED`), provider_task_id, posted_at, completed_at, answer, answer_hash, web_search, fan_out_queries[], details (jsonb: search results, brand entities marked by the platform, token usage, check URL), detector_version, cost_usd, error | one answer; unique (prompt_id, platform, run_on, sample_index). Platforms: `CHATGPT`, `GEMINI`, `PERPLEXITY`, `CLAUDE`, `GOOGLE_AI_MODE`, `GOOGLE_AI_OVERVIEW` |
+| `ai_mention` | run_id, entity_id, first_rank, first_offset, mention_count, sentiment, sentiment_confidence, classifier_version | PK (run_id, entity_id): one row per mentioned brand |
+| `ai_citation` | run_id, rank, url, host, domain, title, entity_id?, page_url? | PK (run_id, rank): every cited source; `domain` is the registrable domain, `page_url` a known page of the project |
 
-See [geo-aeo.md](geo-aeo.md) for detection rules and metric formulas.
+Dashboards aggregate answers, mentions and citations in SQL by period, platform and week;
+a daily rollup table can be added when volumes need it. See [geo-aeo.md](geo-aeo.md) for
+detection rules and metric formulas.
 
 ## Backlinks and domains (M4)
 

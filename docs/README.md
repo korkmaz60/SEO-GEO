@@ -48,3 +48,7 @@ change until the milestone that depends on it starts.
 | D14 | Rank checks through the DataForSEO Standard queue at depth 30, collected by polling `tasks_ready`; SERPs of the same query and market are shared across projects for 20 hours | Accepted (M2) |
 | D15 | Own site crawler in `packages/core` (safe fetcher, cheerio) instead of the On-Page API, so audits cost nothing and work without a provider key | Accepted (M2) |
 | D16 | Search Console and GA4 through each workspace's own Google OAuth consent (read-only scopes, sealed state + PKCE); imported rows are private to the project and never cached across workspaces | Accepted (M2) |
+| D17 | AI answers through DataForSEO: LLM Scraper (ChatGPT, Gemini) and SERP API (Google AI Mode, AI Overviews) in the Standard queue, LLM Responses live (Claude, Perplexity); weekly with one sample by default; answers stored in the database | Accepted (M3) |
+| D18 | AI visibility score v1 and page citability score v1 are deterministic, versioned formulas; rates carry 95% Wilson intervals; LLMs classify (sentiment) but never produce a metric | Accepted (M3) |
+| D19 | Workspace-bound API keys with scopes (`read`, `write`, `run:paid`) built on Better Auth keys; keys act as their creator and are refused on account endpoints | Accepted (M3) |
+| D20 | MCP server inside the api at `/api/v1/mcp` (Streamable HTTP, stateless, API-key auth); paid tools return an estimate and need `confirm_cost_usd` | Accepted (M3) |

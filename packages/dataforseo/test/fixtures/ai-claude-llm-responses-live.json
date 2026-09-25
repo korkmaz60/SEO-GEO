@@ -1,0 +1,84 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "2.1344 sec.",
+  "cost": 0.026868,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "09241101-1535-0601-0000-c1a0de000001",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "time": "2.0815 sec.",
+      "cost": 0.026868,
+      "result_count": 1,
+      "path": ["v3", "ai_optimization", "claude", "llm_responses", "live"],
+      "data": {
+        "api": "ai_optimization",
+        "function": "live",
+        "se": "claude",
+        "user_prompt": "Türkiye'de en iyi kahve makinesi markaları hangileri?",
+        "model_name": "claude-haiku-4-5",
+        "web_search": true,
+        "tag": "01926f3e-0000-7c11-9d2e-00000000b001"
+      },
+      "result": [
+        {
+          "model_name": "claude-haiku-4-5-20251001",
+          "input_tokens": 14210,
+          "output_tokens": 412,
+          "reasoning_tokens": 0,
+          "web_search": true,
+          "money_spent": 0.026268,
+          "datetime": "2026-09-24 10:14:02 +00:00",
+          "items": [
+            {
+              "type": "message",
+              "sections": [
+                {
+                  "type": "text",
+                  "text": "Türkiye'de kahve makinesi alırken en çok önerilen markalar arasında Example Store, De'Longhi ve Philips var. Example Store özellikle espresso makinelerindeki seçenekleriyle öne çıkıyor.",
+                  "annotations": [
+                    {
+                      "title": "Kahve Makineleri | Example Store",
+                      "url": "https://www.example.com/kahve-makineleri",
+                      "start_index": 0,
+                      "end_index": 120
+                    },
+                    {
+                      "title": "Kahve makinesi - Vikipedi",
+                      "url": "https://tr.wikipedia.org/wiki/Kahve_makinesi",
+                      "start_index": 0,
+                      "end_index": 60
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": "Rakip A ise bütçe dostu tam otomatik modellerle tercih ediliyor; ancak servis ağı daha sınırlı.",
+                  "annotations": [
+                    {
+                      "title": "En iyi kahve makineleri 2026",
+                      "url": "https://www.rakip-a.com/blog/en-iyi-kahve-makineleri",
+                      "start_index": 0,
+                      "end_index": 40
+                    },
+                    {
+                      "title": "Kahve Makineleri | Example Store",
+                      "url": "https://www.example.com/kahve-makineleri",
+                      "start_index": 41,
+                      "end_index": 80
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "fan_out_queries": null
+        }
+      ]
+    }
+  ]
+}

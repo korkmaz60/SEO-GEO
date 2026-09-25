@@ -318,6 +318,8 @@ function BrandsSection({ project, canEdit }: { project: ProjectDetail; canEdit: 
               <span className="truncate text-xs text-muted-foreground">
                 {brand.domains.join(", ")}
                 {brand.aliases.length > 0 && ` · ${t("aliasesShort")}: ${brand.aliases.join(", ")}`}
+                {brand.ambiguousAliases.length > 0 &&
+                  ` · ${t("ambiguousShort")}: ${brand.ambiguousAliases.join(", ")}`}
               </span>
             </div>
             {canEdit && (
