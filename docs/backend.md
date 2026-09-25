@@ -170,8 +170,8 @@ usage ledger and checks the budget before paid work.
 | AI Mode | SERP API Google AI Mode `task_post` → `tasks_ready` → `task_get` | Standard queue |
 | Keyword explorer *(M2)* | Labs keyword ideas, keyword suggestions, related keywords; keyword overview for the metrics of tracked keywords | Live, cached |
 | Search volume (bulk) | Keywords Data Google Ads search volume | Standard |
-| Domain overview | Labs domain rank overview, ranked keywords, historical rank overview, competitors, domain intersection | Live, cached |
-| Backlinks | Backlinks summary, referring domains, anchors, backlinks, new/lost time series, spam score | Live, cached |
+| Domain overview *(M4)* | Labs domain rank overview, historical rank overview, ranked keywords, competitors; Backlinks summary | Live, cached |
+| Backlinks *(M4)* | Backlinks summary, history, referring domains, backlinks, anchors, new/lost time series, bulk ranks, domain intersection (link gap) | Live, cached |
 | Site audit (optional provider) | On-Page API task-based crawl, pages, links, duplicates, Lighthouse | Standard |
 | AI visibility *(M3)* | AI Optimization API: LLM Scraper for ChatGPT and Gemini (`task_post` → `tasks_ready` → `task_get`); LLM Responses for Claude and Perplexity; LLM Responses models list (cached 1 day) | Standard queue / Live |
 | Sentiment *(M3)* | LLM Responses, the cheapest ChatGPT model, no web search | Live |
@@ -192,7 +192,8 @@ estimates (checked 2026-09-24):
 | Google organic SERP, first page of 10 results | 0.0006 Standard · 0.0012 priority · 0.002 Live |
 | Each further page of 10 results | 75% of the first page |
 | `load_async_ai_overview` | +0.0006, refunded when the SERP has no asynchronous AI Overview |
-| Labs (ideas, suggestions, related keywords, keyword overview) | 0.012 per request + 0.00012 per returned keyword |
+| Labs (ideas, suggestions, related keywords, keyword overview, domain endpoints) | 0.012 per request + 0.00012 per returned item |
+| Backlinks API (every live endpoint) | 0.024 per request + 0.000036 per returned row; no monthly commitment since 1 July 2026 (it was 100 per month before) |
 | Google AI Mode, one answer | 0.0012 Standard · 0.004 Live |
 | LLM Scraper (ChatGPT, Gemini), one answer | 0.0012 Standard · 0.004 Live |
 | LLM Responses (Claude, Perplexity), one answer | 0.0002 Standard · 0.0006 Live task fee, plus what the model provider charges for tokens and searches (reported per answer; estimated per model family for previews, e.g. 0.05 for Claude Haiku, 0.01 for Sonar) |
@@ -242,6 +243,42 @@ for the cloud edition can replace polling later.
   are added; metrics older than 30 days are fetched again when the keyword is next checked.
 - Weekly keywords carry their last position forward for up to 7 days in daily series;
   changes compare with the check 7 and 30 days earlier, within a tolerance of 7 days.
+
+## Domain overview and backlinks (M4)
+
+Domain and backlink data are the same for everyone, so they are loaded on demand, shared by
+all workspaces through `provider_cache`, and never refreshed on a schedule:
+
+| Data | Endpoints | Fresh for |
+|---|---|---|
+| Organic metrics of a domain in a market: keywords by position, estimated traffic and its value, new and lost keywords | Labs `domain_rank_overview` | 7 days |
+| Monthly organic history (last 12 months) | Labs `historical_rank_overview` | 7 days |
+| Top keywords by estimated traffic (100) | Labs `ranked_keywords` | 7 days |
+| Organic competitors (10) | Labs `competitors_domain` | 7 days |
+| Backlink profile: rank (0–100 scale), backlinks, referring domains and main domains, nofollow shares, spam score | Backlinks `summary` | 1 day |
+| Monthly backlink history, lists (referring domains, backlinks, anchors), daily new and lost, competitors' ranks, link gap | Backlinks `history`, `referring_domains`, `backlinks`, `anchors`, `timeseries_new_lost_summary`, `bulk_ranks`, `domain_intersection` | 1 day |
+
+- **Targets** are hosts without `www.` (`example.com`, `blog.example.com`); URLs are reduced
+  to their host. Labs data needs a market (location and language); backlink data does not.
+- **Quote first.** Every load returns the cost of its parts that are not cached (0 when all
+  are), and runs only with the budget to cover it; each response is written to the usage
+  ledger with what DataForSEO charged. A domain overview costs about 0.08, a project's
+  backlink profile about 0.15.
+- **Provenance.** Responses carry, per source (Labs, Backlinks), when the data was fetched
+  and whether it came from the cache.
+- **History** comes from DataForSEO's own monthly series (`historical_rank_overview`,
+  `backlinks/history`) and new and lost links from its new/lost series, never from
+  differences between totals of our own snapshots, so no snapshot tables are needed.
+
+**Domain overview** (`POST /workspaces/:id/research/domains/quote` and
+`POST /workspaces/:id/research/domains`, members and above, `run:paid` for API keys) takes a
+domain or address and a market and combines five cached parts: the rank overview, the last
+12 months (the current one included), the 100 keywords with the most estimated traffic, 10
+competitors (the domain itself left out; one extra is requested for it) and the backlink
+summary. Only missing parts are paid for; parts that succeed are cached and billed even when
+another fails, so trying again pays only for the rest. Position changes of keywords compare
+absolute ranks with the previous month, as DataForSEO reports them. A domain Labs does not
+know returns empty sections, and a backlink summary without links is `null`.
 
 ## AI visibility
 
@@ -347,10 +384,12 @@ code.
   Tools call the same services with the same workspace membership, roles and scopes:
   `list_projects`, `get_rankings`, `get_ai_visibility`, `list_ai_prompts`,
   `get_ai_answers`, `list_ai_sources`, `get_site_audit`, `list_audit_pages`,
-  `get_audit_page`, `get_keyword_ideas`, `add_ai_prompts` and `run_site_audit`.
-- Tools that spend money (`get_keyword_ideas` when the result is not cached,
-  `add_ai_prompts`) need the `run:paid` scope and return the estimated cost first; they run
-  only when called again with `confirm_cost_usd` of at least that estimate.
+  `get_audit_page`, `get_keyword_ideas`, `get_domain_overview`, `add_ai_prompts` and
+  `run_site_audit`. `get_domain_overview` analyzes any domain (the project's own by default)
+  in the project's market and returns its 50 best keywords.
+- Tools that spend money (`get_keyword_ideas` and `get_domain_overview` when the result is
+  not cached, `add_ai_prompts`) need the `run:paid` scope and return the estimated cost
+  first; they run only when called again with `confirm_cost_usd` of at least that estimate.
 - Workspace settings → API & MCP shows the endpoint and ready-made client configuration.
 
 ## Billing (cloud edition)

@@ -1,7 +1,15 @@
-import { ModulePage, pageMetadata } from "@/components/module-page";
+import { Suspense } from "react";
+
+import { DomainOverviewView } from "@/components/domains/domain-overview-view";
+import { pageMetadata } from "@/components/module-page";
 
 export const generateMetadata = pageMetadata("domainOverview");
 
 export default function Page() {
-  return <ModulePage pageKey="domainOverview" />;
+  // The view reads the domain and market from the URL.
+  return (
+    <Suspense>
+      <DomainOverviewView />
+    </Suspense>
+  );
 }

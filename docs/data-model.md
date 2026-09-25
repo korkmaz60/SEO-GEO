@@ -149,10 +149,10 @@ detection rules and metric formulas.
 
 ## Backlinks and domains (M4)
 
-| Table | Key columns | Notes |
-|---|---|---|
-| `domain_snapshot` | domain, date, source, metrics (jsonb) | shared cache of domain-level metrics |
-| `backlink_snapshot` | project_id, date, backlinks, referring_domains, rank, new_backlinks, lost_backlinks | new/lost come from the provider's new/lost series, never from total differences |
+No tables of their own: domain and backlink data is public market data, cached for all
+workspaces in `provider_cache` (Labs responses for 7 days, Backlinks responses for 1 day).
+Trends come from DataForSEO's monthly history and new/lost series, never from differences
+between stored totals. See [backend.md](backend.md#domain-overview-and-backlinks-m4).
 
 ## Reports and alerts (M4)
 

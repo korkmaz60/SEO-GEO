@@ -38,6 +38,28 @@ export {
   type SearchIntent,
 } from "./endpoints/labs.js";
 export {
+  LABS_COMPETITORS_DOMAIN_PATH,
+  LABS_DOMAIN_RANK_OVERVIEW_PATH,
+  LABS_HISTORICAL_RANK_OVERVIEW_PATH,
+  LABS_RANKED_KEYWORDS_PATH,
+  getCompetitorsDomain,
+  getDomainRankOverview,
+  getHistoricalRankOverview,
+  getRankedKeywords,
+  type DomainCompetitor,
+  type DomainRankMetrics,
+  type LabsDomainRequest,
+  type MonthlyDomainMetrics,
+  type PositionBucket,
+  type RankedKeyword,
+} from "./endpoints/domains.js";
+export {
+  BACKLINKS_SUMMARY_PATH,
+  getBacklinksSummary,
+  type BacklinksSummary,
+  type BacklinksTarget,
+} from "./endpoints/backlinks.js";
+export {
   GOOGLE_ORGANIC_LIVE_ADVANCED_PATH,
   GOOGLE_ORGANIC_TASKS_READY_PATH,
   GOOGLE_ORGANIC_TASK_POST_PATH,
@@ -66,6 +88,7 @@ export {
   DATAFORSEO_PRICES,
   SERP_PAGE_SIZE,
   estimateAiAnswerCost,
+  estimateBacklinksCost,
   estimateLabsCost,
   estimateProviderAnswerCost,
   estimateSerpCost,

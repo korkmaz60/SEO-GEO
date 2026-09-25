@@ -3,6 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import {
   AuditPageFilterSchema,
+  DomainOverviewRequestSchema,
   KeywordResearchSchema,
   ResearchModeSchema,
   WorkspaceRoleSchema,
@@ -19,6 +20,7 @@ import type { Principal } from "../auth/principal.js";
 import { APP_CONFIG } from "../config/config.module.js";
 import type { AppConfig } from "../config/env.js";
 import { PrismaService } from "../database/prisma.service.js";
+import { DomainOverviewService } from "../domains/domain-overview.service.js";
 import { KeywordResearchService } from "../keywords/keyword-research.service.js";
 import { RankTrackerService } from "../rank-tracker/rank-tracker.service.js";
 import { SiteAuditService } from "../site-audit/site-audit.service.js";
@@ -40,10 +42,12 @@ const ConfirmCost = z
   );
 
 const READ_ONLY = { readOnlyHint: true, openWorldHint: false } as const;
+/** Top keywords a domain overview returns to agents (the web app shows all). */
+const MCP_DOMAIN_KEYWORDS = 50;
 
 const INSTRUCTIONS = `SEO-GEO: rankings, keyword research, site audits and visibility in AI answers (ChatGPT, Gemini, Perplexity, Claude, Google AI Mode and AI Overviews) for the projects of a workspace.
 Start with list_projects. Rates come with 95% intervals; "lowSample" means fewer than 20 answers, so read changes with care.
-Paid tools (get_keyword_ideas when not cached, add_ai_prompts) first return an estimate; call them again with confirm_cost_usd to proceed.`;
+Paid tools (get_keyword_ideas and get_domain_overview when not cached, add_ai_prompts) first return an estimate; call them again with confirm_cost_usd to proceed.`;
 
 function text(value: unknown): CallToolResult {
   return { content: [{ type: "text", text: JSON.stringify(value) }] };
@@ -75,6 +79,7 @@ export class McpService {
     private readonly prompts: PromptsService,
     private readonly siteAudit: SiteAuditService,
     private readonly research: KeywordResearchService,
+    private readonly domains: DomainOverviewService,
   ) {}
 
   createServer(principal: Principal): McpServer {
@@ -390,6 +395,68 @@ export class McpService {
               intent: item.intent,
               trend: item.trend,
             })),
+          };
+        }),
+    );
+
+    server.registerTool(
+      "get_domain_overview",
+      {
+        title: "Get domain overview",
+        description:
+          "Organic keywords, estimated traffic and its history, the keywords with the most traffic, competing domains and the backlink summary of any domain, in the project's market. Paid unless cached: returns the estimate first.",
+        inputSchema: {
+          project_id: ProjectId,
+          domain: z
+            .string()
+            .trim()
+            .min(1)
+            .max(2048)
+            .optional()
+            .describe("A domain such as example.com; the project's own domain when omitted."),
+          confirm_cost_usd: ConfirmCost,
+        },
+        annotations: { readOnlyHint: true, openWorldHint: true },
+      },
+      ({ project_id, domain, confirm_cost_usd }) =>
+        run(async () => {
+          const project = await access.project(project_id, "member", "read");
+          const input = DomainOverviewRequestSchema.parse({
+            domain: domain ?? project.domain,
+            locationCode: project.defaultLocationCode,
+            languageCode: project.defaultLanguageCode,
+          });
+          const quote = await this.domains.quote(input);
+          if (quote.estimatedCostUsd > 0) {
+            access.requireScope("run:paid");
+            if (!confirmed(confirm_cost_usd, quote.estimatedCostUsd)) {
+              return confirmation(quote.estimatedCostUsd);
+            }
+          }
+          const overview = await this.domains.overview(project.workspaceId, input);
+          return {
+            domain: overview.domain,
+            locationCode: overview.locationCode,
+            languageCode: overview.languageCode,
+            costUsd: overview.costUsd,
+            organic: overview.organic,
+            history: overview.history,
+            topKeywords: overview.topKeywords.slice(0, MCP_DOMAIN_KEYWORDS).map((item) => ({
+              keyword: item.keyword,
+              position: item.position,
+              change: item.change,
+              isNew: item.isNew,
+              searchVolume: item.searchVolume,
+              keywordDifficulty: item.keywordDifficulty,
+              traffic: item.traffic,
+              url: item.url,
+            })),
+            competitors: overview.competitors,
+            backlinks: overview.backlinks,
+            dataAsOf: {
+              labs: overview.sources.labs.fetchedAt,
+              backlinks: overview.sources.backlinks.fetchedAt,
+            },
           };
         }),
     );

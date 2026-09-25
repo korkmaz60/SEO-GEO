@@ -11,12 +11,13 @@ import {
   type SearchIntent,
 } from "@seo-geo/contracts";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, ArrowUpDown, ListPlus, Search, TrendingUp } from "lucide-react";
+import { ListPlus, Search, TrendingUp } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState, type FormEvent } from "react";
 
 import { Sparkline } from "@/components/charts/sparkline";
 import { EmptyState } from "@/components/data/empty-state";
+import { SortHeader, compareValues, nextSort, type SortState } from "@/components/data/sort-header";
 import { PageHeader } from "@/components/page-header";
 import { AddKeywordsDialog } from "@/components/rank-tracker/add-keywords-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -262,7 +263,7 @@ function Results({ result }: { result: KeywordResearchResult }) {
   const [minVolume, setMinVolume] = useState("");
   const [maxDifficulty, setMaxDifficulty] = useState("");
   const [intent, setIntent] = useState<"all" | SearchIntent>("all");
-  const [sort, setSort] = useState<{ key: SortKey; direction: 1 | -1 }>({
+  const [sort, setSort] = useState<SortState<SortKey>>({
     key: "volume",
     direction: -1,
   });
@@ -293,18 +294,7 @@ function Results({ result }: { result: KeywordResearchResult }) {
       .filter((keyword) => (keyword.searchVolume ?? 0) >= min)
       .filter((keyword) => keyword.keywordDifficulty === null || keyword.keywordDifficulty <= max)
       .filter((keyword) => intent === "all" || keyword.intent === intent)
-      .sort((a, b) => {
-        const left = value(a);
-        const right = value(b);
-        if (left === null && right === null) return 0;
-        if (left === null) return 1;
-        if (right === null) return -1;
-        const order =
-          typeof left === "string" && typeof right === "string"
-            ? left.localeCompare(right, locale)
-            : Number(left) - Number(right);
-        return order * sort.direction;
-      });
+      .sort((a, b) => compareValues(value(a), value(b), sort.direction, locale));
   }, [result.items, search, minVolume, maxDifficulty, intent, sort, locale]);
 
   const selectedKeywords = rows
@@ -321,31 +311,15 @@ function Results({ result }: { result: KeywordResearchResult }) {
 
   function toggleSort(key: SortKey) {
     setSort((previous) =>
-      previous.key === key
-        ? { key, direction: previous.direction === 1 ? -1 : 1 }
-        : { key, direction: key === "keyword" || key === "difficulty" ? 1 : -1 },
+      nextSort(previous, key, (column) =>
+        column === "keyword" || column === "difficulty" ? 1 : -1,
+      ),
     );
   }
 
-  const header = (label: string, key: SortKey, className?: string) => {
-    const active = sort.key === key;
-    const Icon = !active ? ArrowUpDown : sort.direction === 1 ? ArrowUp : ArrowDown;
-    return (
-      <TableHead
-        className={className}
-        aria-sort={active ? (sort.direction === 1 ? "ascending" : "descending") : "none"}
-      >
-        <button
-          type="button"
-          onClick={() => toggleSort(key)}
-          className="inline-flex items-center gap-1 hover:text-foreground"
-        >
-          {label}
-          <Icon className={cn("size-3", !active && "opacity-40")} aria-hidden />
-        </button>
-      </TableHead>
-    );
-  };
+  const header = (label: string, key: SortKey, className?: string) => (
+    <SortHeader label={label} column={key} sort={sort} onSort={toggleSort} className={className} />
+  );
 
   return (
     <div className="flex flex-col gap-4">

@@ -1,0 +1,95 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "0.4121 sec.",
+  "cost": 0.024036,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "09251402-1535-0372-0000-7a1b2c3d4e63",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "time": "0.3902 sec.",
+      "cost": 0.024036,
+      "result_count": 1,
+      "path": ["v3", "backlinks", "summary", "live"],
+      "data": {
+        "api": "backlinks",
+        "function": "summary",
+        "target": "example.com",
+        "include_subdomains": true,
+        "backlinks_status_type": "live",
+        "rank_scale": "one_hundred",
+        "internal_list_limit": 10
+      },
+      "result": [
+        {
+          "target": "example.com",
+          "first_seen": "2017-03-04 12:31:00 +00:00",
+          "lost_date": null,
+          "rank": 42,
+          "backlinks": 18342,
+          "backlinks_spam_score": 6,
+          "crawled_pages": 3120,
+          "info": {
+            "server": "nginx",
+            "cms": null,
+            "platform_type": ["organization"],
+            "ip_address": "192.0.2.10",
+            "country": "TR",
+            "is_ip": false,
+            "target_spam_score": 4
+          },
+          "internal_links_count": 96120,
+          "external_links_count": 4210,
+          "broken_backlinks": 214,
+          "broken_pages": 18,
+          "referring_domains": 812,
+          "referring_domains_nofollow": 133,
+          "referring_main_domains": 744,
+          "referring_main_domains_nofollow": 120,
+          "referring_ips": 690,
+          "referring_subnets": 601,
+          "referring_pages": 15320,
+          "referring_pages_nofollow": 2210,
+          "referring_links_tld": {
+            "com": 9876,
+            "com.tr": 5120,
+            "net": 1402,
+            "org": 830
+          },
+          "referring_links_types": {
+            "anchor": 17004,
+            "image": 1210,
+            "redirect": 128
+          },
+          "referring_links_attributes": {
+            "nofollow": 2403,
+            "noopener": 1102,
+            "ugc": 88,
+            "sponsored": 41
+          },
+          "referring_links_platform_types": {
+            "blogs": 6120,
+            "cms": 5120,
+            "organization": 2040,
+            "news": 1830
+          },
+          "referring_links_semantic_locations": {
+            "article": 9120,
+            "": 5230,
+            "section": 2300
+          },
+          "referring_links_countries": {
+            "TR": 12010,
+            "US": 2400,
+            "DE": 810,
+            "": 330
+          }
+        }
+      ]
+    }
+  ]
+}

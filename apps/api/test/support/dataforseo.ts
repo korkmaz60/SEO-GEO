@@ -32,6 +32,20 @@ export interface FakeKeywordMetrics {
   intent: string;
 }
 
+/** What the fake Labs and Backlinks APIs know about a domain. */
+export interface FakeDomain {
+  /** Organic keywords by the position of the best result: 1, 2–3, 4–10 and 11–20. */
+  positions: [number, number, number, number];
+  traffic: number;
+  /** Past months, oldest first, ending with the current month. */
+  history?: { keywords: number; traffic: number; top10: number }[];
+  /** Ranked keywords by traffic: `[keyword, position, traffic, previous position]`. */
+  keywords?: [keyword: string, position: number, traffic: number, previous?: number][];
+  /** `[domain, common keywords, average position]`; may include the domain itself. */
+  competitors?: [domain: string, common: number, avgPosition: number][];
+  backlinks?: { rank: number; backlinks: number; referringDomains: number };
+}
+
 export interface FakeDataForSeoState {
   balance: number;
   revoked?: boolean;
@@ -47,6 +61,10 @@ export interface FakeDataForSeoState {
   sentiments?: Record<string, "positive" | "neutral" | "negative">;
   /** Platforms whose live answers fail with a server error. */
   failingPlatforms?: FakeAiPlatform[];
+  /** Domains by host; unknown domains have no data, as with DataForSEO. */
+  domains?: Record<string, FakeDomain>;
+  /** Paths (without `/v3`) that fail with a server error. */
+  failingPaths?: string[];
 }
 
 export interface RecordedRequest {
@@ -72,6 +90,8 @@ export const FAKE_TASK_COST = 0.0021;
 export const FAKE_LABS_COST = 0.0125;
 /** A location code the fake Labs API refuses (DataForSEO answers 40501 Invalid Field). */
 export const UNSUPPORTED_LOCATION = 1;
+/** Cost DataForSEO reports per Backlinks summary (request and one row). */
+export const FAKE_BACKLINKS_COST = 0.024036;
 /** Cost DataForSEO reports per posted LLM Scraper or AI Mode task. */
 export const FAKE_AI_TASK_COST = 0.0012;
 /** Cost DataForSEO reports per live LLM Responses answer (task fee and provider tokens). */
@@ -207,6 +227,102 @@ function labsItem(keyword: string, metrics: FakeKeywordMetrics) {
   };
 }
 
+const EMPTY_POSITIONS = [
+  "pos_21_30",
+  "pos_31_40",
+  "pos_41_50",
+  "pos_51_60",
+  "pos_61_70",
+  "pos_71_80",
+  "pos_81_90",
+  "pos_91_100",
+];
+
+/** `DataforseoLabsMetricsInfo` for keyword counts by position bucket. */
+function domainMetrics(positions: readonly number[], traffic: number) {
+  const [pos1 = 0, pos2to3 = 0, pos4to10 = 0, pos11to20 = 0] = positions;
+  return {
+    pos_1: pos1,
+    pos_2_3: pos2to3,
+    pos_4_10: pos4to10,
+    pos_11_20: pos11to20,
+    ...Object.fromEntries(EMPTY_POSITIONS.map((key) => [key, 0])),
+    etv: traffic,
+    impressions_etv: traffic * 12,
+    count: pos1 + pos2to3 + pos4to10 + pos11to20,
+    estimated_paid_traffic_cost: Math.round(traffic * 25) / 100,
+    is_new: 12,
+    is_up: 30,
+    is_down: 21,
+    is_lost: 9,
+  };
+}
+
+function rankedKeyword(
+  target: string,
+  [keyword, position, traffic, previous]: NonNullable<FakeDomain["keywords"]>[number],
+  metrics: FakeKeywordMetrics | undefined,
+) {
+  return {
+    se_type: "google",
+    keyword_data: labsItem(
+      keyword,
+      metrics ?? { searchVolume: 1000, keywordDifficulty: 20, cpc: 0.1, intent: "informational" },
+    ),
+    ranked_serp_element: {
+      se_type: "google",
+      serp_item: {
+        se_type: "google",
+        type: "organic",
+        rank_group: position,
+        rank_absolute: position + 1,
+        position: "left",
+        domain: target,
+        url: `https://${target}/${keyword.replaceAll(" ", "-")}`,
+        etv: traffic,
+        rank_changes: {
+          previous_rank_absolute: previous === undefined ? null : previous + 1,
+          is_new: previous === undefined,
+          is_up: previous !== undefined && previous > position,
+          is_down: previous !== undefined && previous < position,
+        },
+      },
+      serp_item_types: ["organic"],
+      se_results_count: 1_000_000,
+      is_lost: false,
+      last_updated_time: providerTime(60 * 24),
+      previous_updated_time: providerTime(60 * 24 * 31),
+    },
+  };
+}
+
+function backlinksSummary(target: string, backlinks: FakeDomain["backlinks"]) {
+  const domains = backlinks?.referringDomains ?? 0;
+  return {
+    target,
+    first_seen: backlinks ? "2017-03-04 12:31:00 +00:00" : null,
+    lost_date: null,
+    rank: backlinks?.rank ?? 0,
+    backlinks: backlinks?.backlinks ?? 0,
+    backlinks_spam_score: backlinks ? 6 : 0,
+    crawled_pages: backlinks ? 3120 : 0,
+    broken_backlinks: backlinks ? 14 : 0,
+    broken_pages: backlinks ? 2 : 0,
+    referring_domains: domains,
+    referring_domains_nofollow: Math.round(domains / 10),
+    referring_main_domains: Math.round(domains * 0.9),
+    referring_ips: Math.round(domains * 0.8),
+    referring_subnets: Math.round(domains * 0.7),
+    referring_pages: Math.round((backlinks?.backlinks ?? 0) * 0.8),
+    referring_links_tld: {},
+    referring_links_types: {},
+    referring_links_attributes: {},
+    referring_links_platform_types: {},
+    referring_links_semantic_locations: {},
+    referring_links_countries: {},
+  };
+}
+
 /** A provider timestamp `minutesAgo` before now, formatted like DataForSEO's `datetime`. */
 function providerTime(minutesAgo: number): string {
   const iso = new Date(Date.now() - minutesAgo * 60_000).toISOString();
@@ -321,6 +437,12 @@ export function fakeDataForSeo(state: FakeDataForSeoState = { balance: 42.5 }) {
     }
 
     const path = url.pathname.replace(/^\/v3/, "");
+    if (state.failingPaths?.includes(path)) {
+      return Response.json(
+        { status_code: 50000, status_message: "Internal Error." },
+        { status: 500 },
+      );
+    }
     if (path === "/appendix/user_data") {
       return Response.json(
         envelope(
@@ -431,6 +553,108 @@ export function fakeDataForSeo(state: FakeDataForSeoState = { balance: 42.5 }) {
       };
       const cost = FAKE_LABS_COST + items.length * 0.00012;
       return Response.json(envelope([task("labs", [result], cost)], cost));
+    }
+
+    const domainLabs =
+      /^\/dataforseo_labs\/google\/(domain_rank_overview|historical_rank_overview|ranked_keywords|competitors_domain)\/live$/.exec(
+        path,
+      );
+    if (domainLabs) {
+      const [request] = body as {
+        target: string;
+        location_code: number;
+        language_code: string;
+        limit?: number;
+        date_from?: string;
+      }[];
+      if (!request || request.location_code === UNSUPPORTED_LOCATION) {
+        return Response.json(envelope([task("labs", null, 0, {}, 40501)], 0));
+      }
+      const domain = state.domains?.[request.target];
+      const header = {
+        se_type: "google",
+        target: request.target,
+        location_code: request.location_code,
+        language_code: request.language_code,
+      };
+      let items: object[] = [];
+      let total = 0;
+      if (domain && domainLabs[1] === "domain_rank_overview") {
+        items = [
+          {
+            se_type: "google",
+            location_code: request.location_code,
+            language_code: request.language_code,
+            metrics: {
+              organic: domainMetrics(domain.positions, domain.traffic),
+              paid: domainMetrics([0, 1, 2, 0], 12.5),
+            },
+          },
+        ];
+        total = 1;
+      } else if (domain && domainLabs[1] === "historical_rank_overview") {
+        const now = new Date();
+        const from = request.date_from ?? "0000-00-00";
+        items = (domain.history ?? [])
+          .map((point, index, all) => {
+            const date = new Date(
+              Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (all.length - 1 - index), 1),
+            );
+            const metrics = domainMetrics(
+              [0, 0, point.top10, point.keywords - point.top10],
+              point.traffic,
+            );
+            return {
+              se_type: "google",
+              year: date.getUTCFullYear(),
+              month: date.getUTCMonth() + 1,
+              metrics: { organic: metrics, paid: null },
+            };
+          })
+          .filter((item) => {
+            const month = `${item.year}-${String(item.month).padStart(2, "0")}-01`;
+            return month >= from;
+          })
+          // DataForSEO lists the latest month first.
+          .reverse();
+        total = items.length;
+      } else if (domain && domainLabs[1] === "ranked_keywords") {
+        const ranked = domain.keywords ?? [];
+        items = ranked
+          .slice(0, request.limit ?? 100)
+          .map((entry) => rankedKeyword(request.target, entry, state.metrics?.[entry[0]]));
+        total = ranked.length;
+      } else if (domain && domainLabs[1] === "competitors_domain") {
+        const competitors = domain.competitors ?? [];
+        items = competitors.slice(0, request.limit ?? 5).map(([name, common, average]) => {
+          const known = state.domains?.[name];
+          return {
+            se_type: "google",
+            domain: name,
+            avg_position: average,
+            sum_position: Math.round(average * common),
+            intersections: common,
+            full_domain_metrics: known
+              ? { organic: domainMetrics(known.positions, known.traffic), paid: null }
+              : null,
+            metrics: null,
+            competitor_metrics: null,
+          };
+        });
+        total = competitors.length;
+      }
+      const cost = FAKE_LABS_COST + items.length * 0.00012;
+      const result = { ...header, total_count: total, items_count: items.length, items };
+      return Response.json(envelope([task("labs", [result], cost)], cost));
+    }
+
+    if (path === "/backlinks/summary/live") {
+      const [request] = body as { target: string }[];
+      const domain = state.domains?.[request?.target ?? ""];
+      const result = backlinksSummary(request?.target ?? "", domain?.backlinks);
+      return Response.json(
+        envelope([task("backlinks", [result], FAKE_BACKLINKS_COST)], FAKE_BACKLINKS_COST),
+      );
     }
 
     const aiPost =

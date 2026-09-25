@@ -1242,6 +1242,130 @@
       "remove": "{keyword} kelimesini listeden çıkar"
     }
   },
+  "domainOverview": {
+    "domain": "Alan adı",
+    "domainPlaceholder": "Bir alan adı girin, ör. example.com",
+    "market": "Pazar",
+    "analyze": "Analiz et",
+    "hint": "Alan adı, alt alan adı veya adres; www. ve yol kısmı dikkate alınmaz.",
+    "target": "{domain} analiz edilir",
+    "invalidDomain": "example.com gibi bir alan adı girin.",
+    "quote": "Tahmini maliyet: en fazla {cost}",
+    "quoteCached": "Önbellekte — açmak ücretsiz",
+    "viewerNote": "Alan adı analizi için en az üye rolü gerekir.",
+    "emptyTitle": "Herhangi bir alan adını analiz edin",
+    "emptyBody": "Bir sitenin organik anahtar kelimelerini, tahmini trafiğini ve geçmişini, en çok ziyaret getiren kelimelerini, rakiplerini ve backlink profilini görün.",
+    "yourProjects": "Projeleriniz",
+    "confirm": {
+      "title": "{domain} bu pazarda yakın zamanda analiz edilmedi",
+      "body": "{market} pazarında analiz en fazla {cost} tutar. Sonuç 7 gün (backlink verisi 1 gün) saklanır; bu sürede yeniden açmak ücretsizdir.",
+      "run": "Analiz et · {cost}"
+    },
+    "loading": "{domain} DataForSEO'dan alınıyor…",
+    "failed": "Analiz tamamlanamadı.",
+    "retry": "Tekrar dene",
+    "providerMissing": {
+      "title": "DataForSEO bağlı değil",
+      "body": "Alan adı analizi DataForSEO hesabınızı kullanır. Sağlayıcı ayarlarından bağlayın.",
+      "askAdmin": "Alan adı analizi çalışma alanının DataForSEO hesabını kullanır; bağlaması için bir yöneticiye başvurun.",
+      "action": "DataForSEO'yu bağla"
+    },
+    "visit": "{domain} adresini yeni sekmede aç",
+    "scope": "Google organik · {market} · {language}",
+    "cost": "Bu analizin maliyeti {cost}",
+    "fromCache": "Önbellekten, {date} tarihinde alındı",
+    "provenance": "Organik veriler: DataForSEO Labs (Google, {market}), {labsDate} tarihinde alındı. Backlinkler: DataForSEO Backlinks API, {backlinksDate} tarihinde alındı. Trafik ve değeri; sıralamalar, arama hacimleri ve tıklama oranlarından yapılan tahminlerdir, ölçülmüş ziyaretler değildir.",
+    "kpi": {
+      "keywords": "Organik anahtar kelime",
+      "keywordsDetail": "Bu ay {new} yeni · {lost} kayıp",
+      "traffic": "Organik trafik",
+      "trafficDetail": "Tahmini aylık ziyaret",
+      "trafficValue": "Trafik değeri",
+      "trafficValueDetail": "Aynı trafiğin aylık reklam karşılığı",
+      "rank": "Alan adı gücü",
+      "rankDetail": "0–100, bağlantıların ağırlığına göre",
+      "referringDomains": "Yönlendiren alan adı",
+      "nofollowShare": "{share} nofollow",
+      "backlinks": "Backlink",
+      "brokenDetail": "{count} kırık",
+      "noOrganic": "Bu pazarda sıralaması yok",
+      "noBacklinks": "Bilinen bağlantı yok"
+    },
+    "history": {
+      "title": "Organik geçmiş",
+      "description": "DataForSEO Labs verisiyle son 12 ay.",
+      "metric": "Ölçüm",
+      "traffic": "Trafik",
+      "keywords": "Anahtar kelime",
+      "top10": "İlk 10'da",
+      "month": "Ay",
+      "tableView": "Tablo olarak göster",
+      "emptyTitle": "Geçmiş yok",
+      "emptyBody": "Labs'ta bu alan adının bu pazar için iki aydan az verisi var."
+    },
+    "positions": {
+      "title": "Sıralara göre kelimeler",
+      "description": "Alan adının her kelimedeki en iyi sırası.",
+      "top10": "{count} kelime ({share}) ilk 10'da.",
+      "emptyTitle": "Sıralama yok",
+      "emptyBody": "Alan adı bu pazarda Labs'ın bildiği hiçbir kelimede ilk 100'de değil."
+    },
+    "keywords": {
+      "title": "En iyi organik kelimeler",
+      "description": "Tahmini trafiği en yüksek {shown} kelime, toplam {total} kelimeden.",
+      "descriptionEmpty": "Tahmini trafiği en yüksek kelimeler.",
+      "emptyTitle": "Kelime yok",
+      "emptyBody": "Labs bu alan adının bu pazardaki sıralamalarını bilmiyor.",
+      "openUrl": "Sıralanan sayfayı aç",
+      "columns": {
+        "keyword": "Kelime",
+        "position": "Sıra",
+        "change": "Değişim",
+        "volume": "Hacim",
+        "traffic": "Trafik",
+        "difficulty": "Zorluk",
+        "cpc": "TBM",
+        "intent": "Niyet",
+        "url": "Sıralanan sayfa"
+      }
+    },
+    "competitors": {
+      "title": "Organik rakipler",
+      "description": "Bu pazarda aynı kelimelerde sıralanan alan adları. Analiz etmek için birini açın.",
+      "emptyTitle": "Rakip bulunamadı",
+      "emptyBody": "Başka hiçbir alan adı bununla yeterince ortak kelime paylaşmıyor.",
+      "visit": "{domain} adresini yeni sekmede aç",
+      "analyze": "{domain} alan adını analiz et",
+      "columns": {
+        "domain": "Alan adı",
+        "common": "Ortak kelime",
+        "avgPosition": "Ort. sıra",
+        "keywords": "Kelime",
+        "traffic": "Trafik",
+        "actions": "İşlemler"
+      }
+    },
+    "backlinks": {
+      "title": "Backlink profili",
+      "description": "Canlı bağlantılar, DataForSEO Backlinks API.",
+      "emptyTitle": "Bilinen bağlantı yok",
+      "emptyBody": "DataForSEO bu alan adına bağlantı bulmadı.",
+      "rank": "Alan adı gücü",
+      "backlinks": "Backlink",
+      "referringDomains": "Yönlendiren alan adı",
+      "referringMainDomains": "Yönlendiren ana alan adı",
+      "referringIps": "Yönlendiren IP",
+      "nofollowDomains": "Nofollow alan adları",
+      "brokenBacklinks": "Kırık backlink",
+      "spamScore": "Spam skoru",
+      "spam": {
+        "low": "düşük",
+        "medium": "orta",
+        "high": "yüksek"
+      },
+      "firstSeen": "İlk görülme"
+    }
+  },
   "siteAudit": {
     "lastFailed": "Son denetim tamamlanamadı: {error}",
     "lastCanceled": "Son denetim iptal edildi. Aşağıda önceki tamamlanan denetim gösteriliyor.",

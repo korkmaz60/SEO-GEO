@@ -4,10 +4,12 @@ import {
   computeDelta,
   formatBytes,
   formatCompact,
+  formatMonth,
   formatNumber,
   formatPercent,
   formatRelativeTime,
   formatUsd,
+  formatUsdCompact,
 } from "@/lib/format";
 
 describe("number formatting", () => {
@@ -35,6 +37,17 @@ describe("number formatting", () => {
     expect(formatUsd(0.0024, "en")).toBe("$0.0024");
     expect(formatUsd(12.5, "en")).toBe("$12.50");
     expect(formatUsd(0, "en")).toBe("$0.00");
+  });
+
+  it("shortens large amounts in USD for tiles", () => {
+    expect(formatUsdCompact(4608.18, "en")).toBe("$4.6K");
+    expect(formatUsdCompact(4608.18, "tr")).toBe("$4,6\u00a0B");
+    expect(formatUsdCompact(460.5, "en")).toBe("$461");
+  });
+
+  it("names months without a day", () => {
+    expect(formatMonth("2026-09-01", "tr")).toBe("Eyl 2026");
+    expect(formatMonth("2026-09-01", "en")).toBe("Sep 2026");
   });
 });
 

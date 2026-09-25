@@ -1242,6 +1242,130 @@
       "remove": "Remove {keyword} from the list"
     }
   },
+  "domainOverview": {
+    "domain": "Domain",
+    "domainPlaceholder": "Enter a domain, e.g. example.com",
+    "market": "Market",
+    "analyze": "Analyze",
+    "hint": "A domain, subdomain or address; www. and paths are ignored.",
+    "target": "Analyzes {domain}",
+    "invalidDomain": "Enter a domain such as example.com.",
+    "quote": "Estimated cost: up to {cost}",
+    "quoteCached": "Cached — free to open",
+    "viewerNote": "Domain analysis needs at least the member role.",
+    "emptyTitle": "Analyze any domain",
+    "emptyBody": "See a site's organic keywords, estimated traffic and its history, the keywords that bring the most visits, its competitors and its backlink profile.",
+    "yourProjects": "Your projects",
+    "confirm": {
+      "title": "{domain} has not been analyzed in this market recently",
+      "body": "Analyzing it in {market} costs up to {cost}. The result is kept for 7 days (backlinks for 1 day); opening it again in that time is free.",
+      "run": "Analyze · {cost}"
+    },
+    "loading": "Fetching {domain} from DataForSEO…",
+    "failed": "The analysis could not be completed.",
+    "retry": "Try again",
+    "providerMissing": {
+      "title": "DataForSEO is not connected",
+      "body": "Domain analysis uses your DataForSEO account. Connect it in the provider settings.",
+      "askAdmin": "Domain analysis uses the workspace's DataForSEO account; ask an admin to connect it.",
+      "action": "Connect DataForSEO"
+    },
+    "visit": "Open {domain} in a new tab",
+    "scope": "Google organic · {market} · {language}",
+    "cost": "This analysis cost {cost}",
+    "fromCache": "From cache, fetched {date}",
+    "provenance": "Organic data: DataForSEO Labs (Google, {market}), fetched {labsDate}. Backlinks: DataForSEO Backlinks API, fetched {backlinksDate}. Traffic and its value are estimates from rankings, search volumes and click-through rates, not measured visits.",
+    "kpi": {
+      "keywords": "Organic keywords",
+      "keywordsDetail": "{new} new · {lost} lost this month",
+      "traffic": "Organic traffic",
+      "trafficDetail": "Estimated visits per month",
+      "trafficValue": "Traffic value",
+      "trafficValueDetail": "The same traffic as ads, per month",
+      "rank": "Domain rank",
+      "rankDetail": "0–100, by the weight of its links",
+      "referringDomains": "Referring domains",
+      "nofollowShare": "{share} nofollow",
+      "backlinks": "Backlinks",
+      "brokenDetail": "{count} broken",
+      "noOrganic": "Not ranking in this market",
+      "noBacklinks": "No known links"
+    },
+    "history": {
+      "title": "Organic history",
+      "description": "The last 12 months, as DataForSEO Labs saw them.",
+      "metric": "Metric",
+      "traffic": "Traffic",
+      "keywords": "Keywords",
+      "top10": "In the top 10",
+      "month": "Month",
+      "tableView": "Show as table",
+      "emptyTitle": "No history",
+      "emptyBody": "Labs has fewer than two months of data for this domain in this market."
+    },
+    "positions": {
+      "title": "Keywords by position",
+      "description": "The best position of the domain for each keyword.",
+      "top10": "{count} keywords ({share}) in the top 10.",
+      "emptyTitle": "No rankings",
+      "emptyBody": "The domain does not rank in the top 100 for any keyword Labs knows in this market."
+    },
+    "keywords": {
+      "title": "Top organic keywords",
+      "description": "The {shown} keywords with the most estimated traffic, out of {total}.",
+      "descriptionEmpty": "Keywords with the most estimated traffic.",
+      "emptyTitle": "No keywords",
+      "emptyBody": "Labs knows no rankings of this domain in this market.",
+      "openUrl": "Open the ranking page",
+      "columns": {
+        "keyword": "Keyword",
+        "position": "Position",
+        "change": "Change",
+        "volume": "Volume",
+        "traffic": "Traffic",
+        "difficulty": "Difficulty",
+        "cpc": "CPC",
+        "intent": "Intent",
+        "url": "Ranking page"
+      }
+    },
+    "competitors": {
+      "title": "Organic competitors",
+      "description": "Domains that rank for the same keywords in this market. Open one to analyze it.",
+      "emptyTitle": "No competitors found",
+      "emptyBody": "No other domain shares enough keywords with this one.",
+      "visit": "Open {domain} in a new tab",
+      "analyze": "Analyze {domain}",
+      "columns": {
+        "domain": "Domain",
+        "common": "Common keywords",
+        "avgPosition": "Avg. position",
+        "keywords": "Keywords",
+        "traffic": "Traffic",
+        "actions": "Actions"
+      }
+    },
+    "backlinks": {
+      "title": "Backlink profile",
+      "description": "Live links, DataForSEO Backlinks API.",
+      "emptyTitle": "No known links",
+      "emptyBody": "DataForSEO has not found links to this domain.",
+      "rank": "Domain rank",
+      "backlinks": "Backlinks",
+      "referringDomains": "Referring domains",
+      "referringMainDomains": "Referring main domains",
+      "referringIps": "Referring IPs",
+      "nofollowDomains": "Nofollow domains",
+      "brokenBacklinks": "Broken backlinks",
+      "spamScore": "Spam score",
+      "spam": {
+        "low": "low",
+        "medium": "medium",
+        "high": "high"
+      },
+      "firstSeen": "First seen"
+    }
+  },
   "siteAudit": {
     "lastFailed": "The last audit could not finish: {error}",
     "lastCanceled": "The last audit was canceled. The previous completed audit is shown below.",

@@ -42,6 +42,15 @@ describe.skipIf(!TEST_SERVER_URL)("MCP server", () => {
         intent: "transactional",
       },
     },
+    domains: {
+      "example.com": {
+        positions: [4, 11, 30, 60],
+        traffic: 2410.5,
+        keywords: [["kahve makinesi", 4, 1820, 6]],
+        competitors: [["rakip.example", 48, 12.5]],
+        backlinks: { rank: 31, backlinks: 5120, referringDomains: 240 },
+      },
+    },
   });
   let context: IntegrationApp;
   let owner: Agent;
@@ -149,6 +158,7 @@ describe.skipIf(!TEST_SERVER_URL)("MCP server", () => {
       "list_audit_pages",
       "get_audit_page",
       "get_keyword_ideas",
+      "get_domain_overview",
       "add_ai_prompts",
       "run_site_audit",
     ]);
@@ -248,6 +258,42 @@ describe.skipIf(!TEST_SERVER_URL)("MCP server", () => {
     // The same request again is cached: free, no confirmation, even for a read key.
     const cached = await callTool(readKey, "get_keyword_ideas", args);
     expect(cached.data).toMatchObject({ cached: true, costUsd: 0 });
+  });
+
+  it("gives a domain overview of the project's domain after a confirmed estimate", async () => {
+    const args = { project_id: projectId };
+    const refused = await callTool(readKey, "get_domain_overview", args);
+    expect(refused.text).toBe("This API key does not have the run:paid scope.");
+
+    const estimate = await callTool(paidKey, "get_domain_overview", args);
+    expect(estimate.data).toMatchObject({ confirmationRequired: true });
+    const { estimatedCostUsd } = estimate.data as { estimatedCostUsd: number };
+    expect(dataForSeo.calls.some((url) => url.includes("domain_rank_overview"))).toBe(false);
+
+    const overview = await callTool(paidKey, "get_domain_overview", {
+      ...args,
+      confirm_cost_usd: estimatedCostUsd,
+    });
+    expect(overview).toMatchObject({
+      isError: false,
+      data: {
+        domain: "example.com",
+        locationCode: 2792,
+        organic: { keywords: 105, traffic: 2410.5 },
+        topKeywords: [{ keyword: "kahve makinesi", position: 4, change: 2 }],
+        competitors: [{ domain: "rakip.example", commonKeywords: 48 }],
+        backlinks: { rank: 31, referringDomains: 240 },
+      },
+    });
+
+    // Cached now: free for a read key; anything but a domain is refused.
+    const cached = await callTool(readKey, "get_domain_overview", {
+      ...args,
+      domain: "https://www.example.com/",
+    });
+    expect(cached.data).toMatchObject({ domain: "example.com", costUsd: 0 });
+    const invalid = await callTool(paidKey, "get_domain_overview", { ...args, domain: "a b" });
+    expect(invalid).toMatchObject({ isError: true, text: "Enter a domain such as example.com." });
   });
 
   it("adds prompts after confirmation and starts audits with the write scope", async () => {

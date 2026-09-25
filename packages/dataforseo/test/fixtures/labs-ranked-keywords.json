@@ -1,0 +1,408 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "0.4121 sec.",
+  "cost": 0.01236,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "09251402-1535-0370-0000-7a1b2c3d4e61",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "time": "0.3902 sec.",
+      "cost": 0.01236,
+      "result_count": 1,
+      "path": ["v3", "dataforseo_labs", "google", "ranked_keywords", "live"],
+      "data": {
+        "api": "dataforseo_labs",
+        "function": "ranked_keywords",
+        "se_type": "google",
+        "target": "example.com",
+        "location_code": 2792,
+        "language_code": "tr",
+        "item_types": ["organic"],
+        "limit": 3,
+        "order_by": ["ranked_serp_element.serp_item.etv,desc"]
+      },
+      "result": [
+        {
+          "se_type": "google",
+          "target": "example.com",
+          "location_code": 2792,
+          "language_code": "tr",
+          "total_count": 6880,
+          "items_count": 3,
+          "metrics": {
+            "organic": {
+              "pos_1": 42,
+              "pos_2_3": 118,
+              "pos_4_10": 596,
+              "pos_11_20": 1204,
+              "pos_21_30": 980,
+              "pos_31_40": 850,
+              "pos_41_50": 720,
+              "pos_51_60": 610,
+              "pos_61_70": 540,
+              "pos_71_80": 480,
+              "pos_81_90": 410,
+              "pos_91_100": 330,
+              "etv": 18432.7,
+              "impressions_etv": 401832.9,
+              "count": 6880,
+              "estimated_paid_traffic_cost": 5230.18,
+              "is_new": 212,
+              "is_up": 604,
+              "is_down": 488,
+              "is_lost": 173,
+              "clickstream_etv": null,
+              "clickstream_gender_distribution": null,
+              "clickstream_age_distribution": null
+            },
+            "paid": {
+              "pos_1": 3,
+              "pos_2_3": 4,
+              "pos_4_10": 5,
+              "pos_11_20": 2,
+              "pos_21_30": 0,
+              "pos_31_40": 0,
+              "pos_41_50": 0,
+              "pos_51_60": 0,
+              "pos_61_70": 0,
+              "pos_71_80": 0,
+              "pos_81_90": 0,
+              "pos_91_100": 0,
+              "etv": 120.5,
+              "impressions_etv": 2626.9,
+              "count": 14,
+              "estimated_paid_traffic_cost": 88.2,
+              "is_new": 2,
+              "is_up": 0,
+              "is_down": 1,
+              "is_lost": 1,
+              "clickstream_etv": null,
+              "clickstream_gender_distribution": null,
+              "clickstream_age_distribution": null
+            }
+          },
+          "metrics_absolute": {
+            "organic": {
+              "pos_1": 42,
+              "pos_2_3": 118,
+              "pos_4_10": 596,
+              "pos_11_20": 1204,
+              "pos_21_30": 980,
+              "pos_31_40": 850,
+              "pos_41_50": 720,
+              "pos_51_60": 610,
+              "pos_61_70": 540,
+              "pos_71_80": 480,
+              "pos_81_90": 410,
+              "pos_91_100": 330,
+              "etv": 18432.7,
+              "impressions_etv": 401832.9,
+              "count": 6880,
+              "estimated_paid_traffic_cost": 5230.18,
+              "is_new": 212,
+              "is_up": 604,
+              "is_down": 488,
+              "is_lost": 173,
+              "clickstream_etv": null,
+              "clickstream_gender_distribution": null,
+              "clickstream_age_distribution": null
+            },
+            "paid": {
+              "pos_1": 3,
+              "pos_2_3": 4,
+              "pos_4_10": 5,
+              "pos_11_20": 2,
+              "pos_21_30": 0,
+              "pos_31_40": 0,
+              "pos_41_50": 0,
+              "pos_51_60": 0,
+              "pos_61_70": 0,
+              "pos_71_80": 0,
+              "pos_81_90": 0,
+              "pos_91_100": 0,
+              "etv": 120.5,
+              "impressions_etv": 2626.9,
+              "count": 14,
+              "estimated_paid_traffic_cost": 88.2,
+              "is_new": 2,
+              "is_up": 0,
+              "is_down": 1,
+              "is_lost": 1,
+              "clickstream_etv": null,
+              "clickstream_gender_distribution": null,
+              "clickstream_age_distribution": null
+            }
+          },
+          "items": [
+            {
+              "se_type": "google",
+              "keyword_data": {
+                "se_type": "google",
+                "keyword": "kahve makinesi",
+                "location_code": 2792,
+                "language_code": "tr",
+                "keyword_info": {
+                  "se_type": "google",
+                  "last_updated_time": "2026-09-20 03:41:12 +00:00",
+                  "competition": 1,
+                  "competition_level": "HIGH",
+                  "cpc": 0.38,
+                  "search_volume": 110000,
+                  "low_top_of_page_bid": null,
+                  "high_top_of_page_bid": null,
+                  "categories": null,
+                  "monthly_searches": null,
+                  "search_volume_trend": null
+                },
+                "keyword_properties": {
+                  "se_type": "google",
+                  "core_keyword": null,
+                  "synonym_clustering_algorithm": "text_processing",
+                  "keyword_difficulty": 54,
+                  "detected_language": "tr",
+                  "is_another_language": false
+                },
+                "search_intent_info": {
+                  "se_type": "google",
+                  "main_intent": "commercial",
+                  "foreign_intent": null,
+                  "last_updated_time": "2026-09-01 10:12:40 +00:00"
+                }
+              },
+              "ranked_serp_element": {
+                "se_type": "google",
+                "serp_item": {
+                  "se_type": "google",
+                  "type": "organic",
+                  "rank_group": 3,
+                  "rank_absolute": 5,
+                  "position": "left",
+                  "xpath": "/html[1]/body[1]/div[2]",
+                  "domain": "example.com",
+                  "title": "Kahve makinesi | Example",
+                  "url": "https://example.com/kahve-makineleri",
+                  "breadcrumb": "https://example.com",
+                  "website_name": "Example",
+                  "is_image": false,
+                  "is_video": false,
+                  "is_featured_snippet": false,
+                  "is_malicious": false,
+                  "description": "…",
+                  "pre_snippet": null,
+                  "extended_snippet": null,
+                  "amp_version": false,
+                  "rating": null,
+                  "highlighted": ["kahve makinesi"],
+                  "links": null,
+                  "about_this_result": null,
+                  "main_domain": "example.com",
+                  "relative_url": "/kahve-makineleri",
+                  "etv": 4620.0,
+                  "estimated_paid_traffic_cost": 1755.6,
+                  "clickstream_etv": null,
+                  "rank_changes": {
+                    "previous_rank_absolute": 7,
+                    "is_new": false,
+                    "is_up": true,
+                    "is_down": false
+                  },
+                  "backlinks_info": null,
+                  "rank_info": {
+                    "page_rank": 41,
+                    "main_domain_rank": 55
+                  }
+                },
+                "check_url": "https://www.google.com.tr/search?q=kahve+makinesi",
+                "serp_item_types": ["organic", "people_also_ask"],
+                "se_results_count": 1830000,
+                "keyword_difficulty": 54,
+                "is_lost": false,
+                "last_updated_time": "2026-09-18 11:02:33 +00:00",
+                "previous_updated_time": "2026-08-19 09:40:02 +00:00"
+              }
+            },
+            {
+              "se_type": "google",
+              "keyword_data": {
+                "se_type": "google",
+                "keyword": "espresso makinesi",
+                "location_code": 2792,
+                "language_code": "tr",
+                "keyword_info": {
+                  "se_type": "google",
+                  "last_updated_time": "2026-09-20 03:41:12 +00:00",
+                  "competition": 1,
+                  "competition_level": "HIGH",
+                  "cpc": 0.41,
+                  "search_volume": 49500,
+                  "low_top_of_page_bid": null,
+                  "high_top_of_page_bid": null,
+                  "categories": null,
+                  "monthly_searches": null,
+                  "search_volume_trend": null
+                },
+                "keyword_properties": {
+                  "se_type": "google",
+                  "core_keyword": null,
+                  "synonym_clustering_algorithm": "text_processing",
+                  "keyword_difficulty": 47,
+                  "detected_language": "tr",
+                  "is_another_language": false
+                },
+                "search_intent_info": {
+                  "se_type": "google",
+                  "main_intent": "commercial",
+                  "foreign_intent": null,
+                  "last_updated_time": "2026-09-01 10:12:40 +00:00"
+                }
+              },
+              "ranked_serp_element": {
+                "se_type": "google",
+                "serp_item": {
+                  "se_type": "google",
+                  "type": "organic",
+                  "rank_group": 2,
+                  "rank_absolute": 3,
+                  "position": "left",
+                  "xpath": "/html[1]/body[1]/div[2]",
+                  "domain": "example.com",
+                  "title": "Espresso makinesi | Example",
+                  "url": "https://example.com/espresso-makineleri",
+                  "breadcrumb": "https://example.com",
+                  "website_name": "Example",
+                  "is_image": false,
+                  "is_video": false,
+                  "is_featured_snippet": false,
+                  "is_malicious": false,
+                  "description": "…",
+                  "pre_snippet": null,
+                  "extended_snippet": null,
+                  "amp_version": false,
+                  "rating": null,
+                  "highlighted": ["espresso makinesi"],
+                  "links": null,
+                  "about_this_result": null,
+                  "main_domain": "example.com",
+                  "relative_url": "/espresso-makineleri",
+                  "etv": 3960.3,
+                  "estimated_paid_traffic_cost": 1623.72,
+                  "clickstream_etv": null,
+                  "rank_changes": {
+                    "previous_rank_absolute": 3,
+                    "is_new": false,
+                    "is_up": false,
+                    "is_down": false
+                  },
+                  "backlinks_info": null,
+                  "rank_info": {
+                    "page_rank": 41,
+                    "main_domain_rank": 55
+                  }
+                },
+                "check_url": "https://www.google.com.tr/search?q=espresso+makinesi",
+                "serp_item_types": ["organic", "people_also_ask"],
+                "se_results_count": 1830000,
+                "keyword_difficulty": 47,
+                "is_lost": false,
+                "last_updated_time": "2026-09-18 11:02:33 +00:00",
+                "previous_updated_time": "2026-08-19 09:40:02 +00:00"
+              }
+            },
+            {
+              "se_type": "google",
+              "keyword_data": {
+                "se_type": "google",
+                "keyword": "filtre kahve nasıl yapılır",
+                "location_code": 2792,
+                "language_code": "tr",
+                "keyword_info": {
+                  "se_type": "google",
+                  "last_updated_time": "2026-09-20 03:41:12 +00:00",
+                  "competition": 1,
+                  "competition_level": "HIGH",
+                  "cpc": null,
+                  "search_volume": 22200,
+                  "low_top_of_page_bid": null,
+                  "high_top_of_page_bid": null,
+                  "categories": null,
+                  "monthly_searches": null,
+                  "search_volume_trend": null
+                },
+                "keyword_properties": {
+                  "se_type": "google",
+                  "core_keyword": null,
+                  "synonym_clustering_algorithm": "text_processing",
+                  "keyword_difficulty": 18,
+                  "detected_language": "tr",
+                  "is_another_language": false
+                },
+                "search_intent_info": {
+                  "se_type": "google",
+                  "main_intent": "informational",
+                  "foreign_intent": null,
+                  "last_updated_time": "2026-09-01 10:12:40 +00:00"
+                }
+              },
+              "ranked_serp_element": {
+                "se_type": "google",
+                "serp_item": {
+                  "se_type": "google",
+                  "type": "organic",
+                  "rank_group": 1,
+                  "rank_absolute": 1,
+                  "position": "left",
+                  "xpath": "/html[1]/body[1]/div[2]",
+                  "domain": "example.com",
+                  "title": "Filtre kahve nasıl yapılır | Example",
+                  "url": "https://example.com/blog/filtre-kahve-nasil-yapilir",
+                  "breadcrumb": "https://example.com",
+                  "website_name": "Example",
+                  "is_image": false,
+                  "is_video": false,
+                  "is_featured_snippet": false,
+                  "is_malicious": false,
+                  "description": "…",
+                  "pre_snippet": null,
+                  "extended_snippet": null,
+                  "amp_version": false,
+                  "rating": null,
+                  "highlighted": ["filtre kahve nasıl yapılır"],
+                  "links": null,
+                  "about_this_result": null,
+                  "main_domain": "example.com",
+                  "relative_url": "/blog/filtre-kahve-nasil-yapilir",
+                  "etv": 2842.6,
+                  "estimated_paid_traffic_cost": 0.0,
+                  "clickstream_etv": null,
+                  "rank_changes": {
+                    "previous_rank_absolute": null,
+                    "is_new": true,
+                    "is_up": true,
+                    "is_down": false
+                  },
+                  "backlinks_info": null,
+                  "rank_info": {
+                    "page_rank": 41,
+                    "main_domain_rank": 55
+                  }
+                },
+                "check_url": "https://www.google.com.tr/search?q=filtre+kahve+nasıl+yapılır",
+                "serp_item_types": ["organic", "people_also_ask"],
+                "se_results_count": 1830000,
+                "keyword_difficulty": 18,
+                "is_lost": false,
+                "last_updated_time": "2026-09-18 11:02:33 +00:00",
+                "previous_updated_time": "2026-08-19 09:40:02 +00:00"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

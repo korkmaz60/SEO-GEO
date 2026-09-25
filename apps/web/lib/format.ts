@@ -67,6 +67,16 @@ export function formatUsd(value: number, locale: Locale): string {
   }).format(value);
 }
 
+/** Large amounts in USD for KPI tiles: 4608.18 → "$4.6K" (en) / "$4,6 B" (tr). */
+export function formatUsdCompact(value: number, locale: Locale): string {
+  return new Intl.NumberFormat(intlLocale(locale), {
+    style: "currency",
+    currency: "USD",
+    notation: "compact",
+    maximumFractionDigits: value < 1000 ? 0 : 1,
+  }).format(value);
+}
+
 export type Trend = "up" | "down" | "flat";
 
 export interface Delta {
@@ -132,6 +142,15 @@ export function formatDay(day: string, locale: Locale): string {
     month: "short",
     timeZone: "UTC",
   }).format(new Date(`${day}T00:00:00Z`));
+}
+
+/** A month (`YYYY-MM-DD`, any day) as a short label, e.g. "Eyl 2026" / "Sep 2026". */
+export function formatMonth(day: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(intlLocale(locale), {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${day.slice(0, 10)}T00:00:00Z`));
 }
 
 /** A percent change with its sign, e.g. "+%12" (tr) / "+12%" (en); `value` is in percent. */

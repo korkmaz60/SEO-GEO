@@ -30,7 +30,8 @@ export default async function WorkspaceLayout({ children, params }: LayoutProps<
           {t("skipToContent")}
         </a>
         <AppSidebar />
-        <SidebarInset>
+        {/* min-w-0: wide tables scroll inside their cards instead of widening the page. */}
+        <SidebarInset className="min-w-0">
           <AppHeader />
           <div id="content" className="flex-1 p-4 md:p-6">
             {children}

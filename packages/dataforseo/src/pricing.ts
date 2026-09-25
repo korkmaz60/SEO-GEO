@@ -37,6 +37,15 @@ export const DATAFORSEO_PRICES = {
      */
     llmResponsesTaskFee: { standard: 0.0002, live: 0.0006 },
   },
+  /**
+   * Backlinks API, every live endpoint (checked 2026-09-25). Pay-as-you-go since 1 July 2026,
+   * when the 100 USD monthly commitment was dropped and rates rose.
+   */
+  backlinks: {
+    perRequest: 0.024,
+    /** Charged per returned row (item). */
+    perRow: 0.000036,
+  },
 } as const;
 
 /**
@@ -132,6 +141,12 @@ export function estimateSerpCost(input: SerpCostInput): number {
 export function estimateLabsCost(input: { items: number; requests?: number }): number {
   const prices = DATAFORSEO_PRICES.labs;
   return roundUsd((input.requests ?? 1) * prices.perRequest + input.items * prices.perItem);
+}
+
+/** Upper-bound cost of Backlinks API requests returning at most `rows` rows in total. */
+export function estimateBacklinksCost(input: { rows: number; requests?: number }): number {
+  const prices = DATAFORSEO_PRICES.backlinks;
+  return roundUsd((input.requests ?? 1) * prices.perRequest + input.rows * prices.perRow);
 }
 
 /** Rounds to the ledger precision (numeric(12,6)). */

@@ -25,7 +25,10 @@ interface TimeSeriesChartProps {
   data: SeriesPoint[];
   series: Series[];
   formatDate: (date: string) => string;
+  /** Values in the tooltip and the table view. */
   formatValue: (value: number) => string;
+  /** Y-axis ticks; `formatValue` when omitted. Compact numbers keep the axis narrow. */
+  formatTick?: (value: number) => string;
   /** Rankings: 1 at the top. */
   reversed?: boolean;
   yDomain?: [number | "auto" | "dataMin" | "dataMax", number | "auto" | "dataMin" | "dataMax"];
@@ -46,6 +49,7 @@ export function TimeSeriesChart({
   series,
   formatDate,
   formatValue,
+  formatTick = formatValue,
   reversed = false,
   yDomain,
   showDots = false,
@@ -77,7 +81,7 @@ export function TimeSeriesChart({
             reversed={reversed}
             domain={yDomain ?? ["auto", "auto"]}
             allowDecimals={false}
-            tickFormatter={(value: number) => formatValue(value)}
+            tickFormatter={(value: number) => formatTick(value)}
           />
           <ChartTooltip
             content={
