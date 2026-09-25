@@ -21,7 +21,7 @@ import {
   Users,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
 import { TimeSeriesChart } from "@/components/charts/time-series-chart";
 import { EmptyState } from "@/components/data/empty-state";
@@ -60,6 +60,7 @@ import {
 } from "@/components/ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { slotColor } from "@/lib/chart-colors";
+import { pathOf } from "@/lib/domain";
 import {
   computeDelta,
   formatCompact,
@@ -78,10 +79,12 @@ interface DomainReportProps {
   overview: DomainOverview;
   /** Opens another domain (a competitor) in the same market. */
   onOpenDomain: (domain: string) => void;
+  /** Shown beside when the data was fetched, e.g. the Refresh button. */
+  actions?: ReactNode;
 }
 
 /** The sections of a domain overview; the numbers are DataForSEO estimates, labeled as such. */
-export function DomainReport({ overview, onOpenDomain }: DomainReportProps) {
+export function DomainReport({ overview, onOpenDomain, actions }: DomainReportProps) {
   const t = useTranslations("domainOverview");
   const locale = useLocale() as Locale;
   const market = findMarket(overview.locationCode);
@@ -102,11 +105,14 @@ export function DomainReport({ overview, onOpenDomain }: DomainReportProps) {
             {t("scope", { market: marketName, language: overview.languageCode })}
           </p>
         </div>
-        <p className="text-xs text-muted-foreground">
-          {overview.costUsd > 0
-            ? t("cost", { cost: formatUsd(overview.costUsd, locale) })
-            : t("fromCache", { date: formatDateTime(overview.sources.labs.fetchedAt, locale) })}
-        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-xs text-muted-foreground">
+            {overview.costUsd > 0
+              ? t("cost", { cost: formatUsd(overview.costUsd, locale) })
+              : t("fromCache", { date: formatDateTime(overview.sources.labs.fetchedAt, locale) })}
+          </p>
+          {actions}
+        </div>
       </div>
 
       <SummaryTiles overview={overview} />
@@ -384,17 +390,6 @@ function sortValue(keyword: DomainKeyword, key: KeywordSort): number | string | 
       return keyword.traffic;
     case "cpc":
       return keyword.cpc;
-  }
-}
-
-/** The path of a ranking URL, e.g. `/kahve-makineleri`, for a narrow column. */
-function pathOf(url: string | null): string | null {
-  if (!url) return null;
-  try {
-    const parsed = new URL(url);
-    return `${parsed.pathname}${parsed.search}` || "/";
-  } catch {
-    return url;
   }
 }
 

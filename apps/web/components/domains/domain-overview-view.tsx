@@ -6,7 +6,7 @@ import {
   type DomainOverviewRequest,
   type Locale,
 } from "@seo-geo/contracts";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Globe, KeyRound, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -15,6 +15,7 @@ import { useState, type FormEvent } from "react";
 
 import { usageQueryKey } from "@/components/app-shell/usage-meter";
 import { EmptyState } from "@/components/data/empty-state";
+import { RefreshDataButton } from "@/components/data/refresh-data";
 import { PageHeader } from "@/components/page-header";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,11 @@ const QUOTE_DELAY_MS = 400;
 
 function requestKey(request: DomainOverviewRequest | null): string | null {
   return request ? `${request.domain}|${request.locationCode}` : null;
+}
+
+/** The earlier of two ISO timestamps. */
+function oldest(a: string, b: string): string {
+  return Date.parse(a) <= Date.parse(b) ? a : b;
 }
 
 /**
@@ -112,6 +118,20 @@ export function DomainOverviewView() {
   });
   const formQuote = useQuery(quoteOptions(debounced));
   const activeQuote = useQuery(quoteOptions(active));
+  // What loading the shown overview again costs (D23): every part, cached or not.
+  const refreshQuote = useQuery({
+    queryKey: ["domain-overview-quote", workspace.id, requestKey(active), "refresh"] as const,
+    queryFn: () =>
+      apiSend(
+        "POST",
+        `/workspaces/${workspace.id}/research/domains/quote`,
+        { ...active, refresh: true },
+        DomainOverviewQuoteSchema,
+      ),
+    enabled: canRun && active !== null,
+    staleTime: Infinity,
+    retry: false,
+  });
 
   const activeKey = requestKey(active);
   const approved =
@@ -135,6 +155,22 @@ export function DomainOverviewView() {
     staleTime: Infinity,
     gcTime: 30 * 60_000,
     retry: false,
+  });
+  const refresh = useMutation({
+    mutationFn: () =>
+      apiSend(
+        "POST",
+        `/workspaces/${workspace.id}/research/domains`,
+        { ...active, refresh: true },
+        DomainOverviewSchema,
+      ),
+    onSuccess: (result) => {
+      queryClient.setQueryData(["domain-overview", workspace.id, activeKey], result);
+      void queryClient.invalidateQueries({ queryKey: ["domain-overview-quote", workspace.id] });
+      void queryClient.invalidateQueries({ queryKey: usageQueryKey(workspace.id) });
+      // Project backlink pages share the backlink summary.
+      void queryClient.invalidateQueries({ queryKey: ["backlinks"] });
+    },
   });
 
   function open(host: string, code: number, run: boolean) {
@@ -272,6 +308,17 @@ export function DomainOverviewView() {
         <DomainReport
           overview={overview.data}
           onOpenDomain={(host) => open(host, overview.data.locationCode, false)}
+          actions={
+            <RefreshDataButton
+              fetchedAt={oldest(
+                overview.data.sources.labs.fetchedAt,
+                overview.data.sources.backlinks.fetchedAt,
+              )}
+              costUsd={refreshQuote.data?.estimatedCostUsd}
+              disabled={refresh.isPending}
+              onRefresh={() => refresh.mutateAsync()}
+            />
+          }
         />
       ) : overview.error ? (
         missingProvider ? (
