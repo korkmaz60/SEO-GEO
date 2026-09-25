@@ -91,7 +91,8 @@ In this order, each shipped on its own:
   save them), competitors and the backlink summary; a quote before paid loads, a cache shared
   across workspaces, shareable URLs and the `get_domain_overview` MCP tool.
 - [ ] Project backlinks: profile, history, new and lost links, referring domains, backlinks,
-  anchors, competitors' profiles and the link gap.
+  anchors, competitors' profiles and the link gap. Backlink data is kept 7 days, with a
+  Refresh button that shows its cost, on this page and on the domain overview (D23).
 - [ ] Alerts: rank drops, new critical audit issues, AI visibility changes, budget thresholds;
   email, Slack and signed webhooks.
 - [ ] Reports: templates, white-label branding, server-rendered PDF, schedules, email delivery.

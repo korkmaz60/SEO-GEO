@@ -1258,7 +1258,7 @@
     "yourProjects": "Projeleriniz",
     "confirm": {
       "title": "{domain} bu pazarda yakın zamanda analiz edilmedi",
-      "body": "{market} pazarında analiz en fazla {cost} tutar. Sonuç 7 gün (backlink verisi 1 gün) saklanır; bu sürede yeniden açmak ücretsizdir.",
+      "body": "{market} pazarında analiz en fazla {cost} tutar. Sonuç 7 gün saklanır; bu sürede yeniden açmak ücretsizdir.",
       "run": "Analiz et · {cost}"
     },
     "loading": "{domain} DataForSEO'dan alınıyor…",

@@ -255,8 +255,8 @@ all workspaces through `provider_cache`, and never refreshed on a schedule:
 | Monthly organic history (last 12 months) | Labs `historical_rank_overview` | 7 days |
 | Top keywords by estimated traffic (100) | Labs `ranked_keywords` | 7 days |
 | Organic competitors (10) | Labs `competitors_domain` | 7 days |
-| Backlink profile: rank (0–100 scale), backlinks, referring domains and main domains, nofollow shares, spam score | Backlinks `summary` | 1 day |
-| Monthly backlink history, lists (referring domains, backlinks, anchors), daily new and lost, competitors' ranks, link gap | Backlinks `history`, `referring_domains`, `backlinks`, `anchors`, `timeseries_new_lost_summary`, `bulk_ranks`, `domain_intersection` | 1 day |
+| Backlink profile: rank (0–100 scale), backlinks, referring domains and main domains, nofollow shares, spam score | Backlinks `summary` | 7 days |
+| Monthly backlink history, lists (referring domains, backlinks, anchors), daily new and lost, competitors' ranks, link gap | Backlinks `history`, `referring_domains`, `backlinks`, `anchors`, `timeseries_new_lost_summary`, `bulk_ranks`, `domain_intersection` | 7 days |
 
 - **Targets** are hosts without `www.` (`example.com`, `blog.example.com`); URLs are reduced
   to their host. Labs data needs a market (location and language); backlink data does not.
@@ -266,6 +266,12 @@ all workspaces through `provider_cache`, and never refreshed on a schedule:
   backlink profile about 0.15.
 - **Provenance.** Responses carry, per source (Labs, Backlinks), when the data was fetched
   and whether it came from the cache.
+- **Refresh** (D23; built with the project backlinks page, for both pages). Data stays fresh
+  for 7 days: backlink profiles change slowly, and the daily new and lost links come from
+  DataForSEO's own series, so a week-old load still shows them day by day. A Refresh loads
+  the data again before it expires: its quote counts every part as missing, it runs only
+  after the cost is shown and confirmed, and the new response replaces the cached one for
+  every workspace and goes to the usage ledger like any other load.
 - **History** comes from DataForSEO's own monthly series (`historical_rank_overview`,
   `backlinks/history`) and new and lost links from its new/lost series, never from
   differences between totals of our own snapshots, so no snapshot tables are needed.
