@@ -545,8 +545,9 @@ describe.skipIf(!TEST_SERVER_URL)("project backlinks", () => {
       estimatedCostUsd: estimateBacklinksCost({ rows: 100 }),
     });
     const calls = providerCalls().length;
+    // The body may be left out.
     const report = ProjectBacklinksSchema.parse(
-      (await owner.post(backlinks(solo)).send({}).expect(200)).body,
+      (await owner.post(backlinks(solo)).expect(200)).body,
     );
     expect(
       providerCalls()

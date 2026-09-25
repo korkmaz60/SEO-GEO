@@ -23,7 +23,7 @@ import {
   formatRelativeTime,
   formatUsd,
 } from "@/lib/format";
-import { useNow } from "@/lib/use-now";
+import { notBefore, useNow } from "@/lib/use-now";
 
 /** Spam score bands of DataForSEO (0–100), shown as text. */
 export function spamLevel(score: number): "low" | "medium" | "high" {
@@ -63,7 +63,13 @@ export function BacklinksReport({
           <p className="text-xs text-muted-foreground" title={formatDateTime(fetchedAt, locale)}>
             {report.costUsd > 0
               ? t("cost", { cost: formatUsd(report.costUsd, locale) })
-              : t("fetched", { relative: formatRelativeTime(new Date(fetchedAt), locale, now) })}
+              : t("fetched", {
+                  relative: formatRelativeTime(
+                    new Date(fetchedAt),
+                    locale,
+                    notBefore(now, fetchedAt),
+                  ),
+                })}
           </p>
           {actions}
         </div>

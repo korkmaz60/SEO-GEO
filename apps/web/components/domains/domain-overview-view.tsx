@@ -165,7 +165,8 @@ export function DomainOverviewView() {
         DomainOverviewSchema,
       ),
     onSuccess: (result) => {
-      queryClient.setQueryData(["domain-overview", workspace.id, activeKey], result);
+      // Keyed by the result, not by the URL: it may have changed while the request ran.
+      queryClient.setQueryData(["domain-overview", workspace.id, requestKey(result)], result);
       void queryClient.invalidateQueries({ queryKey: ["domain-overview-quote", workspace.id] });
       void queryClient.invalidateQueries({ queryKey: usageQueryKey(workspace.id) });
       // Project backlink pages share the backlink summary.

@@ -15,3 +15,12 @@ export function useNow(intervalMs = 60_000): Date {
   }, [intervalMs]);
   return now;
 }
+
+/**
+ * `now`, or `date` when it is later: data fetched since the last tick is "now", never "in 40
+ * seconds".
+ */
+export function notBefore(now: Date, date: Date | string): Date {
+  const time = new Date(date).getTime();
+  return time > now.getTime() ? new Date(time) : now;
+}

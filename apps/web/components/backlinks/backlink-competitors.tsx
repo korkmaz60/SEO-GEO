@@ -50,7 +50,7 @@ import {
   formatRelativeTime,
   formatUsd,
 } from "@/lib/format";
-import { useNow } from "@/lib/use-now";
+import { notBefore, useNow } from "@/lib/use-now";
 import { useCan, useWorkspace } from "@/lib/workspace-context";
 
 import { ScaleBar } from "./backlink-lists";
@@ -180,7 +180,11 @@ export function BacklinkCompetitorsPanel({ project }: { project: Project }) {
             {report.costUsd > 0
               ? t("cost", { cost: formatUsd(report.costUsd, locale) })
               : t("fetched", {
-                  relative: formatRelativeTime(new Date(report.source.fetchedAt), locale, now),
+                  relative: formatRelativeTime(
+                    new Date(report.source.fetchedAt),
+                    locale,
+                    notBefore(now, report.source.fetchedAt),
+                  ),
                 })}
           </p>
           {canRun && (

@@ -17,10 +17,15 @@ export const BACKLINK_LIMITS = {
   linkGap: 100,
 } as const;
 
-/** Loads backlink data; `refresh` loads every part again even when it is cached (D23). */
-export const BacklinksLoadSchema = z.strictObject({
-  refresh: z.boolean().optional(),
-});
+/**
+ * Loads backlink data; `refresh` loads every part again even when it is cached (D23). The body
+ * may be left out.
+ */
+export const BacklinksLoadSchema = z
+  .strictObject({
+    refresh: z.boolean().optional(),
+  })
+  .default({});
 export type BacklinksLoad = z.infer<typeof BacklinksLoadSchema>;
 
 export const BacklinkHistoryPointSchema = z.object({
