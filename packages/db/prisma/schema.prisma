@@ -132,6 +132,8 @@ model Organization {
   googleConnections   GoogleConnection[]
   projectIntegrations ProjectIntegration[]
   auditRuns           AuditRun[]
+  prompts             Prompt[]
+  aiRuns              AiRun[]
 
   @@map("organization")
 }
@@ -240,6 +242,9 @@ model Project {
   gscPageDaily    GscPageDaily[]
   ga4PageDaily    Ga4PageDaily[]
   auditRuns       AuditRun[]
+  prompts         Prompt[]
+  aiSettings      ProjectAiSettings?
+  aiRuns          AiRun[]
 
   @@unique([workspaceId, slug])
   @@index([workspaceId, createdAt])
@@ -255,22 +260,27 @@ enum BrandKind {
 
 /// The project's own brand and its competitors; one OWN entity per project (enforced by the service).
 model BrandEntity {
-  id          String    @id @default(uuid(7)) @db.Uuid
-  workspaceId String    @map("workspace_id") @db.Uuid
-  projectId   String    @map("project_id") @db.Uuid
-  kind        BrandKind
-  name        String
+  id               String    @id @default(uuid(7)) @db.Uuid
+  workspaceId      String    @map("workspace_id") @db.Uuid
+  projectId        String    @map("project_id") @db.Uuid
+  kind             BrandKind
+  name             String
   /// Registrable domains that count as this brand.
-  domains     String[]
+  domains          String[]
   /// Other names the brand is mentioned by, e.g. product names.
-  aliases     String[]
+  aliases          String[]
+  /// Names that are also ordinary words (e.g. "Mango"); they count as a mention only when
+  /// the same answer also names one of the brand's domains or unambiguous names.
+  ambiguousAliases String[]  @default([]) @map("ambiguous_aliases")
   /// Categorical chart slot (1–8); the own brand is always 1.
-  colorSlot   Int       @map("color_slot")
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  colorSlot        Int       @map("color_slot")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  workspace Organization @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workspace   Organization @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  aiMentions  AiMention[]
+  aiCitations AiCitation[]
 
   @@index([workspaceId, projectId])
   @@map("brand_entity")
@@ -915,4 +925,180 @@ model AuditIssue {
   @@index([runId, code])
   @@index([pageId])
   @@map("audit_issue")
+}
+
+// ── AI visibility (GEO/AEO) ─────────────────────────────────────────────────────────
+
+/// Where an AI answer comes from. See docs/geo-aeo.md for the method behind each one.
+enum AiPlatform {
+  /// ChatGPT as users see it (DataForSEO LLM Scraper).
+  CHATGPT
+  /// Gemini as users see it (DataForSEO LLM Scraper).
+  GEMINI
+  /// Perplexity Sonar models (DataForSEO LLM Responses, live).
+  PERPLEXITY
+  /// Claude with web search (DataForSEO LLM Responses, live).
+  CLAUDE
+  /// Google AI Mode (DataForSEO SERP API).
+  GOOGLE_AI_MODE
+  /// The AI Overview on Google's results page for the prompt (DataForSEO SERP API).
+  GOOGLE_AI_OVERVIEW
+
+  @@map("ai_platform")
+}
+
+enum AiFrequency {
+  DAILY
+  WEEKLY
+
+  @@map("ai_frequency")
+}
+
+enum AiRunStatus {
+  PENDING
+  COMPLETED
+  FAILED
+
+  @@map("ai_run_status")
+}
+
+/// A question the project asks AI platforms on a schedule.
+model Prompt {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  workspaceId  String   @map("workspace_id") @db.Uuid
+  projectId    String   @map("project_id") @db.Uuid
+  /// Up to 500 characters, single spaces.
+  text         String
+  locationCode Int      @map("location_code")
+  languageCode String   @map("language_code")
+  tags         String[] @default([])
+  /// Paused prompts keep their history but are not asked again.
+  active       Boolean  @default(true)
+  createdBy    String?  @map("created_by") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Organization @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  runs      AiRun[]
+
+  @@unique([projectId, text, locationCode, languageCode])
+  @@index([workspaceId, projectId])
+  @@map("prompt")
+}
+
+/// How a project's prompts are asked: platforms, schedule, samples and models.
+model ProjectAiSettings {
+  projectId   String       @id @map("project_id") @db.Uuid
+  workspaceId String       @map("workspace_id") @db.Uuid
+  platforms   AiPlatform[]
+  frequency   AiFrequency  @default(WEEKLY)
+  /// Answers collected per prompt, platform and period (answers vary between runs).
+  samples     Int          @default(1)
+  /// Model per LLM Responses platform, e.g. `{ "CLAUDE": "claude-haiku-4-5" }`.
+  models      Json         @default("{}")
+  /// Classify the tone of each brand mention (costs LLM tokens).
+  sentiment   Boolean      @default(false)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("project_ai_settings")
+}
+
+/// One answer of one platform to one prompt. Created as PENDING when requested and
+/// completed with the answer, its citations and the detected brand mentions.
+model AiRun {
+  id              String      @id @default(uuid(7)) @db.Uuid
+  workspaceId     String      @map("workspace_id") @db.Uuid
+  projectId       String      @map("project_id") @db.Uuid
+  promptId        String      @map("prompt_id") @db.Uuid
+  platform        AiPlatform
+  /// `llm_scraper`, `llm_responses`, `google_ai_mode` or `google_ai_overview`.
+  method          String
+  /// Model requested or reported by the platform.
+  model           String?
+  sampleIndex     Int         @default(0) @map("sample_index")
+  /// Day of the run in the project's time zone (the period the answer belongs to).
+  runOn           DateTime    @map("run_on") @db.Date
+  status          AiRunStatus @default(PENDING)
+  /// DataForSEO task ID while the answer is being collected.
+  providerTaskId  String?     @map("provider_task_id")
+  postedAt        DateTime?   @map("posted_at") @db.Timestamptz(3)
+  completedAt     DateTime?   @map("completed_at") @db.Timestamptz(3)
+  /// The answer text (Markdown when the platform returns it); `null` without an answer.
+  answer          String?
+  /// SHA-256 of the answer, to compare answers without loading them.
+  answerHash      String?     @map("answer_hash")
+  webSearch       Boolean?    @map("web_search")
+  fanOutQueries   String[]    @default([]) @map("fan_out_queries")
+  /// Evidence kept with the answer: web results looked at, brands the platform marked,
+  /// token usage and the check URL.
+  details         Json        @default("{}")
+  /// Version of the detection rules that produced the mentions and citations.
+  detectorVersion Int         @default(1) @map("detector_version")
+  costUsd         Decimal     @default(0) @map("cost_usd") @db.Decimal(12, 6)
+  error           String?
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Organization @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  prompt    Prompt       @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  mentions  AiMention[]
+  citations AiCitation[]
+
+  @@unique([promptId, platform, runOn, sampleIndex])
+  @@index([projectId, runOn])
+  @@index([status, postedAt])
+  @@index([providerTaskId])
+  @@map("ai_run")
+}
+
+/// A tracked brand (own or competitor) mentioned in an answer.
+model AiMention {
+  runId               String  @map("run_id") @db.Uuid
+  entityId            String  @map("entity_id") @db.Uuid
+  /// Order of the brand's first mention among all tracked brands in the answer; 1 = first.
+  firstRank           Int     @map("first_rank")
+  /// Character offset of the first mention in the answer.
+  firstOffset         Int     @map("first_offset")
+  mentionCount        Int     @map("mention_count")
+  /// `positive`, `neutral` or `negative` when sentiment is enabled.
+  sentiment           String?
+  sentimentConfidence Float?  @map("sentiment_confidence")
+  classifierVersion   Int?    @map("classifier_version")
+
+  run    AiRun       @relation(fields: [runId], references: [id], onDelete: Cascade)
+  entity BrandEntity @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@id([runId, entityId])
+  @@index([entityId])
+  @@map("ai_mention")
+}
+
+/// A source an answer cites, in the answer's order.
+model AiCitation {
+  runId    String  @map("run_id") @db.Uuid
+  /// 1 = listed first.
+  rank     Int
+  url      String?
+  /// Host of the URL, e.g. `blog.example.com`.
+  host     String?
+  /// Registrable domain (Public Suffix List), e.g. `example.com`.
+  domain   String
+  title    String?
+  /// The tracked brand whose domains the source belongs to.
+  entityId String? @map("entity_id") @db.Uuid
+  /// The source as one of the project's known pages (normalized URL), when it matches one.
+  pageUrl  String? @map("page_url")
+
+  run    AiRun        @relation(fields: [runId], references: [id], onDelete: Cascade)
+  entity BrandEntity? @relation(fields: [entityId], references: [id], onDelete: SetNull)
+
+  @@id([runId, rank])
+  @@index([domain])
+  @@index([entityId])
+  @@map("ai_citation")
 }
