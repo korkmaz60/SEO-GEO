@@ -822,26 +822,28 @@ enum IssueSeverity {
 
 /// One crawl of a project's site.
 model AuditRun {
-  id           String         @id @default(uuid(7)) @db.Uuid
-  workspaceId  String         @map("workspace_id") @db.Uuid
-  projectId    String         @map("project_id") @db.Uuid
-  status       AuditRunStatus @default(QUEUED)
+  id              String         @id @default(uuid(7)) @db.Uuid
+  workspaceId     String         @map("workspace_id") @db.Uuid
+  projectId       String         @map("project_id") @db.Uuid
+  status          AuditRunStatus @default(QUEUED)
   /// `manual` or `schedule`.
-  trigger      String         @default("manual")
+  trigger         String         @default("manual")
   /// `{ startUrl, maxPages, maxDepth }`
-  config       Json
+  config          Json
   /// Counts by status class, severity and crawl outcome; see the audit service.
-  stats        Json           @default("{}")
-  pagesCrawled Int            @default(0) @map("pages_crawled")
-  healthScore  Int?           @map("health_score")
-  scoreVersion Int            @default(1) @map("score_version")
-  taskId       String?        @map("task_id") @db.Uuid
-  error        String?
-  createdBy    String?        @map("created_by") @db.Uuid
-  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
-  startedAt    DateTime?      @map("started_at") @db.Timestamptz(3)
-  finishedAt   DateTime?      @map("finished_at") @db.Timestamptz(3)
-  updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+  stats           Json           @default("{}")
+  pagesCrawled    Int            @default(0) @map("pages_crawled")
+  healthScore     Int?           @map("health_score")
+  scoreVersion    Int            @default(1) @map("score_version")
+  /// Mean citability score of the indexable pages (0–100); `null` before M3 or without pages.
+  citabilityScore Int?           @map("citability_score")
+  taskId          String?        @map("task_id") @db.Uuid
+  error           String?
+  createdBy       String?        @map("created_by") @db.Uuid
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  startedAt       DateTime?      @map("started_at") @db.Timestamptz(3)
+  finishedAt      DateTime?      @map("finished_at") @db.Timestamptz(3)
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   workspace Organization @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -885,6 +887,10 @@ model AuditPage {
   /// `[{ lang, href }]`
   hreflang        Json     @default("[]")
   inSitemap       Boolean  @default(false) @map("in_sitemap")
+  /// Citability score v1 (0–100) of indexable pages.
+  citabilityScore Int?     @map("citability_score")
+  /// `{ version, factors: { <factor>: { value, data } } }`; see docs/geo-aeo.md.
+  citability      Json?
 
   run    AuditRun     @relation(fields: [runId], references: [id], onDelete: Cascade)
   issues AuditIssue[]

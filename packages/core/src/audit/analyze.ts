@@ -1,5 +1,13 @@
+import {
+  CITABILITY_FACTORS,
+  CITABILITY_SCORE_VERSION,
+  citability,
+  type CitabilityFactor,
+  type CitabilityResult,
+} from "./citability.js";
 import type { CrawledPage, CrawlResult } from "./crawler.js";
 import { issueSeverity, type AuditIssue, type IssueCode, type IssueData } from "./issues.js";
+import { originOf } from "./url.js";
 
 /** Version of the health score formula; stored with every run. */
 export const HEALTH_SCORE_VERSION = 1;
@@ -25,6 +33,18 @@ export interface AuditStats {
   issues: { ERROR: number; WARNING: number; NOTICE: number };
   pagesWithErrors: number;
   pagesWithWarnings: number;
+  citability: CitabilityStats;
+}
+
+/** Citability over the indexable pages of a crawl. */
+export interface CitabilityStats {
+  version: number;
+  /** Pages scored: indexable HTML pages. */
+  scored: number;
+  /** Mean page score, rounded; `null` without scored pages. */
+  average: number | null;
+  /** Per factor: mean value (0–1) and pages below full score. */
+  factors: Record<CitabilityFactor, { average: number | null; below: number }>;
 }
 
 export interface AuditAnalysis {
@@ -32,7 +52,17 @@ export interface AuditAnalysis {
   /** Crawled pages linking to each URL (distinct pages, self-links excluded). */
   inlinks: Map<string, number>;
   healthScore: number | null;
+  /** Citability of every indexable page, by URL. */
+  citability: Map<string, CitabilityResult>;
   stats: AuditStats;
+}
+
+export interface AnalyzeOptions {
+  /** Whether a URL belongs to the audited site; the start URL's origin by default. */
+  isInternal?: (url: string) => boolean;
+  /** Language of pages that do not declare one; English by default. */
+  defaultLanguage?: string;
+  now?: Date;
 }
 
 const NOINDEX = new Set(["noindex", "none"]);
@@ -58,8 +88,8 @@ const isBroken = (page: CrawledPage | undefined) =>
 const isRedirect = (page: CrawledPage | undefined) =>
   page !== undefined && page.status !== null && page.status >= 300 && page.status < 400;
 
-/** Applies the audit rules to a crawl and computes the health score. */
-export function analyzeCrawl(result: CrawlResult): AuditAnalysis {
+/** Applies the audit rules to a crawl and computes the health and citability scores. */
+export function analyzeCrawl(result: CrawlResult, options: AnalyzeOptions = {}): AuditAnalysis {
   const pages = new Map(result.pages.map((page) => [page.url, page]));
   const issues: AuditIssue[] = [];
   const add = (code: IssueCode, url: string | null, data?: IssueData) =>
@@ -82,7 +112,59 @@ export function analyzeCrawl(result: CrawlResult): AuditAnalysis {
   evaluateDuplicates(result.pages, add);
   evaluateSite(result, pages, add);
 
-  return { issues, inlinks, ...score(result.pages, issues) };
+  const origin = originOf(result.startUrl);
+  const isInternal = options.isInternal ?? ((url: string) => originOf(url) === origin);
+  const scores = new Map<string, CitabilityResult>();
+  for (const page of result.pages) {
+    if (!page.facts || !isIndexable(page)) continue;
+    scores.set(
+      page.url,
+      citability({
+        url: page.url,
+        facts: page.facts,
+        isInternal,
+        blockedAiSearch: page.blockedAiSearch,
+        defaultLanguage: options.defaultLanguage ?? "en",
+        now: options.now ?? new Date(),
+      }),
+    );
+  }
+
+  const { healthScore, stats } = score(result.pages, issues);
+  return {
+    issues,
+    inlinks,
+    healthScore,
+    citability: scores,
+    stats: { ...stats, citability: citabilityStats([...scores.values()]) },
+  };
+}
+
+function citabilityStats(results: readonly CitabilityResult[]): CitabilityStats {
+  const mean = (values: readonly number[]) =>
+    values.length > 0 ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+  const average = mean(results.map((result) => result.score));
+  const factors = Object.fromEntries(
+    CITABILITY_FACTORS.map((factor) => {
+      const values = results
+        .map((result) => result.factors[factor].value)
+        .filter((value): value is number => value !== null);
+      const factorMean = mean(values);
+      return [
+        factor,
+        {
+          average: factorMean === null ? null : Math.round(factorMean * 100) / 100,
+          below: values.filter((value) => value < 1).length,
+        },
+      ];
+    }),
+  ) as CitabilityStats["factors"];
+  return {
+    version: CITABILITY_SCORE_VERSION,
+    scored: results.length,
+    average: average === null ? null : Math.round(average),
+    factors,
+  };
 }
 
 function evaluatePage(
@@ -253,7 +335,7 @@ function evaluateSite(
 function score(
   pages: readonly CrawledPage[],
   issues: readonly AuditIssue[],
-): { healthScore: number | null; stats: AuditStats } {
+): { healthScore: number | null; stats: Omit<AuditStats, "citability"> } {
   const crawled = pages.filter((page) => page.fetchError !== "blocked_by_robots");
   const errors = new Set<string>();
   const warnings = new Set<string>();

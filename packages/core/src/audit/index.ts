@@ -6,9 +6,25 @@ export {
   analyzeCrawl,
   isIndexable,
   isNoindex,
+  type AnalyzeOptions,
   type AuditAnalysis,
   type AuditStats,
+  type CitabilityStats,
 } from "./analyze.js";
+export {
+  CITABILITY_FACTORS,
+  CITABILITY_SCORE_VERSION,
+  CITABILITY_THRESHOLDS,
+  CITABILITY_WEIGHTS,
+  CITABLE_SCHEMA_TYPES,
+  citability,
+  citabilityRecommendations,
+  type CitabilityData,
+  type CitabilityFactor,
+  type CitabilityFactorResult,
+  type CitabilityInput,
+  type CitabilityResult,
+} from "./citability.js";
 export {
   crawlSite,
   type CrawlFetch,
@@ -18,7 +34,13 @@ export {
   type DiscoveredBy,
 } from "./crawler.js";
 export { diffIssues, type IssueChange, type IssueRef } from "./diff.js";
-export { extractPageFacts, headerRobotsDirectives, type PageFacts, type PageLink } from "./html.js";
+export {
+  extractPageFacts,
+  headerRobotsDirectives,
+  type ContentFacts,
+  type PageFacts,
+  type PageLink,
+} from "./html.js";
 export {
   ISSUE_CATALOG,
   ISSUE_CODES,

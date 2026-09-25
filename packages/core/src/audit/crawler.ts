@@ -1,6 +1,6 @@
 import { SafeFetchError, type SafeFetchOptions, type SafeResponse } from "../net/safe-fetch.js";
 import { extractPageFacts, headerRobotsDirectives, type PageFacts } from "./html.js";
-import { blockedAiCrawlers, parseRobots, type RobotsRules } from "./robots.js";
+import { AI_SEARCH_CRAWLERS, blockedAiCrawlers, parseRobots, type RobotsRules } from "./robots.js";
 import { parseSitemap, sitemapText } from "./sitemap.js";
 import { normalizeUrl, originOf } from "./url.js";
 
@@ -46,6 +46,8 @@ export interface CrawledPage {
   /** From the `X-Robots-Tag` header. */
   headerRobots: string[];
   inSitemap: boolean;
+  /** AI search crawlers that robots.txt keeps away from this page (HTML pages only). */
+  blockedAiSearch: string[];
 }
 
 export interface CrawlResult {
@@ -204,10 +206,12 @@ export async function crawlSite(options: CrawlOptions): Promise<CrawlResult> {
       facts: null,
       headerRobots: [],
       inSitemap: sitemapInfo.urls.has(entry.url),
+      blockedAiSearch: [],
     };
     pages.set(entry.url, page);
 
-    if (!(await robotsFor(entry.url)).isAllowed(entry.url)) {
+    const rules = await robotsFor(entry.url);
+    if (!rules.isAllowed(entry.url)) {
       page.fetchError = "blocked_by_robots";
       return;
     }
@@ -246,6 +250,7 @@ export async function crawlSite(options: CrawlOptions): Promise<CrawlResult> {
       HTML_TYPES.has(response.contentType)
     ) {
       page.facts = extractPageFacts(response.text(), entry.url);
+      page.blockedAiSearch = AI_SEARCH_CRAWLERS.filter((bot) => !rules.isAllowed(entry.url, bot));
       const depth = entry.depth < 0 ? -1 : entry.depth + 1;
       if (entry.depth >= 0 && depth > options.maxDepth) return;
       for (const link of page.facts.links) {

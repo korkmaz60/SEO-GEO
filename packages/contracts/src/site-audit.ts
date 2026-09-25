@@ -27,6 +27,23 @@ export const IssueCategorySchema = z.enum([
 ]);
 export type IssueCategory = z.infer<typeof IssueCategorySchema>;
 
+/** Factors of the page citability score (docs/geo-aeo.md), in the formula's order. */
+export const CitabilityFactorSchema = z.enum([
+  "answer_first",
+  "question_headings",
+  "structured_content",
+  "structured_data",
+  "authorship",
+  "freshness",
+  "evidence",
+  "readability",
+  "ai_crawler_access",
+]);
+export type CitabilityFactor = z.infer<typeof CitabilityFactorSchema>;
+export const CITABILITY_FACTORS = CitabilityFactorSchema.options;
+/** Pages below this citability score are listed by the "low citability" filter. */
+export const LOW_CITABILITY_SCORE = 50;
+
 export const StartAuditSchema = z.strictObject({
   maxPages: z.int().min(10).max(MAX_AUDIT_PAGES).default(DEFAULT_AUDIT_PAGES),
   /** Clicks from the start page. */
@@ -55,6 +72,19 @@ export const AuditStatsSchema = z.looseObject({
   robots: z.object({ found: z.boolean(), unreachable: z.boolean() }),
   sitemaps: z.object({ read: z.int(), failed: z.int(), urls: z.int() }),
   llmsTxt: z.object({ found: z.boolean() }),
+  /** Citability of the indexable pages; missing in runs from before it existed. */
+  citability: z
+    .object({
+      version: z.int(),
+      scored: z.int(),
+      average: z.int().nullable(),
+      /** Per factor: mean value (0–1) and pages below full score. */
+      factors: z.record(
+        CitabilityFactorSchema,
+        z.object({ average: z.number().nullable(), below: z.int() }),
+      ),
+    })
+    .optional(),
 });
 export type AuditStats = z.infer<typeof AuditStatsSchema>;
 
@@ -68,6 +98,8 @@ export const AuditRunSchema = z.object({
   pagesCrawled: z.int(),
   healthScore: z.int().nullable(),
   scoreVersion: z.int(),
+  /** Mean citability score of the indexable pages. */
+  citabilityScore: z.int().nullable(),
   stats: AuditStatsSchema.nullable(),
   error: z.string().nullable(),
   taskId: z.uuid().nullable(),
@@ -121,11 +153,14 @@ export const AuditPageFilterSchema = z.enum([
   "broken",
   "redirects",
   "noindex",
+  "low_citability",
 ]);
 export type AuditPageFilter = z.infer<typeof AuditPageFilterSchema>;
 
 export const AuditPagesQuerySchema = z.object({
   filter: AuditPageFilterSchema.default("all"),
+  /** `citability`: lowest score first. */
+  sort: z.enum(["url", "citability"]).default("url"),
   search: z.string().trim().max(200).optional(),
   limit: z.coerce.number().int().min(1).max(200).default(50),
   offset: z.coerce.number().int().min(0).default(0),
@@ -146,6 +181,8 @@ export const AuditPageRowSchema = z.object({
   loadMs: z.int().nullable(),
   inlinks: z.int(),
   schemaTypes: z.array(z.string()),
+  /** Indexable pages only. */
+  citabilityScore: z.int().nullable(),
   issues: z.object({ errors: z.int(), warnings: z.int(), notices: z.int() }),
 });
 export type AuditPageRow = z.infer<typeof AuditPageRowSchema>;
@@ -155,3 +192,48 @@ export const AuditPageListSchema = z.object({
   total: z.int(),
 });
 export type AuditPageList = z.infer<typeof AuditPageListSchema>;
+
+export const CitabilityFactorResultSchema = z.object({
+  factor: CitabilityFactorSchema,
+  /** Share of the score, 0–1. */
+  weight: z.number(),
+  /** 0–1; `null` when it cannot be judged (it then does not count). */
+  value: z.number().nullable(),
+  /** What the value was computed from, e.g. `{ introWords: 112, topicShare: 0.5 }`. */
+  data: z.record(z.string(), z.unknown()),
+});
+export type CitabilityFactorResult = z.infer<typeof CitabilityFactorResultSchema>;
+
+export const AuditPageDetailSchema = z.object({
+  page: AuditPageRowSchema.extend({
+    metaDescription: z.string().nullable(),
+    h1: z.string().nullable(),
+    h1Count: z.int(),
+    canonical: z.string().nullable(),
+    robotsMeta: z.string().nullable(),
+    lang: z.string().nullable(),
+    inSitemap: z.boolean(),
+    outlinks: z.int(),
+    externalLinks: z.int(),
+    bytes: z.int().nullable(),
+  }),
+  issues: z.array(
+    z.object({
+      code: z.string(),
+      severity: IssueSeveritySchema,
+      category: IssueCategorySchema,
+      data: z.record(z.string(), z.unknown()),
+    }),
+  ),
+  citability: z
+    .object({
+      version: z.int(),
+      score: z.int(),
+      /** In the formula's order. */
+      factors: z.array(CitabilityFactorResultSchema),
+      /** Factors below full score, most score to gain first. */
+      recommendations: z.array(CitabilityFactorSchema),
+    })
+    .nullable(),
+});
+export type AuditPageDetail = z.infer<typeof AuditPageDetailSchema>;

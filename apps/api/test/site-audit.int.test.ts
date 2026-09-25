@@ -2,6 +2,7 @@ import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 
 import {
+  AuditPageDetailSchema,
   AuditPageListSchema,
   AuditRunSchema,
   ProjectDetailSchema,
@@ -25,6 +26,10 @@ const PASSWORD = "a long enough password";
 const text = (count: number) => Array.from({ length: count }, (_, i) => `söz${i}`).join(" ");
 const page = (title: string, body: string, head = "") =>
   `<!doctype html><html lang="tr"><head><title>${title}</title><meta name="viewport" content="width=device-width"><meta name="description" content="${title} açıklaması"><link rel="canonical" href="PATH">${head}<script type="application/ld+json">{"@type":"WebPage"}</script></head><body><h1>${title}</h1><p>${text(250)}</p>${body}</body></html>`;
+
+/** A page written to be quoted: short answer first, question headings, list, table, sources. */
+const guide = (modified: string) =>
+  `<!doctype html><html lang="tr"><head><title>Kahve makinesi rehberi</title><meta name="viewport" content="width=device-width"><meta name="description" content="Rehber"><link rel="canonical" href="PATH"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Kahve makinesi rehberi","dateModified":"${modified}","author":{"@type":"Person","name":"Ayşe"}}</script></head><body><nav><a href="/">Ana sayfa</a> <a href="/hakkimizda">Hakkımızda</a></nav><main><h1>Kahve makinesi nasıl seçilir?</h1><p>Kahve makinesi seçerken bütçenizi, günlük fincan sayınızı ve sevdiğiniz kahve türünü düşünün. Espresso için tam otomatik, filtre kahve için damlatmalı makineler uygundur. Satılan makinelerin %35'i tam otomatiktir. Bu rehberde türleri, fiyatları ve bakım ipuçlarını bulacaksınız.</p><h2>Hangi türler var?</h2><ul><li>Tam otomatik</li><li>Filtre</li></ul><h2>Fiyatlar ne kadar?</h2><table><tr><th>Tür</th><th>Fiyat</th></tr><tr><td>Filtre</td><td>1.200 TL</td></tr></table><p>${text(250)}</p><p>Kaynak: <a href="https://tr.wikipedia.org/wiki/Kahve">Vikipedi</a>. Ortalama ömür 7,5 yıl.</p></main></body></html>`;
 
 /** The site under audit; tests change it between runs. */
 const site: Record<string, string | { status: number; location?: string }> = {};
@@ -248,6 +253,104 @@ describe.skipIf(!TEST_SERVER_URL)("site audit", () => {
     expect(byCode.get("broken_internal_links")).toMatchObject({ count: 0, new: 0, fixed: 1 });
     expect(byCode.get("images_missing_alt")).toMatchObject({ count: 1, new: 1, fixed: 0 });
     expect(overview.runs.map((entry) => entry.status)).toEqual(["COMPLETED", "COMPLETED"]);
+    resetSite();
+  });
+
+  it("scores how easily AI answers can quote each page", async () => {
+    site["/"] = page(
+      "Ana sayfa başlığı burada",
+      '<a href="/a">A</a><a href="/b">B</a><a href="/rehber">Rehber</a>',
+    );
+    site["/rehber"] = guide(new Date().toISOString());
+    site["/robots.txt"] = "User-agent: *\nAllow: /\n\nUser-agent: PerplexityBot\nDisallow: /a\n";
+    const run = AuditRunSchema.parse((await owner.post(api("/runs")).send({}).expect(201)).body);
+    await runQueuedAudit(run.id);
+
+    const overview = SiteAuditOverviewSchema.parse((await viewer.get(api("")).expect(200)).body);
+    // Indexable pages: /, /a, /b and the guide; (14 + 12 + 14 + 90) / 4.
+    expect(overview.latest).toMatchObject({
+      id: run.id,
+      citabilityScore: 33,
+      stats: { citability: { version: 1, scored: 4, average: 33 } },
+    });
+    expect(overview.latest?.stats?.citability?.factors.question_headings).toEqual({
+      average: 0.25,
+      below: 3,
+    });
+
+    const sorted = AuditPageListSchema.parse(
+      (await viewer.get(api(`/runs/${run.id}/pages?sort=citability`)).expect(200)).body,
+    );
+    expect(sorted.data.map((row) => [row.url, row.citabilityScore])).toEqual([
+      ["https://site.test/a", 12],
+      ["https://site.test/", 14],
+      ["https://site.test/b", 14],
+      ["https://site.test/rehber", 90],
+      ["https://site.test/eski", null],
+      ["https://site.test/hakkimizda", null],
+    ]);
+    const low = AuditPageListSchema.parse(
+      (await viewer.get(api(`/runs/${run.id}/pages?filter=low_citability`)).expect(200)).body,
+    );
+    expect(low.total).toBe(3);
+
+    const pageId = (url: string) => sorted.data.find((row) => row.url === url)?.id as string;
+    const guidePage = AuditPageDetailSchema.parse(
+      (
+        await viewer
+          .get(api(`/runs/${run.id}/pages/${pageId("https://site.test/rehber")}`))
+          .expect(200)
+      ).body,
+    );
+    expect(guidePage.page).toMatchObject({
+      h1: "Kahve makinesi nasıl seçilir?",
+      citabilityScore: 90,
+    });
+    expect(guidePage.citability?.score).toBe(90);
+    expect(guidePage.citability?.factors.map((factor) => [factor.factor, factor.value])).toEqual([
+      ["answer_first", 1],
+      ["question_headings", 1],
+      ["structured_content", 1],
+      ["structured_data", 1],
+      ["authorship", 1],
+      ["freshness", 1],
+      ["evidence", 1],
+      ["readability", 0],
+      ["ai_crawler_access", 1],
+    ]);
+    expect(guidePage.citability?.factors[0]).toMatchObject({
+      weight: 0.15,
+      data: { topicShare: 0.67 },
+    });
+    // One run-on "sentence" of 250 words is far too hard to read.
+    expect(guidePage.citability?.recommendations).toEqual(["readability"]);
+
+    const pageA = AuditPageDetailSchema.parse(
+      (await viewer.get(api(`/runs/${run.id}/pages/${pageId("https://site.test/a")}`)).expect(200))
+        .body,
+    );
+    expect(pageA.citability?.factors.at(-1)).toMatchObject({
+      factor: "ai_crawler_access",
+      value: 0.83,
+      data: { blocked: ["PerplexityBot"] },
+    });
+    expect(pageA.citability?.recommendations.slice(0, 2)).toEqual([
+      "answer_first",
+      "structured_data",
+    ]);
+
+    const broken = AuditPageDetailSchema.parse(
+      (
+        await viewer
+          .get(api(`/runs/${run.id}/pages/${pageId("https://site.test/hakkimizda")}`))
+          .expect(200)
+      ).body,
+    );
+    expect(broken.citability).toBeNull();
+    expect(broken.issues.map((issue) => [issue.code, issue.severity])).toEqual([
+      ["page_4xx", "ERROR"],
+    ]);
+    await viewer.get(api(`/runs/${run.id}/pages/${run.id}`)).expect(404);
     resetSite();
   });
 
