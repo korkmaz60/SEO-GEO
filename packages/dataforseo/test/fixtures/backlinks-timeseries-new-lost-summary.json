@@ -1,0 +1,80 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "0.2977 sec.",
+  "cost": 0.024144,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "09251402-1535-0372-0000-7a1b2c3d4e72",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "time": "0.2761 sec.",
+      "cost": 0.024144,
+      "result_count": 1,
+      "path": ["v3", "backlinks", "timeseries_new_lost_summary", "live"],
+      "data": {
+        "api": "backlinks",
+        "function": "timeseries_new_lost_summary",
+        "target": "example.com",
+        "date_from": "2026-09-21",
+        "date_to": "2026-09-24",
+        "group_range": "day",
+        "include_subdomains": true
+      },
+      "result": [
+        {
+          "target": "example.com",
+          "date_from": "2026-09-21",
+          "date_to": "2026-09-24",
+          "group_range": "day",
+          "items_count": 4,
+          "items": [
+            {
+              "type": "backlinks_timeseries_new_lost_summary",
+              "date": "2026-09-24 00:00:00 +00:00",
+              "new_backlinks": 51,
+              "lost_backlinks": 12,
+              "new_referring_domains": 3,
+              "lost_referring_domains": 1,
+              "new_referring_main_domains": 3,
+              "lost_referring_main_domains": 1
+            },
+            {
+              "type": "backlinks_timeseries_new_lost_summary",
+              "date": "2026-09-23 00:00:00 +00:00",
+              "new_backlinks": 0,
+              "lost_backlinks": 0,
+              "new_referring_domains": 0,
+              "lost_referring_domains": 0,
+              "new_referring_main_domains": 0,
+              "lost_referring_main_domains": 0
+            },
+            {
+              "type": "backlinks_timeseries_new_lost_summary",
+              "date": "2026-09-22 00:00:00 +00:00",
+              "new_backlinks": 18,
+              "lost_backlinks": 40,
+              "new_referring_domains": 2,
+              "lost_referring_domains": 4,
+              "new_referring_main_domains": 2,
+              "lost_referring_main_domains": 3
+            },
+            {
+              "type": "backlinks_timeseries_new_lost_summary",
+              "date": "2026-09-21 00:00:00 +00:00",
+              "new_backlinks": 7,
+              "lost_backlinks": 3,
+              "new_referring_domains": 1,
+              "lost_referring_domains": 0,
+              "new_referring_main_domains": 1,
+              "lost_referring_main_domains": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

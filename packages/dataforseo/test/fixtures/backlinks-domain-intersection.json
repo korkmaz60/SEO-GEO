@@ -1,0 +1,101 @@
+{
+  "version": "0.1.20260901",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "time": "0.9031 sec.",
+  "cost": 0.024072,
+  "tasks_count": 1,
+  "tasks_error": 0,
+  "tasks": [
+    {
+      "id": "09251402-1535-0372-0000-7a1b2c3d4e76",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "time": "0.8810 sec.",
+      "cost": 0.024072,
+      "result_count": 1,
+      "path": ["v3", "backlinks", "domain_intersection", "live"],
+      "data": {
+        "api": "backlinks",
+        "function": "domain_intersection",
+        "targets": { "1": "rakip-a.example" },
+        "exclude_targets": ["example.com"],
+        "include_subdomains": true,
+        "backlinks_status_type": "live",
+        "exclude_internal_backlinks": true,
+        "rank_scale": "one_hundred",
+        "limit": 3,
+        "order_by": ["1.rank,desc"]
+      },
+      "result": [
+        {
+          "targets": { "1": "rakip-a.example" },
+          "total_count": 318,
+          "items_count": 2,
+          "items": [
+            {
+              "domain_intersection": {
+                "1": {
+                  "type": "backlinks_domain_intersection",
+                  "target": "dergi.example.org",
+                  "rank": 64,
+                  "backlinks": 7,
+                  "first_seen": "2024-04-02 13:12:09 +00:00",
+                  "lost_date": null,
+                  "backlinks_spam_score": 0,
+                  "broken_backlinks": 0,
+                  "broken_pages": 0,
+                  "referring_domains": 1,
+                  "referring_domains_nofollow": 0,
+                  "referring_main_domains": 1,
+                  "referring_main_domains_nofollow": 0,
+                  "referring_ips": 1,
+                  "referring_subnets": 1,
+                  "referring_pages": 5,
+                  "referring_pages_nofollow": 0,
+                  "referring_links_tld": { "org": 7 },
+                  "referring_links_types": { "anchor": 7 },
+                  "referring_links_attributes": null,
+                  "referring_links_platform_types": { "news": 7 },
+                  "referring_links_semantic_locations": { "article": 7 },
+                  "referring_links_countries": null
+                }
+              },
+              "summary": { "intersections_count": 1 }
+            },
+            {
+              "domain_intersection": {
+                "1": {
+                  "type": "backlinks_domain_intersection",
+                  "target": "rehber.example.net",
+                  "rank": 29,
+                  "backlinks": 2,
+                  "first_seen": "2026-08-30 19:40:00 +00:00",
+                  "lost_date": null,
+                  "backlinks_spam_score": 2,
+                  "broken_backlinks": 0,
+                  "broken_pages": 0,
+                  "referring_domains": 1,
+                  "referring_domains_nofollow": 1,
+                  "referring_main_domains": 1,
+                  "referring_main_domains_nofollow": 1,
+                  "referring_ips": 1,
+                  "referring_subnets": 1,
+                  "referring_pages": 2,
+                  "referring_pages_nofollow": 1,
+                  "referring_links_tld": { "net": 2 },
+                  "referring_links_types": { "anchor": 2 },
+                  "referring_links_attributes": { "nofollow": 1 },
+                  "referring_links_platform_types": { "blogs": 2 },
+                  "referring_links_semantic_locations": { "aside": 2 },
+                  "referring_links_countries": null
+                }
+              },
+              "summary": { "intersections_count": 1 }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
