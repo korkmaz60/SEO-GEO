@@ -118,7 +118,7 @@ page score is `100 × Σ weight × factor`.
 | Authorship signals | 0.10 | author identified (Person schema or byline) and about/contact pages linked |
 | Freshness | 0.10 | `dateModified` / `datePublished` within 12 months (0.5 within 24 months) |
 | Evidence | 0.10 | links to other sources and specific numbers or statistics |
-| Readability | 0.10 | Ateşman score 50–70 for Turkish, Flesch Reading Ease 50–70 for English |
+| Readability | 0.10 | Ateşman (Turkish) or Flesch Reading Ease (English) score of at least 50 (0.5 from 30); easier text is not penalized |
 | AI crawler access | 0.10 | `robots.txt` allows GPTBot, ClaudeBot and PerplexityBot (share allowed) |
 
 Informational checks, not scored: presence of `llms.txt`, and the `Google-Extended` rule

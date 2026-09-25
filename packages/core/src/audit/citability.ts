@@ -1,4 +1,4 @@
-import { CITABILITY_FACTORS, type CitabilityFactor } from "@seo-geo/contracts";
+import { CITABILITY_FACTORS, CITABILITY_WEIGHTS, type CitabilityFactor } from "@seo-geo/contracts";
 
 import { foldText } from "../geo/text.js";
 import { AI_SEARCH_CRAWLERS } from "./robots.js";
@@ -7,20 +7,7 @@ import type { PageFacts } from "./html.js";
 /** Version of the citability formula; stored with every scored page. */
 export const CITABILITY_SCORE_VERSION = 1;
 
-export { CITABILITY_FACTORS, type CitabilityFactor };
-
-/** Weights of v1 (docs/geo-aeo.md, "Page citability score v1"); they add up to 1. */
-export const CITABILITY_WEIGHTS: Record<CitabilityFactor, number> = {
-  answer_first: 0.15,
-  question_headings: 0.1,
-  structured_content: 0.1,
-  structured_data: 0.15,
-  authorship: 0.1,
-  freshness: 0.1,
-  evidence: 0.1,
-  readability: 0.1,
-  ai_crawler_access: 0.1,
-};
+export { CITABILITY_FACTORS, CITABILITY_WEIGHTS, type CitabilityFactor };
 
 /** JSON-LD types that help answers quote a page, with their common subtypes. */
 export const CITABLE_SCHEMA_TYPES = new Set([
@@ -55,7 +42,8 @@ export const CITABILITY_THRESHOLDS = {
   figures: 3,
   /** Readability is judged from this many words of main text. */
   readabilityMinWords: 100,
-  readability: { full: [50, 70], partial: [30, 90] },
+  /** Minimum Ateşman or Flesch score: higher is easier, and easy text is not penalized. */
+  readability: { full: 50, partial: 30 },
 } as const;
 
 export type CitabilityData = Record<string, string | number | boolean | string[] | null>;
@@ -329,7 +317,7 @@ function readability(input: CitabilityInput): CitabilityFactorResult {
   }
   const t = CITABILITY_THRESHOLDS.readability;
   return {
-    value: within(score, t.full) ? 1 : within(score, t.partial) ? 0.5 : 0,
+    value: score >= t.full ? 1 : score >= t.partial ? 0.5 : 0,
     data: { formula, score: Math.round(score * 10) / 10, words },
   };
 }

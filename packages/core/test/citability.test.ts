@@ -156,8 +156,8 @@ describe("citability v1", () => {
     )}</p></main></body></html>`;
     const result = citability(input(english));
     expect(result.factors.readability.data).toMatchObject({ formula: "flesch", words: 180 });
-    // Very short sentences of one-syllable words: very easy, above the 50–70 band.
-    expect(result.factors.readability.value).toBe(0);
+    // Very short sentences of one-syllable words: very easy, which is not penalized.
+    expect(result.factors.readability.value).toBe(1);
   });
 
   it("does not believe dates in the future and ages older pages", () => {

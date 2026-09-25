@@ -22,6 +22,7 @@ export default async function WorkspaceSettingsLayout({
     { href: `${base}/projects`, label: t("nav.projects") },
     { href: `${base}/providers`, label: t("nav.providers") },
     { href: `${base}/usage`, label: t("nav.usage") },
+    { href: `${base}/api`, label: t("nav.api") },
     ...(isAdmin ? [{ href: `${base}/audit-log`, label: t("nav.auditLog") }] : []),
   ];
 

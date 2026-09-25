@@ -11,6 +11,7 @@ import {
   AiSettingsSchema,
   AiSourcesSchema,
   AiVisibilitySummarySchema,
+  CreatePromptsQuoteSchema,
   CreatePromptsResultSchema,
   CreatePromptsSchema,
   DeletePromptsSchema,
@@ -27,6 +28,7 @@ import {
   type AiSources,
   type AiVisibilitySummary,
   type CreatePrompts,
+  type CreatePromptsQuote,
   type CreatePromptsResult,
   type ModelPlatform,
   type UpdateAiSettings,
@@ -145,6 +147,20 @@ export class AiVisibilityController {
     @Query(new ZodValidationPipe(AiPromptsQuerySchema)) query: AiPromptsQuery,
   ): Promise<AiPromptList> {
     return this.reports.prompts(workspace.id, projectId, query);
+  }
+
+  @Post("prompts/quote")
+  @HttpCode(200)
+  @RequireRole("member")
+  @RequireScope("read")
+  @ApiOperation({ summary: "Preview adding prompts: new, duplicate and invalid ones and costs" })
+  @ApiOkResponse({ schema: toOpenApiSchema(CreatePromptsQuoteSchema) })
+  quotePrompts(
+    @CurrentWorkspace() workspace: WorkspaceContext,
+    @IdParam("projectId", "Project") projectId: string,
+    @Body(new ZodValidationPipe(CreatePromptsSchema)) body: CreatePrompts,
+  ): Promise<CreatePromptsQuote> {
+    return this.prompts.quote(workspace.id, projectId, body);
   }
 
   @Post("prompts")

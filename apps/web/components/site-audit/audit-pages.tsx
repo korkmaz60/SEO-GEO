@@ -35,7 +35,17 @@ import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/lib/workspace-context";
 
 const PAGE_SIZE = 50;
-const FILTERS = ["all", "errors", "warnings", "broken", "redirects", "noindex"] as const;
+const FILTERS = [
+  "all",
+  "errors",
+  "warnings",
+  "broken",
+  "redirects",
+  "noindex",
+  "low_citability",
+] as const;
+const SORTS = ["url", "citability"] as const;
+export type AuditPageSort = (typeof SORTS)[number];
 
 function StatusCell({ page }: { page: AuditPageRow }) {
   const t = useTranslations("siteAudit.pages");
@@ -65,15 +75,46 @@ function StatusCell({ page }: { page: AuditPageRow }) {
   );
 }
 
-export function AuditPages({ projectId, runId }: { projectId: string; runId: string }) {
+/** A page's citability score with a thin bar; "—" for pages that are not scored. */
+function CitabilityCell({ score, locale }: { score: number | null; locale: Locale }) {
+  if (score === null) return <span className="text-muted-foreground">—</span>;
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className="w-7 text-right font-medium tabular-nums">{formatNumber(score, locale)}</span>
+      <span className="h-1.5 w-12 rounded-full bg-muted" aria-hidden>
+        <span className="block h-1.5 rounded-full bg-primary" style={{ width: `${score}%` }} />
+      </span>
+    </span>
+  );
+}
+
+export function AuditPages({
+  projectId,
+  runId,
+  initialFilter = "all",
+  initialSort = "url",
+  onOpen,
+}: {
+  projectId: string;
+  runId: string;
+  initialFilter?: AuditPageFilter;
+  initialSort?: AuditPageSort;
+  onOpen: (pageId: string) => void;
+}) {
   const t = useTranslations("siteAudit.pages");
   const locale = useLocale() as Locale;
   const { workspace } = useWorkspace();
-  const [filter, setFilter] = useState<AuditPageFilter>("all");
+  const [filter, setFilter] = useState<AuditPageFilter>(initialFilter);
+  const [sort, setSort] = useState<AuditPageSort>(initialSort);
   const [search, setSearch] = useState("");
   const [offset, setOffset] = useState(0);
   const debouncedSearch = useDebouncedValue(search.trim(), 300);
-  const params = new URLSearchParams({ filter, limit: String(PAGE_SIZE), offset: String(offset) });
+  const params = new URLSearchParams({
+    filter,
+    sort,
+    limit: String(PAGE_SIZE),
+    offset: String(offset),
+  });
   if (debouncedSearch) params.set("search", debouncedSearch);
   const pages = useQuery({
     queryKey: ["site-audit", projectId, runId, "pages", params.toString()],
@@ -86,6 +127,7 @@ export function AuditPages({ projectId, runId }: { projectId: string; runId: str
     placeholderData: keepPreviousData,
   });
   const filterItems = FILTERS.map((value) => ({ value, label: t(`filters.${value}`) }));
+  const sortItems = SORTS.map((value) => ({ value, label: t(`sorts.${value}`) }));
   const total = pages.data?.total ?? 0;
 
   return (
@@ -126,6 +168,27 @@ export function AuditPages({ projectId, runId }: { projectId: string; runId: str
             ))}
           </SelectContent>
         </Select>
+        <Select
+          items={sortItems}
+          value={sort}
+          onValueChange={(value) => {
+            if (value) {
+              setSort(value as AuditPageSort);
+              setOffset(0);
+            }
+          }}
+        >
+          <SelectTrigger size="sm" aria-label={t("sort")}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {sortItems.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                {item.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <span className="text-sm text-muted-foreground sm:ml-auto">
           {t("count", { count: total })}
         </span>
@@ -137,6 +200,7 @@ export function AuditPages({ projectId, runId }: { projectId: string; runId: str
               <TableHead className="min-w-72">{t("url")}</TableHead>
               <TableHead>{t("status")}</TableHead>
               <TableHead>{t("issues")}</TableHead>
+              <TableHead>{t("citability")}</TableHead>
               <TableHead className="text-right">{t("depth")}</TableHead>
               <TableHead className="text-right">{t("inlinks")}</TableHead>
               <TableHead className="text-right">{t("words")}</TableHead>
@@ -147,17 +211,25 @@ export function AuditPages({ projectId, runId }: { projectId: string; runId: str
           <TableBody>
             {pages.data?.data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={9} className="py-10 text-center text-muted-foreground">
                   {t("empty")}
                 </TableCell>
               </TableRow>
             ) : (
               pages.data?.data.map((page) => (
-                <TableRow key={page.id}>
+                <TableRow key={page.id} className="cursor-pointer" onClick={() => onOpen(page.id)}>
                   <TableCell className="max-w-md">
-                    <p className="truncate font-medium" title={page.url}>
+                    <button
+                      type="button"
+                      className="block max-w-full truncate text-left font-medium hover:underline"
+                      title={page.url}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onOpen(page.id);
+                      }}
+                    >
                       {page.url.replace(/^https?:\/\//, "")}
-                    </p>
+                    </button>
                     {page.title && (
                       <p className="truncate text-xs text-muted-foreground">{page.title}</p>
                     )}
@@ -191,6 +263,9 @@ export function AuditPages({ projectId, runId }: { projectId: string; runId: str
                         </span>
                       )}
                     </span>
+                  </TableCell>
+                  <TableCell>
+                    <CitabilityCell score={page.citabilityScore} locale={locale} />
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
                     {page.depth < 0 ? "—" : page.depth}

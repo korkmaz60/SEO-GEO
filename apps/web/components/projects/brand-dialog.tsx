@@ -23,6 +23,7 @@ export interface BrandInput {
   name: string;
   domains: string[];
   aliases: string[];
+  ambiguousAliases: string[];
 }
 
 function splitList(value: string): string[] {
@@ -67,6 +68,7 @@ export function BrandDialog({
         name: String(form.get("name")).trim(),
         domains: splitList(String(form.get("domains"))),
         aliases: splitList(String(form.get("aliases"))),
+        ambiguousAliases: splitList(String(form.get("ambiguousAliases"))),
       });
       setOpen(false);
     } catch (caught) {
@@ -131,6 +133,16 @@ export function BrandDialog({
                 placeholder={t("aliasesPlaceholder")}
               />
               <FieldDescription>{t("aliasesHint")}</FieldDescription>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="brand-ambiguous">{t("ambiguousAliases")}</FieldLabel>
+              <Input
+                id="brand-ambiguous"
+                name="ambiguousAliases"
+                defaultValue={brand?.ambiguousAliases.join(", ")}
+                placeholder={t("ambiguousPlaceholder")}
+              />
+              <FieldDescription>{t("ambiguousHint")}</FieldDescription>
             </Field>
           </FieldGroup>
           <DialogFooter>

@@ -144,6 +144,19 @@ export const CreatePromptsResultSchema = z.object({
 });
 export type CreatePromptsResult = z.infer<typeof CreatePromptsResultSchema>;
 
+export const CreatePromptsQuoteSchema = z.object({
+  /** New prompts that would be added. */
+  prompts: z.int(),
+  duplicates: z.int(),
+  invalid: z.int(),
+  frequency: AiFrequencySchema,
+  /** Upper-bound cost of asking the new prompts for one period (a day or a week). */
+  perPeriodUsd: z.number(),
+  /** Upper-bound cost of 30 days. */
+  perMonthUsd: z.number(),
+});
+export type CreatePromptsQuote = z.infer<typeof CreatePromptsQuoteSchema>;
+
 export const UpdatePromptSchema = z
   .strictObject({ tags: z.array(TagSchema).max(10), active: z.boolean() })
   .partial()
@@ -157,6 +170,7 @@ export const DeletePromptsSchema = z.strictObject({
 // ── Read models ─────────────────────────────────────────────────────────────────────
 
 export const AI_RANGES = [7, 30, 90] as const;
+export type AiRange = (typeof AI_RANGES)[number];
 
 export const AiRangeQuerySchema = z.object({
   days: z.coerce

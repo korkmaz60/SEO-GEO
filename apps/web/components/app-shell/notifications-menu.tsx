@@ -56,6 +56,15 @@ function describe(notification: Notification, t: Translate, locale: Locale, work
         }),
         href: `/${workspaceSlug}/settings/usage`,
       };
+    case "ai.budget_blocked":
+      return {
+        title: t("types.aiBudgetBlocked.title"),
+        body: t("types.aiBudgetBlocked.body", {
+          project: String(data.project ?? ""),
+          limit: formatUsd(Number(data.limitUsd ?? 0), locale),
+        }),
+        href: `/${workspaceSlug}/settings/usage`,
+      };
     case "dataforseo.account_blocked":
       return {
         title: t("types.dataforseoBlocked.title"),

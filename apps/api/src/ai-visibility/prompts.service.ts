@@ -5,17 +5,21 @@ import {
   MAX_PROMPT_LENGTH,
   MIN_PROMPT_LENGTH,
   type CreatePrompts,
+  type CreatePromptsQuote,
   type CreatePromptsResult,
   type UpdatePrompt,
 } from "@seo-geo/contracts";
+import { roundUsd } from "@seo-geo/dataforseo";
 import type { Project } from "@seo-geo/db";
 
 import { ProblemException } from "../common/problem.exception.js";
 import { CredentialsService } from "../credentials/credentials.service.js";
 import { PrismaService } from "../database/prisma.service.js";
 import { UsageService } from "../usage/usage.service.js";
+import { PERIODS_PER_MONTH } from "./ai-platforms.js";
 import { AiRunsService } from "./ai-runs.service.js";
 import { AiSettingsService } from "./ai-settings.service.js";
+import { loadAiSettings } from "./ai-settings.js";
 
 /** A prompt as stored: NFC, trimmed, whitespace runs as single spaces. */
 export function normalizePrompt(text: string): string {
@@ -44,6 +48,26 @@ export class PromptsService {
     const costUsd =
       fresh.length > 0 ? await this.settings.periodCost(workspaceId, projectId, fresh.length) : 0;
     return { prompts: fresh, duplicates, invalid, costUsd };
+  }
+
+  /** {@link preview} with the cost per period and per 30 days. */
+  async quote(
+    workspaceId: string,
+    projectId: string,
+    input: CreatePrompts,
+  ): Promise<CreatePromptsQuote> {
+    const [preview, settings] = await Promise.all([
+      this.preview(workspaceId, projectId, input),
+      loadAiSettings(this.prisma, projectId),
+    ]);
+    return {
+      prompts: preview.prompts.length,
+      duplicates: preview.duplicates,
+      invalid: preview.invalid,
+      frequency: settings.frequency,
+      perPeriodUsd: preview.costUsd,
+      perMonthUsd: roundUsd(preview.costUsd * PERIODS_PER_MONTH[settings.frequency]),
+    };
   }
 
   /** Adds prompts; they are asked right away and then on the project's schedule. */

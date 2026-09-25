@@ -41,6 +41,18 @@ export const CitabilityFactorSchema = z.enum([
 ]);
 export type CitabilityFactor = z.infer<typeof CitabilityFactorSchema>;
 export const CITABILITY_FACTORS = CitabilityFactorSchema.options;
+/** Weights of the citability score v1 (docs/geo-aeo.md); they add up to 1. */
+export const CITABILITY_WEIGHTS: Record<CitabilityFactor, number> = {
+  answer_first: 0.15,
+  question_headings: 0.1,
+  structured_content: 0.1,
+  structured_data: 0.15,
+  authorship: 0.1,
+  freshness: 0.1,
+  evidence: 0.1,
+  readability: 0.1,
+  ai_crawler_access: 0.1,
+};
 /** Pages below this citability score are listed by the "low citability" filter. */
 export const LOW_CITABILITY_SCORE = 50;
 

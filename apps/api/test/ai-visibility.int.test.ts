@@ -6,6 +6,7 @@ import {
   AiSettingsSchema,
   AiSourcesSchema,
   AiVisibilitySummarySchema,
+  CreatePromptsQuoteSchema,
   ProjectDetailSchema,
   type ProjectDetail,
 } from "@seo-geo/contracts";
@@ -202,6 +203,23 @@ describe.skipIf(!TEST_SERVER_URL)("AI visibility", () => {
       })
       .expect(200);
     expect(added.body).toEqual({ added: 2, duplicates: 0, invalid: 2 });
+    const quote = CreatePromptsQuoteSchema.parse(
+      (
+        await owner
+          .post(ai("/prompts/quote"))
+          .send({ prompts: [PROMPT, "Filtre kahve mi espresso mu?", "x"] })
+          .expect(200)
+      ).body,
+    );
+    // One new prompt on five default platforms: 4 × $0.0012 queued + $0.0106 Perplexity.
+    expect(quote).toEqual({
+      prompts: 1,
+      duplicates: 1,
+      invalid: 1,
+      frequency: "WEEKLY",
+      perPeriodUsd: 0.0154,
+      perMonthUsd: 0.066,
+    });
     const again = await owner
       .post(ai("/prompts"))
       .send({ prompts: [PROMPT] })

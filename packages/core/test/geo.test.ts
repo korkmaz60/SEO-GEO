@@ -116,6 +116,18 @@ describe("detectMentions", () => {
     expect(
       detectMentions("Mango indirimde.", [mango], { citedBrandIds: new Set(["mango"]) }),
     ).toHaveLength(1);
+    // An ambiguous name that is not also the name or an alias counts the same way.
+    const shop: BrandToDetect = {
+      id: "shop",
+      name: "Example Store",
+      aliases: [],
+      ambiguousAliases: ["Example"],
+      domains: ["example.com"],
+    };
+    expect(mentioned("Example bir kelimedir.", [shop])).toEqual([]);
+    expect(mentioned("Example, example.com adresinde satış yapar.", [shop])).toEqual([
+      ["shop", 1, 2],
+    ]);
     // Names shorter than three letters are ambiguous by themselves.
     const ab: BrandToDetect = { id: "ab", name: "AB", aliases: [], domains: [] };
     expect(mentioned("AB üyesi ülkeler", [ab])).toEqual([]);

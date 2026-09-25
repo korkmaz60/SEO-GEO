@@ -267,11 +267,11 @@ describe.skipIf(!TEST_SERVER_URL)("site audit", () => {
     await runQueuedAudit(run.id);
 
     const overview = SiteAuditOverviewSchema.parse((await viewer.get(api("")).expect(200)).body);
-    // Indexable pages: /, /a, /b and the guide; (14 + 12 + 14 + 90) / 4.
+    // Indexable pages: /, /a, /b and the guide; (14 + 12 + 14 + 100) / 4.
     expect(overview.latest).toMatchObject({
       id: run.id,
-      citabilityScore: 33,
-      stats: { citability: { version: 1, scored: 4, average: 33 } },
+      citabilityScore: 35,
+      stats: { citability: { version: 1, scored: 4, average: 35 } },
     });
     expect(overview.latest?.stats?.citability?.factors.question_headings).toEqual({
       average: 0.25,
@@ -285,7 +285,7 @@ describe.skipIf(!TEST_SERVER_URL)("site audit", () => {
       ["https://site.test/a", 12],
       ["https://site.test/", 14],
       ["https://site.test/b", 14],
-      ["https://site.test/rehber", 90],
+      ["https://site.test/rehber", 100],
       ["https://site.test/eski", null],
       ["https://site.test/hakkimizda", null],
     ]);
@@ -304,9 +304,9 @@ describe.skipIf(!TEST_SERVER_URL)("site audit", () => {
     );
     expect(guidePage.page).toMatchObject({
       h1: "Kahve makinesi nasıl seçilir?",
-      citabilityScore: 90,
+      citabilityScore: 100,
     });
-    expect(guidePage.citability?.score).toBe(90);
+    expect(guidePage.citability?.score).toBe(100);
     expect(guidePage.citability?.factors.map((factor) => [factor.factor, factor.value])).toEqual([
       ["answer_first", 1],
       ["question_headings", 1],
@@ -315,15 +315,16 @@ describe.skipIf(!TEST_SERVER_URL)("site audit", () => {
       ["authorship", 1],
       ["freshness", 1],
       ["evidence", 1],
-      ["readability", 0],
+      ["readability", 1],
       ["ai_crawler_access", 1],
     ]);
     expect(guidePage.citability?.factors[0]).toMatchObject({
       weight: 0.15,
       data: { topicShare: 0.67 },
     });
-    // One run-on "sentence" of 250 words is far too hard to read.
-    expect(guidePage.citability?.recommendations).toEqual(["readability"]);
+    // Short sentences read easily (Ateşman above 90), which is not penalized.
+    expect(guidePage.citability?.factors[7]?.data).toMatchObject({ formula: "atesman" });
+    expect(guidePage.citability?.recommendations).toEqual([]);
 
     const pageA = AuditPageDetailSchema.parse(
       (await viewer.get(api(`/runs/${run.id}/pages/${pageId("https://site.test/a")}`)).expect(200))
@@ -338,6 +339,8 @@ describe.skipIf(!TEST_SERVER_URL)("site audit", () => {
       "answer_first",
       "structured_data",
     ]);
+    // One run-on "sentence" of 250 words is far too hard to read.
+    expect(pageA.citability?.recommendations).toContain("readability");
 
     const broken = AuditPageDetailSchema.parse(
       (

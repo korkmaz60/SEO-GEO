@@ -123,6 +123,10 @@
         "googleRevoked": {
           "title": "Google access was revoked",
           "body": "Reconnect {email} to keep Search Console and Analytics data current."
+        },
+        "aiBudgetBlocked": {
+          "title": "AI visibility checks are paused",
+          "body": "Asking the prompts of {project} would exceed the monthly budget of {limit}. Raise the budget to continue."
         }
       }
     }
@@ -235,7 +239,8 @@
       "brand": "Define your brand and competitors",
       "keywords": "Add keywords to track",
       "audit": "Start the first site audit",
-      "gsc": "Connect Search Console"
+      "gsc": "Connect Search Console",
+      "prompts": "Add prompts to ask AI assistants"
     },
     "progress": "{done}/{total}",
     "done": "Done"
@@ -293,7 +298,8 @@
     "ownBrand": "You",
     "open": "Open",
     "sources": {
-      "rankTracker": "Rank tracker"
+      "rankTracker": "Rank tracker",
+      "aiVisibility": "AI visibility (prompt tracking)"
     },
     "shareMethod": "Your CTR-weighted visibility as a share of the total visibility of all tracked brands.",
     "rankDescription": "Visibility {visibility} · in the last check {improved, plural, one {# keyword} other {# keywords}} moved up and {declined} moved down",
@@ -318,6 +324,14 @@
       "emptyBody": "The first audit checks technical issues and AI crawler access.",
       "running": "The first audit is running; results appear here when it finishes.",
       "action": "Go to site audit"
+    },
+    "ai": {
+      "noPrompts": "Add prompts",
+      "collecting": "Collecting answers",
+      "collectingTitle": "Collecting answers",
+      "method": "Score v1 from {runs, plural, one {# answer} other {# answers}} in the last 30 days",
+      "description": "Last 30 days · mentioned in {mentioned} of the answers, cited in {cited} · {runs, plural, one {# answer} other {# answers}}",
+      "action": "Go to prompts"
     }
   },
   "auth": {
@@ -551,7 +565,8 @@
       "projects": "Projects",
       "providers": "Providers",
       "usage": "Usage & budget",
-      "auditLog": "Audit log"
+      "auditLog": "Audit log",
+      "api": "API & MCP"
     },
     "general": {
       "title": "Workspace",
@@ -688,6 +703,63 @@
         "budgetUpdated": "Updated the budget",
         "budgetRemoved": "Removed the budget"
       }
+    },
+    "apiKeys": {
+      "title": "Workspace API keys",
+      "description": "Keys for scripts and MCP clients that work in this workspace only, with limited scopes. A key never exceeds its creator's role; send it as the x-api-key header or as Authorization: Bearer.",
+      "empty": "No keys yet.",
+      "created": "created {date}",
+      "expires": "expires {date}",
+      "neverExpires": "never expires",
+      "lastUsed": "last used {when}",
+      "scopes": {
+        "read": "Read",
+        "write": "Write",
+        "paid": "Paid work"
+      },
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke {name}?",
+      "revokeBody": "Scripts and MCP clients using this key lose access at once.",
+      "revoked": "Key revoked.",
+      "create": "Create key",
+      "createTitle": "New API key",
+      "createBody": "The key works in {workspace} only and is shown once.",
+      "name": "Name",
+      "namePlaceholder": "e.g. Claude Desktop",
+      "level": "Access",
+      "levels": {
+        "read": "Read only",
+        "write": "Read and write",
+        "paid": "Read, write and paid work"
+      },
+      "levelHints": {
+        "read": "Reads reports, rankings and AI visibility; changes nothing.",
+        "write": "Also changes project, prompt and keyword settings and starts audits; cannot start paid work.",
+        "paid": "Also starts work DataForSEO charges for, such as keyword research, adding prompts and rank checks."
+      },
+      "expiryLabel": "Valid for",
+      "expiry": {
+        "30": "30 days",
+        "90": "90 days",
+        "365": "1 year",
+        "never": "No expiry"
+      },
+      "createdTitle": "Your key is ready",
+      "createdBody": "Copy the key now and store it safely; it will not be shown again.",
+      "copy": "Copy",
+      "copied": "Copied.",
+      "done": "Done",
+      "failed": "The key could not be created.",
+      "mcp": {
+        "title": "MCP server",
+        "description": "Claude, Cursor and other MCP clients can use this installation's data as tools. Connect with one of the keys above.",
+        "endpoint": "Endpoint (Streamable HTTP)",
+        "claudeCode": "Claude Code",
+        "config": "Configuration for clients that support HTTP",
+        "tools": "Tools: projects, rankings, AI visibility, prompts and answers, cited sources, site audits and page citability, keyword ideas, adding prompts and starting audits.",
+        "paid": "Paid tools first return the estimated cost and run only when called again with that amount confirmed.",
+        "scopes": "Every tool checks the key's scopes and workspace: a read key only reads."
+      }
     }
   },
   "projectSettings": {
@@ -737,7 +809,11 @@
       "aliasesPlaceholder": "e.g. Example, EXAMPLE Inc.",
       "aliasesHint": "Other ways the brand is written; separate with commas.",
       "save": "Save",
-      "limitReached": "A project can track up to 7 competitors."
+      "limitReached": "A project can track up to 7 competitors.",
+      "ambiguousAliases": "Ambiguous names",
+      "ambiguousPlaceholder": "e.g. Mango, Apple",
+      "ambiguousHint": "Names that are also everyday words. They count as a mention only when the answer also names the brand's domain, one of its unambiguous names, or cites it.",
+      "ambiguousShort": "Ambiguous names"
     },
     "danger": {
       "title": "Danger zone",
@@ -810,7 +886,7 @@
     },
     "apiKeys": {
       "title": "API keys",
-      "description": "Personal keys for scripts and integrations. A key acts with your permissions; send it in the x-api-key header.",
+      "description": "Personal keys that work with your permissions in all your workspaces; send them as the x-api-key header or as Authorization: Bearer. For keys limited to one workspace and to scopes, use the API & MCP page of the workspace settings.",
       "empty": "You have no API keys yet.",
       "unnamed": "Unnamed key",
       "created": "created {date}",
@@ -1243,7 +1319,8 @@
         "warnings": "Pages with warnings",
         "broken": "Broken (4xx/5xx)",
         "redirects": "Redirects",
-        "noindex": "Not indexable"
+        "noindex": "Not indexable",
+        "low_citability": "Low citability (<50)"
       },
       "search": "Search URL or title",
       "filter": "Page filter",
@@ -1266,7 +1343,13 @@
       "no": "No",
       "range": "{from}–{to} of {total}",
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "sort": "Sort",
+      "sorts": {
+        "url": "By URL",
+        "citability": "Lowest citability"
+      },
+      "citability": "Citability"
     },
     "history": {
       "scoreTitle": "Health score history",
@@ -1501,6 +1584,95 @@
         "description": "The site has no /llms.txt. It is an emerging proposal that summarizes your most important pages for language models; it is not widely used yet.",
         "fix": "Publish a Markdown file at /llms.txt that briefly introduces your site and links to its most important pages."
       }
+    },
+    "citability": {
+      "title": "AI citability",
+      "description": "How ready the indexable pages are to be cited in AI answers (score v1).",
+      "average": "Average score",
+      "pageScore": "Page score",
+      "scored": "{count, plural, one {# page scored} other {# pages scored}}",
+      "factorsTitle": "Factors",
+      "toImprove": "{count, plural, one {# page to improve} other {# pages to improve}}",
+      "showLowPages": "Low-scoring pages",
+      "notScored": "This audit ran before the citability score existed. Start a new audit to see it.",
+      "notJudged": "Not judged",
+      "weight": "weight {weight}",
+      "recommendation": "Recommendation",
+      "factors": {
+        "answer_first": {
+          "title": "Answer-first introduction",
+          "recommendation": "Open the page with a 30–80 word paragraph that answers the question directly and uses the topic terms of the heading."
+        },
+        "question_headings": {
+          "title": "Question headings",
+          "recommendation": "Phrase at least a third of the H2/H3 headings as the questions users ask, with a short answer right below each."
+        },
+        "structured_content": {
+          "title": "Lists and tables",
+          "recommendation": "Give steps, comparisons and specifications as lists or tables; aim for one structure per 600 words."
+        },
+        "structured_data": {
+          "title": "Structured data",
+          "recommendation": "Add fitting JSON-LD (Article, FAQPage, HowTo, Product, Organization, BreadcrumbList) and fix invalid blocks."
+        },
+        "authorship": {
+          "title": "Author and publisher",
+          "recommendation": "Name the author with Person markup or a visible byline, and link the about and contact pages."
+        },
+        "freshness": {
+          "title": "Freshness",
+          "recommendation": "Update the page regularly and state dateModified/datePublished in JSON-LD or article meta tags."
+        },
+        "evidence": {
+          "title": "Evidence",
+          "recommendation": "Back claims with links to reliable sources and specific figures (rates, statistics, prices)."
+        },
+        "readability": {
+          "title": "Readability",
+          "recommendation": "Shorten sentences and use plain words; aim for an Ateşman or Flesch score of at least 50."
+        },
+        "ai_crawler_access": {
+          "title": "AI search crawler access",
+          "recommendation": "Allow OAI-SearchBot, ChatGPT-User, PerplexityBot, Perplexity-User, Claude-SearchBot and Claude-User to fetch the page in robots.txt."
+        }
+      },
+      "details": {
+        "noIntro": "No paragraph of at least eight words was found.",
+        "introWords": "The first paragraph has {words} words.",
+        "intro": "The first paragraph has {words} words and {share} of the H1's topic terms.",
+        "noHeadings": "No subheadings (H2/H3).",
+        "questions": "{questions} of {headings} subheadings are questions.",
+        "structures": "{lists} lists and {tables} tables in {words} words.",
+        "types": "Types found: {types}.",
+        "noTypes": "No citable JSON-LD types.",
+        "invalid": "{count, plural, one {# invalid JSON-LD block} other {# invalid JSON-LD blocks}}.",
+        "authorship": "Author: {author, select, true {named} other {missing}} · About/contact link: {about, select, true {present} other {missing}}",
+        "dated": "Latest date {date} ({days, plural, one {# day} other {# days}} ago).",
+        "noDate": "The page states no date.",
+        "evidence": "{links, plural, one {# external link} other {# external links}} and {figures, plural, one {# figure} other {# figures}}.",
+        "readability": "{formula, select, atesman {Ateşman} other {Flesch}} score {score}.",
+        "readabilityNotJudged": "Not judged: fewer than 100 words, or a language without a formula.",
+        "blocked": "Blocked crawlers: {bots}.",
+        "allowed": "Every AI search crawler may fetch the page."
+      }
+    },
+    "pageDetail": {
+      "open": "Open the page in a new tab",
+      "status": "Status",
+      "indexable": "Indexable",
+      "yes": "Yes",
+      "no": "No",
+      "words": "Words",
+      "inlinks": "Internal inlinks",
+      "outlinks": "Internal outlinks",
+      "externalLinks": "External links",
+      "size": "Size",
+      "lang": "Language",
+      "h1": "H1",
+      "schema": "Structured data types",
+      "notScored": "Only indexable pages are scored.",
+      "issues": "Issues ({count})",
+      "noIssues": "No issues on this page."
     }
   },
   "searchConsole": {
@@ -1659,6 +1831,217 @@
       "noRows": "No data in this period.",
       "showAll": "Show all {count} rows",
       "showFewer": "Show fewer"
+    }
+  },
+  "aiVisibility": {
+    "rangeLabel": "Period",
+    "range": "{days} days",
+    "rateWithInterval": "{value} (95% interval: {low}–{high})",
+    "interval": "95% interval: {low}–{high}",
+    "lowSample": "Low sample",
+    "lowSampleHint": "Only {runs} answers; read rates from fewer than 20 answers with care.",
+    "runNow": "Ask now",
+    "runQueued": "Due prompts are being asked; answers arrive within minutes.",
+    "runFailed": "The prompts could not be asked.",
+    "actionFailed": "The action could not be completed.",
+    "addPrompts": "Add prompts",
+    "settingsAction": "Settings",
+    "pendingNotice": "{count, plural, one {# answer is} other {# answers are}} being collected; the page refreshes by itself.",
+    "settingsLine": "{frequency, select, DAILY {Daily} other {Weekly}} · {platforms, plural, one {# platform} other {# platforms}} · {samples, plural, one {# answer} other {# answers}} per prompt · {prompts, plural, one {# active prompt} other {# active prompts}}",
+    "trendTitle": "AI visibility score",
+    "trendDescription": "Weekly score across all platforms; every brand in its own color.",
+    "trendPending": "The trend appears once at least two weeks of answers are collected.",
+    "weekOf": "Week of {date}",
+    "week": "Week",
+    "tableView": "Show as table",
+    "shareTitle": "Share of voice",
+    "shareDescription": "Each brand's share of the mentions among the tracked brands.",
+    "noMentions": "None of the tracked brands was mentioned in this period.",
+    "platformsTitle": "Your brand by platform",
+    "platformsDescription": "Mention and citation rates with 95% intervals; the wider the bar, the less certain the result.",
+    "sourcesTitle": "Most cited sources",
+    "sourcesDescription": "Domains the answers cite and their share of all citations.",
+    "allSources": "All sources",
+    "noSources": "The answers cited no sources in this period.",
+    "methodNote": "AI visibility score v{version} = 100 × (0.45 × mention rate + 0.35 × citation rate + 0.20 × prominence). Answers are collected through non-personalized API and interface calls and can differ from what a signed-in user sees.",
+    "providerMissing": {
+      "title": "DataForSEO is not connected",
+      "body": "Connect a DataForSEO account to the workspace to ask AI platforms your prompts.",
+      "action": "Open providers"
+    },
+    "kpi": {
+      "score": "AI visibility score",
+      "mentionRate": "Mention rate",
+      "citationRate": "Citation rate",
+      "shareOfVoice": "Share of voice",
+      "averageRank": "Average mention rank",
+      "notMentioned": "Not mentioned yet",
+      "answers": "Answers analyzed"
+    },
+    "table": {
+      "platform": "Platform",
+      "answers": "Answers",
+      "mentionRate": "Mentioned",
+      "citationRate": "Cited",
+      "shareOfVoice": "Share",
+      "averageRank": "Avg. rank",
+      "score": "Score",
+      "paused": "not asked"
+    },
+    "settings": {
+      "title": "AI visibility settings",
+      "description": "Choose which platforms answer your prompts, how often and how many times. The cost is calculated before you save.",
+      "platforms": "Platforms",
+      "methods": {
+        "CHATGPT": "The ChatGPT interface as users see it (LLM Scraper, queued)",
+        "GEMINI": "The Gemini interface as users see it (LLM Scraper, queued)",
+        "PERPLEXITY": "Sonar models, always with web search (LLM Responses, live)",
+        "CLAUDE": "The Claude API with web search (LLM Responses, live); the most expensive option",
+        "GOOGLE_AI_MODE": "The Google AI Mode answer (SERP API, queued)",
+        "GOOGLE_AI_OVERVIEW": "The AI Overview Google shows when the prompt is searched (SERP API)"
+      },
+      "frequency": "Frequency",
+      "frequencies": {
+        "WEEKLY": "Weekly",
+        "DAILY": "Daily"
+      },
+      "samples": "Answers per prompt",
+      "samplesHint": "Answers vary from run to run; more samples make the rates more reliable but multiply the cost.",
+      "model": "{platform} model",
+      "defaultModel": "Default (cheapest model with web search)",
+      "defaultModelNamed": "Default ({model})",
+      "perAnswer": "~{cost} per answer",
+      "sentiment": "Sentiment",
+      "sentimentHint": "Classifies the tone of every mention (positive, neutral, negative) with a small model; a small extra cost per mention.",
+      "answersPerPeriod": "Answers per {frequency, select, DAILY {day} other {week}}",
+      "sentimentCost": "Sentiment",
+      "perPeriod": "Estimated cost per {frequency, select, DAILY {day} other {week}}",
+      "perMonth": "Estimated cost for 30 days",
+      "costNote": "Upper bound at list prices for {prompts, plural, one {# active prompt} other {# active prompts}}; the actual amount is recorded with every answer.",
+      "save": "Save",
+      "saved": "Settings saved. New platforms are asked at the next hourly check.",
+      "failed": "The settings could not be saved."
+    },
+    "add": {
+      "title": "Add prompts",
+      "description": "Write the questions your customers ask AI assistants. They are asked right away and then on your schedule.",
+      "prompts": "Prompts",
+      "placeholder": "What are the best coffee machine brands?\nWhat should I look for when buying an espresso machine?",
+      "promptsHint": "One prompt per line; up to 500 characters.",
+      "tooLong": "{count, plural, one {# prompt is} other {# prompts are}} longer than {max} characters and will not be added.",
+      "market": "Market",
+      "tags": "Tags",
+      "tagsPlaceholder": "brand, comparison",
+      "newPrompts": "New prompts",
+      "duplicates": "Already tracked",
+      "invalid": "Invalid",
+      "perPeriod": "Estimated cost per {frequency, select, DAILY {day} other {week}}",
+      "perMonth": "Estimated cost for 30 days",
+      "costNote": "Upper bound at list prices with the current settings.",
+      "submit": "{count, plural, =0 {Add prompts} one {Add # prompt} other {Add # prompts}}",
+      "added": "{count, plural, one {# prompt added} other {# prompts added}}; answers arrive within minutes.",
+      "budgetExceeded": "This would exceed the monthly budget. Raise it in the workspace settings.",
+      "failed": "The prompts could not be added."
+    },
+    "prompts": {
+      "search": "Search prompts",
+      "tag": "Tag",
+      "allTags": "All tags",
+      "count": "{count, plural, one {# prompt} other {# prompts}}",
+      "prompt": "Prompt",
+      "mentioned": "Mentioned",
+      "cited": "Cited",
+      "latest": "Latest answers",
+      "lastRun": "Last run",
+      "noMatches": "No prompts match the search.",
+      "noAnswers": "No answers yet",
+      "collecting": "Collecting",
+      "pause": "Pause",
+      "resume": "Resume",
+      "paused": "Prompt paused; its history is kept.",
+      "resumed": "The prompt will be asked at the next hourly check.",
+      "pausedBadge": "Paused",
+      "delete": "Delete",
+      "deleteTitle": "Delete this prompt?",
+      "deleteDescription": "\"{prompt}\" and all its answers will be deleted permanently.",
+      "deleted": "Prompt deleted.",
+      "pageRange": "{from}–{to} of {total}",
+      "previous": "Previous",
+      "next": "Next",
+      "mentionedAt": "mentioned {rank, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}",
+      "notMentioned": "not mentioned",
+      "citedSite": "your site cited",
+      "competitorsMentioned": "{count, plural, one {# competitor} other {# competitors}} mentioned"
+    },
+    "answer": {
+      "mentionRate": "Mention rate",
+      "citationRate": "Citation rate",
+      "answers": "Answers",
+      "lastRun": "Last run",
+      "collecting": "The answer is being collected.",
+      "noAnswers": "No answers in this period.",
+      "history": "Answer history",
+      "failed": "The answer could not be retrieved.",
+      "methods": {
+        "llm_scraper": "Interface",
+        "llm_responses": "API",
+        "google_ai_mode": "SERP API",
+        "google_ai_overview": "SERP API · AI Overview"
+      },
+      "searchedWeb": "searched the web",
+      "mentions": "Mentioned brands",
+      "removedBrand": "Deleted brand",
+      "mentionSummary": "rank {rank} · {count, plural, one {# time} other {# times}}",
+      "sentiments": {
+        "positive": "Positive",
+        "neutral": "Neutral",
+        "negative": "Negative"
+      },
+      "noOverview": "Google showed no AI Overview for this search.",
+      "empty": "The platform gave no answer to this prompt.",
+      "citations": "Sources ({count})",
+      "knownPage": "Your page",
+      "openSource": "Open the source in a new tab",
+      "searches": "Searches the model ran",
+      "answerText": "Answer text"
+    },
+    "sources": {
+      "citations": "Citations",
+      "domains": "Domains",
+      "topHundred": "The 100 most cited domains",
+      "ownShare": "Your site's share",
+      "ownCitations": "{count, plural, one {# citation} other {# citations}}",
+      "domainsTitle": "Cited domains",
+      "domainsDescription": "Sites the answers cite; a starting list for partnerships and content opportunities.",
+      "pagesTitle": "Your cited pages",
+      "pagesDescription": "Your own pages that answers cite as sources.",
+      "noOwnPages": "None of your pages was cited in this period.",
+      "domain": "Domain",
+      "share": "Share",
+      "prompts": "Prompts",
+      "platforms": "Platforms",
+      "you": "You",
+      "page": "Page",
+      "known": "Known page",
+      "knownYes": "In the audit or Search Console",
+      "knownNo": "Unknown",
+      "openPage": "Open the page in a new tab"
+    },
+    "competitors": {
+      "manage": "Manage competitors",
+      "add": "Add competitors",
+      "noAnswersTitle": "No answers to compare yet",
+      "noAnswersBody": "Once your prompts are asked and answers are collected, your brand is compared with your competitors here.",
+      "comparisonTitle": "Brands",
+      "comparisonDescription": "Each brand's score, mention and citation rates, share and average mention rank in the same answers.",
+      "shareTrendTitle": "Weekly share of voice",
+      "shareTrendDescription": "How each brand's share of the mentions changes week by week.",
+      "platformsTitle": "Mention rate by platform",
+      "platformsDescription": "How often each brand is mentioned on each platform.",
+      "brand": "Brand",
+      "you": "You",
+      "significant": "Significant change",
+      "significantHint": "The mention rate changed beyond the confidence intervals of both periods."
     }
   }
 }

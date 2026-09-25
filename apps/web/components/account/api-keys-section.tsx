@@ -203,7 +203,7 @@ function CreateKeyDialog({ onCreated }: { onCreated: () => void }) {
                 <Input
                   id="api-key-name"
                   name="name"
-                  maxLength={64}
+                  maxLength={32}
                   placeholder={t("namePlaceholder")}
                   required
                 />

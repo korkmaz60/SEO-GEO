@@ -13,7 +13,10 @@ export interface BrandToDetect {
   name: string;
   /** Other names the brand is mentioned by. */
   aliases: readonly string[];
-  /** Names that are also ordinary words; they need supporting evidence. */
+  /**
+   * Names that are also ordinary words, whether or not they are the name or an alias above;
+   * they need supporting evidence.
+   */
   ambiguousAliases?: readonly string[];
   /** Registrable domains of the brand, e.g. `example.com`. */
   domains: readonly string[];
@@ -115,7 +118,7 @@ export function detectMentions(
   for (const brand of brands) {
     const ambiguous = new Set((brand.ambiguousAliases ?? []).map(foldText));
     const names = new Map<string, boolean>();
-    for (const name of [brand.name, ...brand.aliases]) {
+    for (const name of [brand.name, ...brand.aliases, ...(brand.ambiguousAliases ?? [])]) {
       const key = foldText(name);
       if (!key || names.has(key)) continue;
       names.set(key, ambiguous.has(key) || wordCharCount(key) < MIN_UNAMBIGUOUS_LENGTH);
