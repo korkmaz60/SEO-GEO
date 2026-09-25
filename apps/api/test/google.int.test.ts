@@ -10,6 +10,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { PrismaService } from "../src/database/prisma.service.js";
 import { GOOGLE_API_OPTIONS } from "../src/google/google-api.js";
+import { GoogleOAuthClientsService } from "../src/google/google-oauth-clients.service.js";
 import { GoogleSyncService } from "../src/google/google-sync.service.js";
 import {
   TEST_SERVER_URL,
@@ -103,7 +104,13 @@ describe.skipIf(!TEST_SERVER_URL)("Google Search Console and GA4", () => {
     const status = GoogleIntegrationsSchema.parse(
       (await member.get(ws("/integrations/google")).expect(200)).body,
     );
-    expect(status).toEqual({ configured: true, connections: [] });
+    expect(status).toEqual({
+      configured: true,
+      client: { source: "INSTANCE", clientId: GOOGLE_TEST_ENV.GOOGLE_CLIENT_ID, verifiedAt: null },
+      instanceClient: true,
+      redirectUri: `${WEB_ORIGIN}/api/v1/integrations/google/callback`,
+      connections: [],
+    });
     await member
       .post(ws("/integrations/google/authorize"))
       .send({ projectId: project.id })
@@ -156,9 +163,10 @@ describe.skipIf(!TEST_SERVER_URL)("Google Search Console and GA4", () => {
     ]);
     connectionId = connected.connections[0]?.id as string;
 
-    // Tokens are stored encrypted.
+    // Tokens are stored encrypted, with the client that issued them.
     const row = await context.app.get(PrismaService).googleConnection.findFirstOrThrow();
     expect(Buffer.from(row.encryptedTokens).toString("utf8")).not.toContain("refresh-1");
+    expect(row.oauthClientId).toBe(GOOGLE_TEST_ENV.GOOGLE_CLIENT_ID);
   });
 
   it("lists properties and selects a Search Console site the account can read", async () => {
@@ -329,5 +337,124 @@ describe.skipIf(!TEST_SERVER_URL)("Google Search Console and GA4", () => {
     expect(await prisma.projectIntegration.count()).toBe(0);
     // The GA4 source used the account: its imported data is gone too.
     expect(await prisma.ga4PageDaily.count()).toBe(0);
+  });
+
+  it("lets a workspace use its own OAuth client, checked with Google first", async () => {
+    const prisma = context.app.get(PrismaService);
+    const clientPath = ws("/integrations/google/client");
+    const own = {
+      clientId: "1234-own.apps.googleusercontent.com",
+      clientSecret: "GOCSPX-own-secret",
+    };
+    google.state.clients.set(own.clientId, own.clientSecret);
+
+    await member.put(clientPath).send(own).expect(403);
+    await owner
+      .put(clientPath)
+      .send({ ...own, clientId: "https://console.cloud.google.com" })
+      .expect(400);
+    const wrong = await owner
+      .put(clientPath)
+      .send({ ...own, clientSecret: "GOCSPX-wrong-secret" })
+      .expect(422);
+    expect(wrong.body.detail).toMatch(/Copy both again/);
+    expect(await prisma.googleOAuthClient.count()).toBe(0);
+
+    // An account connected with the installation's client, before the workspace had its own.
+    await connect(owner);
+    const first = await prisma.googleConnection.findFirstOrThrow();
+
+    const saved = GoogleIntegrationsSchema.parse(
+      (await owner.put(clientPath).send(own).expect(200)).body,
+    );
+    expect(saved).toMatchObject({
+      configured: true,
+      instanceClient: true,
+      client: { source: "WORKSPACE", clientId: own.clientId },
+    });
+    expect(JSON.stringify(saved)).not.toContain(own.clientSecret);
+    const stored = await prisma.googleOAuthClient.findUniqueOrThrow({
+      where: { workspaceId: workspace },
+    });
+    expect(Buffer.from(stored.encryptedSecret).toString("utf8")).not.toContain(own.clientSecret);
+    // The earlier account keeps refreshing with the client that issued its tokens.
+    const clients = context.app.get(GoogleOAuthClientsService);
+    expect((await clients.forConnection(first))?.source).toBe("INSTANCE");
+
+    // New connections use the workspace's client, and their tokens refresh only with it.
+    const started = await owner
+      .post(ws("/integrations/google/authorize"))
+      .send({ projectId: project.id })
+      .expect(200);
+    expect(new URL(started.body.url as string).searchParams.get("client_id")).toBe(own.clientId);
+    google.state.expiresIn = 0;
+    const consent = google.consent(started.body.url as string);
+    const done = await owner
+      .get(
+        `/api/v1/integrations/google/callback?code=${consent.code}&state=${encodeURIComponent(consent.state)}`,
+      )
+      .expect(302);
+    google.state.expiresIn = 3600;
+    expect(done.headers.location).toBe(
+      `${WEB_ORIGIN}/agency/example-com/search-console?google=connected`,
+    );
+    expect(
+      await prisma.googleConnection.findUniqueOrThrow({ where: { id: first.id } }),
+    ).toMatchObject({ oauthClientId: own.clientId, status: "ACTIVE" });
+    await member.get(ws(`/integrations/google/${first.id}/properties`)).expect(200);
+
+    // Replacing the client ends the accounts it connected, and flows it started.
+    const pending = google.consent(
+      (
+        await owner
+          .post(ws("/integrations/google/authorize"))
+          .send({ projectId: project.id })
+          .expect(200)
+      ).body.url as string,
+    );
+    const other = {
+      clientId: "5678-other.apps.googleusercontent.com",
+      clientSecret: "GOCSPX-other-secret",
+    };
+    google.state.clients.set(other.clientId, other.clientSecret);
+    const replaced = GoogleIntegrationsSchema.parse(
+      (await owner.put(clientPath).send(other).expect(200)).body,
+    );
+    expect(replaced.connections).toEqual([
+      expect.objectContaining({
+        status: "REVOKED",
+        lastError: expect.stringMatching(/replaced or removed/),
+      }),
+    ]);
+    const changed = await owner
+      .get(
+        `/api/v1/integrations/google/callback?code=${pending.code}&state=${encodeURIComponent(pending.state)}`,
+      )
+      .expect(302);
+    expect(changed.headers.location).toBe(
+      `${WEB_ORIGIN}/agency/example-com/search-console?google=client_changed`,
+    );
+
+    // Without its own client, the workspace uses the installation's again.
+    await member.delete(clientPath).expect(403);
+    await owner.delete(clientPath).expect(204);
+    await owner.delete(clientPath).expect(404);
+    const status = GoogleIntegrationsSchema.parse(
+      (await member.get(ws("/integrations/google")).expect(200)).body,
+    );
+    expect(status.client).toEqual({
+      source: "INSTANCE",
+      clientId: GOOGLE_TEST_ENV.GOOGLE_CLIENT_ID,
+      verifiedAt: null,
+    });
+    const audit = await prisma.auditLog.findMany({
+      where: { workspaceId: workspace, action: { startsWith: "google.client" } },
+      orderBy: { createdAt: "asc" },
+    });
+    expect(audit.map((entry) => entry.action)).toEqual([
+      "google.client_saved",
+      "google.client_saved",
+      "google.client_removed",
+    ]);
   });
 });

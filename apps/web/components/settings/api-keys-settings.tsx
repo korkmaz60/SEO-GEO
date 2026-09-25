@@ -9,13 +9,14 @@ import {
   type Locale,
 } from "@seo-geo/contracts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, KeyRound, Plus, Trash2 } from "lucide-react";
+import { KeyRound, Plus, Trash2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { FormAlert } from "@/components/auth/form-alert";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { CopyField } from "@/components/data/copy-field";
 import { SettingsSection } from "@/components/settings/settings-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -281,34 +282,6 @@ function CreateKeyDialog({ onCreated }: { onCreated: () => void }) {
         )}
       </DialogContent>
     </Dialog>
-  );
-}
-
-function CopyField({ value, multiline = false }: { value: string; multiline?: boolean }) {
-  const t = useTranslations("workspaceSettings.apiKeys");
-  return (
-    <div className="flex items-start gap-2">
-      <code
-        className={
-          multiline
-            ? "min-w-0 flex-1 overflow-x-auto rounded-md bg-muted px-3 py-2 font-mono text-xs whitespace-pre select-all"
-            : "min-w-0 flex-1 rounded-md bg-muted px-2 py-1.5 font-mono text-xs break-all select-all"
-        }
-      >
-        {value}
-      </code>
-      <Button
-        variant="outline"
-        size="icon-sm"
-        aria-label={t("copy")}
-        onClick={async () => {
-          await navigator.clipboard.writeText(value);
-          toast.success(t("copied"));
-        }}
-      >
-        <Copy />
-      </Button>
-    </div>
   );
 }
 

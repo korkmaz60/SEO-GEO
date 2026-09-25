@@ -16,7 +16,9 @@
     "percentagePoints": "{value} puan",
     "cancel": "Vazgeç",
     "actionFailed": "İşlem tamamlanamadı. Lütfen tekrar deneyin.",
-    "typeToConfirm": "Onaylamak için <code>{text}</code> yazın"
+    "typeToConfirm": "Onaylamak için <code>{text}</code> yazın",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı"
   },
   "nav": {
     "groups": {
@@ -538,14 +540,14 @@
     "upcoming": {
       "aiPlatforms": {
         "title": "AI platformları",
-        "description": "ChatGPT, Gemini, Claude ve Perplexity için kendi API anahtarlarınız."
+        "description": "İçerik önerileri için kendi OpenAI, Anthropic veya Google anahtarlarınız. AI görünürlüğü bugün DataForSEO üzerinden çalışır."
       }
     },
     "google": {
       "title": "Google (Search Console ve Analytics)",
       "description": "Çalışma alanına bağlı Google hesapları. Her projenin Search Console ve GA4 mülkü, projenin Search Console sayfasından seçilir.",
       "empty": "Henüz bağlı bir Google hesabı yok. Bir projenin Search Console sayfasından bağlayabilirsiniz.",
-      "notConfigured": "Bu sunucuda Google OAuth istemcisi yapılandırılmamış (GOOGLE_CLIENT_ID ve GOOGLE_CLIENT_SECRET). Kurulum adımları için kendi sunucunda barındırma belgesine bakın.",
+      "notConfigured": "Google istemcisi ayarlanmadı; hesap bağlamak için önce yukarıdaki bölümden bir istemci ekleyin.",
       "openSearchConsole": "Search Console sayfasına git",
       "connectedAt": "{time} bağlandı",
       "active": "Bağlı",
@@ -554,6 +556,44 @@
       "disconnectTitle": "{email} bağlantısı kaldırılsın mı?",
       "disconnectBody": "Google'daki erişim izni geri alınır. Bu hesabı kullanan projelerin Search Console ve GA4 kaynakları ile içe aktarılmış verileri silinir.",
       "removed": "Google hesabının bağlantısı kaldırıldı."
+    },
+    "googleClient": {
+      "title": "Google OAuth istemcisi",
+      "description": "Search Console ve GA4 hesaplarının bağlandığı, Google Cloud'daki uygulama kaydı. Bir kez ayarlanır.",
+      "sourceWorkspace": "Çalışma alanına özel",
+      "sourceInstance": "Kurulumun varsayılanı",
+      "clientId": "Client ID",
+      "clientIdPlaceholder": "1234567890-abc123.apps.googleusercontent.com",
+      "clientIdHint": "Google Cloud'daki istemcinin kimliği; .apps.googleusercontent.com ile biter.",
+      "clientIdInvalid": "Client ID .apps.googleusercontent.com ile bitmeli. Google Cloud'da istemcinin sayfasından kopyalayın.",
+      "clientSecret": "Client secret",
+      "clientSecretHint": "İstemcinin gizli anahtarı. Göremiyorsanız istemcinin sayfasından yeni bir tane ekleyebilirsiniz.",
+      "encrypted": "Kaydetmeden önce Google ile doğrulanır. Gizli anahtar şifrelenerek saklanır ve bir daha gösterilmez.",
+      "submit": "Doğrula ve kaydet",
+      "verifying": "Doğrulanıyor…",
+      "rejected": "Google bu istemciyi kabul etmedi. Client ID ile Client secret'ı yeniden kopyalayın; istemci türü Web application olmalı.",
+      "unreachable": "Google'a şu anda ulaşılamıyor; hiçbir şey kaydedilmedi. Biraz sonra tekrar deneyin.",
+      "forbidden": "Google istemcisini yalnızca sahipler ve yöneticiler değiştirebilir.",
+      "saved": "Google istemcisi doğrulandı ve kaydedildi.",
+      "removed": "Çalışma alanının Google istemcisi kaldırıldı.",
+      "verifiedAt": "Google ile doğrulandı",
+      "configuredBy": "Ayarlayan",
+      "serverSetting": "Sunucu ayarı (GOOGLE_CLIENT_ID)",
+      "replace": "İstemciyi değiştir",
+      "useOwn": "Kendi istemcinizi kullanın",
+      "remove": "Kaldır",
+      "removeTitle": "Bu çalışma alanının Google istemcisi kaldırılsın mı?",
+      "removeBody": "Bu istemciyle bağlanan Google hesaplarının yeniden bağlanması gerekir. {instance, select, true {Bundan sonra kurulumun varsayılan istemcisi kullanılır.} other {Yeni bir istemci eklenene kadar Google hesabı bağlanamaz.}}",
+      "replaceHint": "Farklı bir istemci kaydederseniz, mevcut istemciyle bağlanmış hesapların yeniden bağlanması gerekir.",
+      "askAdmin": "Google istemcisi henüz ayarlanmadı. Bir sahip veya yöneticiden ayarlamasını isteyin.",
+      "guide": {
+        "title": "İstemci nasıl oluşturulur? (yaklaşık 10 dakika)",
+        "why": "Google, kullanıcıların Search Console ve Analytics verisine erişen her uygulamanın Google Cloud'da kayıtlı olmasını ister. Bu kurulum size ait olduğu için kaydı bir kez siz yaparsınız.",
+        "step1": "Google Cloud'da bir proje seçin ve şu üç API'yi etkinleştirin: <sc>Search Console API</sc>, <data>Google Analytics Data API</data>, <admin>Google Analytics Admin API</admin>.",
+        "step2": "<audience>Google Auth Platform → Audience</audience> sayfasında kullanıcı türünü External seçin. Uygulama test aşamasındayken yalnızca Test users listesindeki hesaplar bağlanabilir (diğerleri “Error 403: access_denied” görür); kalıcı kullanım için Publish app ile yayına alın.",
+        "step3": "<clients>Clients</clients> sayfasında Web application türünde bir istemci oluşturun ve Authorized redirect URIs alanına şu adresi ekleyin:",
+        "step4": "Oluşan Client ID ve Client secret değerlerini aşağıya yapıştırıp kaydedin."
+      }
     }
   },
   "workspaceSettings": {
@@ -746,8 +786,6 @@
       },
       "createdTitle": "Anahtarınız hazır",
       "createdBody": "Bu anahtarı şimdi kopyalayıp güvenli bir yere kaydedin; bir daha gösterilmeyecek.",
-      "copy": "Kopyala",
-      "copied": "Kopyalandı.",
       "done": "Tamam",
       "failed": "Anahtar oluşturulamadı.",
       "mcp": {
@@ -1698,9 +1736,10 @@
     },
     "oauth": {
       "connected": "Google hesabı bağlandı. Şimdi projenin mülklerini seçin.",
-      "denied": "Google izni verilmedi; hiçbir şey bağlanmadı.",
+      "denied": "Google izni verilmedi. Uygulama Google Cloud'da test aşamasındaysa hesabınızı Test users listesine ekleyin.",
       "failed": "Google hesabı bağlanamadı. Lütfen tekrar deneyin.",
-      "forbidden": "Google hesaplarını yalnızca sahipler ve yöneticiler bağlayabilir."
+      "forbidden": "Google hesaplarını yalnızca sahipler ve yöneticiler bağlayabilir.",
+      "client_changed": "Google istemcisi bağlantı sırasında değişti. Lütfen yeniden bağlanın."
     },
     "status": {
       "type": {
@@ -1740,12 +1779,10 @@
       "connectAnother": "Başka bir Google hesabı bağla"
     },
     "notConfigured": {
-      "title": "Google bağlantısı bu sunucuda yapılandırılmamış",
-      "body": "Search Console ve GA4 verileri için sunucunun bir Google OAuth istemcisine ihtiyacı var. Kurulumu yapan kişi aşağıdaki adımları bir kez uygular.",
-      "step1": "Google Cloud Console'da bir proje açın; Search Console API, Google Analytics Data API ve Google Analytics Admin API'yi etkinleştirin.",
-      "step2": "\"Web uygulaması\" türünde bir OAuth istemcisi oluşturun ve yetkili yönlendirme adresi olarak şunu ekleyin:",
-      "step3": "İstemci kimliğini ve gizli anahtarını api ve worker ortam değişkenlerine ekleyin:",
-      "step4": "Servisleri yeniden başlatın. Bu sayfada \"Google hesabını bağla\" düğmesi görünecek."
+      "title": "Google bağlantısı için tek seferlik kurulum gerekiyor",
+      "body": "Google, Search Console ve Analytics verisine erişen her uygulamanın Google Cloud'da kayıtlı bir OAuth istemcisi olmasını ister. Bu kurulum size ait olduğu için istemciyi bir kez siz oluşturursunuz; adım adım rehber ayarlar sayfasında.",
+      "setUp": "Google istemcisini ayarla",
+      "askAdmin": "Bir sahip veya yöneticiden Google istemcisini ayarlamasını isteyin."
     },
     "sources": {
       "title": "Veri kaynakları",

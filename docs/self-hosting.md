@@ -62,26 +62,36 @@ After a change, apply it with `docker compose -f deploy/compose.yaml up -d`.
 ### Google Search Console and GA4
 
 Search Console and GA4 data are read with the user's consent through an OAuth client that
-you create once in Google Cloud:
+you create once in Google Cloud. Google requires every app that reads this data to be
+registered, and each installation has its own address, so the client is yours to create;
+*Workspace settings → Providers → Google OAuth client* walks through the steps with direct
+links:
 
 1. In the [Google Cloud console](https://console.cloud.google.com/), create a project (or
    use an existing one) and enable the **Google Search Console API**, the **Google Analytics
    Data API** and the **Google Analytics Admin API**.
 2. Configure the OAuth consent screen (*Google Auth Platform → Branding and Audience*).
    SEO-GEO asks for `openid`, `email`, `webmasters.readonly` and `analytics.readonly`.
-   While the app is in *Testing*, only the test users you add can connect, and Google
-   expires their access after 7 days; publish the app (and complete verification if Google
-   asks for it), or choose *Internal* in a Google Workspace organization.
-3. Create an OAuth client ID of type **Web application** with this authorized redirect URI
-   (the origin of `WEB_URL` followed by the callback path):
-   `https://seo.example.com/api/v1/integrations/google/callback`.
-4. Put the client ID and secret in `deploy/.env` as `GOOGLE_CLIENT_ID` and
-   `GOOGLE_CLIENT_SECRET` and apply them with `docker compose -f deploy/compose.yaml up -d`.
+   While the app is in *Testing*, only the test users you add can connect (anyone else sees
+   `Error 403: access_denied`), and Google expires their access after 7 days; publish the app
+   (and complete verification if Google asks for it), or choose *Internal* in a Google
+   Workspace organization. An unverified published app shows a warning at consent that
+   people can pass.
+3. Create an OAuth client of type **Web application** with this authorized redirect URI
+   (the origin of `WEB_URL` followed by the callback path; the settings page shows it with a
+   copy button): `https://seo.example.com/api/v1/integrations/google/callback`.
+4. Paste the client ID and secret in *Workspace settings → Providers → Google OAuth client*.
+   They are checked with Google before they are saved, and the secret is stored encrypted.
+   To set one client for every workspace of the installation instead, put them in
+   `deploy/.env` as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` and apply them with
+   `docker compose -f deploy/compose.yaml up -d`; a workspace's own client takes precedence.
 
 Then an owner or admin opens a project's **Search Console** page, connects a Google account
 and chooses the Search Console property (and optionally a GA4 property). The last 90 days
 are imported right away and new days every morning (05:40 UTC). Connected accounts are
-listed, and can be disconnected, in *Workspace settings → Providers*.
+listed, and can be disconnected, in *Workspace settings → Providers*. Accounts stay tied to
+the client they were connected with: replacing or removing a workspace's client means
+connecting them again.
 
 ### AI visibility
 
@@ -171,7 +181,9 @@ while the api and worker are stopped.
 | Sign-in fails with "invalid origin" | `WEB_URL` does not match the address in the browser (scheme, host and port must match). |
 | DataForSEO "could not be reached" | The server has no outbound HTTPS access to `api.dataforseo.com`. |
 | Invitation emails do not arrive | Configure `SMTP_*`, or copy the link from *Members → Pending invitations*. |
-| Google shows `redirect_uri_mismatch` | The OAuth client's redirect URI must be exactly `<origin of WEB_URL>/api/v1/integrations/google/callback`. |
+| Google shows `redirect_uri_mismatch` | The OAuth client's redirect URI must be exactly `<origin of WEB_URL>/api/v1/integrations/google/callback`, and the app must be opened at `WEB_URL` (`localhost` and `127.0.0.1` are different origins). |
+| Google shows `Error 403: access_denied` | The app is in *Testing* in Google Cloud and the account is not a test user: add it under *Google Auth Platform → Audience → Test users*, or publish the app. |
+| Saving the Google client says Google did not accept it | Copy the client ID and secret again from the client's page in Google Cloud; the client must be of the *Web application* type. |
 | Search Console stops updating after a week | The OAuth consent screen is in *Testing*; publish it and reconnect the account. |
 | A site audit finds only a few pages | The site blocks `SEO-GEO-Bot` in `robots.txt`, or its pages are only linked through JavaScript (not rendered in this version). |
 | AI visibility shows no answers | DataForSEO is not connected, no platform is enabled in *AI visibility → Settings*, the budget stopped scheduled answers (see the notifications), or the worker is not running. Queued answers usually arrive within minutes. |

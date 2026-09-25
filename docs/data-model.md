@@ -91,7 +91,8 @@ Managed by Better Auth; our extra fields are added through its schema options.
 | `brand_entity` | id, workspace_id, project_id, kind (`OWN`/`COMPETITOR`), name, domains[], aliases[], ambiguous_aliases[], color_slot | one `OWN` entity per project; competitors are entities too, so rank tracking, AI mentions and share of voice use one definition. Ambiguous names count only with supporting evidence ([geo-aeo.md](geo-aeo.md)); the color slot keeps a brand's color the same in every chart |
 | `project_member` | project_id, user_id, role | M4: restrict client viewers to specific projects |
 | `project_integration` | id, workspace_id, project_id, type (`GSC`/`GA4`), connection_id, external_id, display_name, settings, last_synced_at, synced_through, last_error | selected Search Console site (`sc-domain:example.com` or a URL prefix) or GA4 property (`properties/123`); unique (project_id, type) |
-| `google_connection` | id, workspace_id, google_user_id, email, scopes[], encrypted_tokens (bytea), key_version, status (`ACTIVE`/`REVOKED`), last_error, connected_by | refresh and access tokens, AES-256-GCM encrypted; unique (workspace_id, google_user_id) |
+| `google_connection` | id, workspace_id, google_user_id, email, scopes[], encrypted_tokens (bytea), key_version, status (`ACTIVE`/`REVOKED`), last_error, oauth_client_id, connected_by | refresh and access tokens, AES-256-GCM encrypted; unique (workspace_id, google_user_id). `oauth_client_id` is the client that issued the tokens (`null` for the installation's, before workspace clients) |
+| `google_oauth_client` | workspace_id (PK), client_id, encrypted_secret (bytea), key_version, verified_at, created_by | a workspace's own Google OAuth client; without one the installation's (`GOOGLE_CLIENT_ID`) is used |
 
 ## Rank tracking and keywords
 

@@ -20,16 +20,18 @@ import {
   Settings2,
   ShieldCheck,
 } from "lucide-react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Suspense, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { EmptyState } from "@/components/data/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { GOOGLE_CLIENT_SECTION_ID } from "@/components/settings/google-oauth-client";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { apiGet, apiSend, errorMessage } from "@/lib/api";
@@ -42,7 +44,7 @@ import { connectGoogle, googleStatusKey, siteLabel, SourcesDialog } from "./sour
 
 const RANGES = ["7", "28", "90"] as const;
 type Range = (typeof RANGES)[number];
-const OAUTH_RESULTS = ["connected", "denied", "failed", "forbidden"] as const;
+const OAUTH_RESULTS = ["connected", "denied", "failed", "forbidden", "client_changed"] as const;
 
 export function SearchConsoleView() {
   const t = useTranslations("searchConsole");
@@ -405,44 +407,25 @@ function ConnectSetup({ project, onChoose }: { project: Project; onChoose: () =>
   );
 }
 
-const noSubscription = () => () => {};
-
-/** Self-hosted instances without a Google OAuth client: how to add one. */
+/** Workspaces without a Google OAuth client: why one is needed and where to add it. */
 function NotConfigured() {
   const t = useTranslations("searchConsole.notConfigured");
-  const origin = useSyncExternalStore(
-    noSubscription,
-    () => window.location.origin,
-    () => null,
-  );
-  const redirectUri = `${origin ?? "https://your-domain"}/api/v1/integrations/google/callback`;
+  const { workspace } = useWorkspace();
+  const isAdmin = useCan("admin");
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <KeyRound className="size-4 text-muted-foreground" aria-hidden />
-          {t("title")}
-        </CardTitle>
-        <CardDescription>{t("body")}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3 text-sm">
-        <ol className="list-decimal space-y-2 pl-5 text-muted-foreground">
-          <li>{t("step1")}</li>
-          <li>
-            {t("step2")}
-            <code className="mt-1 block w-fit max-w-full rounded bg-muted px-2 py-1 font-mono text-xs break-all text-foreground">
-              {redirectUri}
-            </code>
-          </li>
-          <li>
-            {t("step3")}
-            <code className="mt-1 block w-fit rounded bg-muted px-2 py-1 font-mono text-xs text-foreground">
-              GOOGLE_CLIENT_ID=… GOOGLE_CLIENT_SECRET=…
-            </code>
-          </li>
-          <li>{t("step4")}</li>
-        </ol>
-      </CardContent>
-    </Card>
+    <EmptyState icon={KeyRound} title={t("title")} description={t("body")}>
+      {isAdmin ? (
+        <Button
+          nativeButton={false}
+          render={
+            <Link href={`/${workspace.slug}/settings/providers#${GOOGLE_CLIENT_SECTION_ID}`} />
+          }
+        >
+          {t("setUp")}
+        </Button>
+      ) : (
+        <p className="text-sm text-muted-foreground">{t("askAdmin")}</p>
+      )}
+    </EmptyState>
   );
 }

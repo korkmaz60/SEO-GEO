@@ -19,6 +19,7 @@ import {
   PerformanceDataSchema,
   PerformanceQuerySchema,
   ProjectIntegrationsSchema,
+  SaveGoogleOAuthClientSchema,
   SelectGa4PropertySchema,
   SelectGscSiteSchema,
   type GoogleIntegrations,
@@ -26,6 +27,7 @@ import {
   type IntegrationType,
   type PerformanceData,
   type ProjectIntegrations,
+  type SaveGoogleOAuthClient,
   type SelectGa4Property,
   type SelectGscSite,
 } from "@seo-geo/contracts";
@@ -45,6 +47,7 @@ import { IdParam } from "../common/params.js";
 import { Meta, type RequestMeta } from "../common/request-meta.js";
 import { ZodValidationPipe } from "../common/zod-validation.pipe.js";
 import { GoogleConnectionsService } from "./google-connections.service.js";
+import { GoogleOAuthClientsService } from "./google-oauth-clients.service.js";
 import { ProjectIntegrationsService } from "./project-integrations.service.js";
 
 const CallbackQuerySchema = z.object({
@@ -76,10 +79,15 @@ export class GoogleCallbackController {
 @WorkspaceScoped()
 @Controller("workspaces/:workspaceId/integrations/google")
 export class GoogleConnectionsController {
-  constructor(private readonly connections: GoogleConnectionsService) {}
+  constructor(
+    private readonly connections: GoogleConnectionsService,
+    private readonly clients: GoogleOAuthClientsService,
+  ) {}
 
   @Get()
-  @ApiOperation({ summary: "Whether Google sign-in is available and the connected accounts" })
+  @ApiOperation({
+    summary: "The OAuth client in use, the redirect URI to register and the connected accounts",
+  })
   @ApiOkResponse({ schema: toOpenApiSchema(GoogleIntegrationsSchema) })
   status(@CurrentWorkspace() workspace: WorkspaceContext): Promise<GoogleIntegrations> {
     return this.connections.status(workspace.id);
@@ -97,6 +105,38 @@ export class GoogleConnectionsController {
     @Body(new ZodValidationPipe(GoogleAuthorizeSchema)) body: { projectId: string },
   ): Promise<{ url: string }> {
     return this.connections.authorize(workspace.id, body.projectId, principal.user.id);
+  }
+
+  @Put("client")
+  @SessionOnly()
+  @RequireRole("admin")
+  @ApiOperation({
+    summary:
+      "Use the workspace's own Google OAuth client; it is checked with Google first and the secret is stored encrypted",
+  })
+  @ApiOkResponse({ schema: toOpenApiSchema(GoogleIntegrationsSchema) })
+  async saveClient(
+    @CurrentWorkspace() workspace: WorkspaceContext,
+    @Body(new ZodValidationPipe(SaveGoogleOAuthClientSchema)) body: SaveGoogleOAuthClient,
+    @Meta() meta: RequestMeta,
+  ): Promise<GoogleIntegrations> {
+    await this.clients.save(workspace.id, body, meta);
+    return this.connections.status(workspace.id);
+  }
+
+  // Declared before `:connectionId` so that "client" is not read as a connection ID.
+  @Delete("client")
+  @SessionOnly()
+  @HttpCode(204)
+  @RequireRole("admin")
+  @ApiOperation({
+    summary: "Stop using the workspace's own Google OAuth client; the installation's applies again",
+  })
+  removeClient(
+    @CurrentWorkspace() workspace: WorkspaceContext,
+    @Meta() meta: RequestMeta,
+  ): Promise<void> {
+    return this.clients.remove(workspace.id, meta);
   }
 
   @Get(":connectionId/properties")

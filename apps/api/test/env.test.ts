@@ -87,6 +87,10 @@ describe("loadConfig", () => {
 
   it("configures Google OAuth only with both client values", () => {
     expect(loadConfig(required).google).toBeNull();
+    // Workspaces can bring their own client, so the redirect URI is always known.
+    expect(
+      loadConfig({ ...required, WEB_URL: "https://seo.example.com/app" }).googleRedirectUri,
+    ).toBe("https://seo.example.com/api/v1/integrations/google/callback");
     expect(
       loadConfig({
         ...required,

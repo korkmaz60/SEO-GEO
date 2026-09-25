@@ -326,8 +326,17 @@ code.
 - **AI referrals.** GA4 session sources are matched against the assistant hosts in
   `packages/core` (chatgpt.com, perplexity.ai, gemini.google.com, copilot.microsoft.com,
   claude.ai, …) to show traffic from AI assistants next to organic search.
-- **Configuration.** `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`; without them the
-  Search Console page explains the setup (see [self-hosting.md](self-hosting.md)).
+- **OAuth clients.** Owners and admins enter the workspace's own client in *Workspace
+  settings → Providers* (`PUT …/integrations/google/client`); it is checked with Google's
+  token endpoint before it is saved (a made-up code is refused as `invalid_grant` only after
+  the client authenticated; a wrong ID or secret gives `invalid_client`), and the secret is
+  sealed like other credentials. `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` set the
+  installation's client, which workspaces without their own use. Every connection stores the
+  client that issued its tokens (`oauth_client_id`) and refreshes only with it; replacing or
+  removing a workspace's client marks the accounts it connected as revoked. The status
+  endpoint returns the client in use, whether the installation has one and the exact redirect
+  URI from `WEB_URL`. Without any client the Search Console page links admins to the setup
+  (see [self-hosting.md](self-hosting.md)).
 
 ## Public API and MCP
 

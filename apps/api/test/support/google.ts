@@ -19,8 +19,14 @@ export const FAKE_GOOGLE_ENDPOINTS: Omit<GoogleApiOptions, "fetch"> = {
 };
 
 export interface FakeGoogleState {
+  /** OAuth clients Google knows: client ID → secret. */
+  clients: Map<string, string>;
   /** PKCE challenges handed out, by authorization code. */
   challenges: Map<string, string>;
+  /** The client each authorization code was issued to. */
+  codeClients: Map<string, string>;
+  /** The client each refresh token belongs to; only that client can use it. */
+  refreshClients: Map<string, string>;
   /** Refresh tokens Google no longer accepts. */
   revoked: Set<string>;
   /** Access token lifetime in seconds. */
@@ -44,7 +50,10 @@ function days(start: string, end: string): string[] {
 /** A stand-in for Google's OAuth, Search Console and GA4 APIs. */
 export function fakeGoogle() {
   const state: FakeGoogleState = {
+    clients: new Map([[GOOGLE_TEST_ENV.GOOGLE_CLIENT_ID, GOOGLE_TEST_ENV.GOOGLE_CLIENT_SECRET]]),
     challenges: new Map(),
+    codeClients: new Map(),
+    refreshClients: new Map(),
     revoked: new Set(),
     expiresIn: 3600,
     revokeCalls: [],
@@ -65,27 +74,45 @@ export function fakeGoogle() {
 
     if (path === "/token") {
       const fields = form();
+      const clientId = fields.get("client_id") ?? "";
+      if (state.clients.get(clientId) !== fields.get("client_secret")) {
+        return Response.json(
+          { error: "invalid_client", error_description: "The OAuth client was not found." },
+          { status: 401 },
+        );
+      }
       if (fields.get("grant_type") === "authorization_code") {
         const code = fields.get("code") ?? "";
         const challenge = state.challenges.get(code);
         const verifier = fields.get("code_verifier") ?? "";
         const expected = createHash("sha256").update(verifier).digest("base64url");
-        if (!challenge || challenge !== expected) {
+        if (!challenge || challenge !== expected || state.codeClients.get(code) !== clientId) {
           return Response.json(
             { error: "invalid_grant", error_description: "Bad code." },
             { status: 400 },
           );
         }
+        // The installation's client keeps its well-known token; other clients get their own.
+        const refreshToken =
+          clientId === GOOGLE_TEST_ENV.GOOGLE_CLIENT_ID ? "refresh-1" : `refresh-${clientId}`;
+        state.refreshClients.set(refreshToken, clientId);
         return Response.json({
           access_token: issueAccess(),
           expires_in: state.expiresIn,
-          refresh_token: "refresh-1",
+          refresh_token: refreshToken,
           scope:
             "openid email https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/analytics.readonly",
           id_token: idToken({ sub: "google-user-1", email: "owner@gmail.example" }),
         });
       }
       const refresh = fields.get("refresh_token") ?? "";
+      const owner = state.refreshClients.get(refresh) ?? GOOGLE_TEST_ENV.GOOGLE_CLIENT_ID;
+      if (owner !== clientId) {
+        return Response.json(
+          { error: "unauthorized_client", error_description: "Unauthorized" },
+          { status: 400 },
+        );
+      }
       if (state.revoked.has(refresh)) {
         return Response.json(
           { error: "invalid_grant", error_description: "Token has been expired or revoked." },
@@ -201,6 +228,7 @@ export function fakeGoogle() {
       const url = new URL(authorizationUrl);
       const code = `code-${state.challenges.size + 1}`;
       state.challenges.set(code, url.searchParams.get("code_challenge") ?? "");
+      state.codeClients.set(code, url.searchParams.get("client_id") ?? "");
       return { code, state: url.searchParams.get("state") ?? "" };
     },
   };

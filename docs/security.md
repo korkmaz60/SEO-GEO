@@ -103,7 +103,11 @@ addresses cannot be allowed by configuration. In the api the client is
 - Scopes are read-only (`webmasters.readonly`, `analytics.readonly`, plus `openid` and
   `email` to identify the account).
 - Tokens are encrypted with AES-256-GCM bound to the workspace and Google account, never
-  returned by the API and never logged. A refused refresh (`invalid_grant`) marks the
+  returned by the API and never logged.
+- A workspace's own OAuth client secret is sealed the same way (bound to the workspace),
+  checked with Google before it is stored, never returned, and changed only by owners and
+  admins in a signed-in session (audit log: `google.client_saved`, `google.client_removed`).
+  Tokens refresh only with the client that issued them. A refused refresh (`invalid_grant`) marks the
   connection revoked and notifies owners and admins; disconnecting revokes the token at
   Google and deletes the connection, the project sources that used it and their imported
   data.
