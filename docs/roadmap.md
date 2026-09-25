@@ -90,9 +90,11 @@ In this order, each shipped on its own:
   12-month history, keywords by position, the 100 keywords with the most traffic (track or
   save them), competitors and the backlink summary; a quote before paid loads, a cache shared
   across workspaces, shareable URLs and the `get_domain_overview` MCP tool.
-- [ ] Project backlinks: profile, history, new and lost links, referring domains, backlinks,
-  anchors, competitors' profiles and the link gap. Backlink data is kept 7 days, with a
-  Refresh button that shows its cost, on this page and on the domain overview (D23).
+- [x] Project backlinks: profile, 12-month history, daily new and lost links, referring
+  domains, backlinks and anchors; competitors' profiles and the link gap, loaded on their
+  own. Backlink data is kept 7 days, readable for free (viewers too), with a Refresh that
+  shows its cost on this page and on the domain overview (D23); `get_backlinks` and
+  `get_link_gap` MCP tools.
 - [ ] Alerts: rank drops, new critical audit issues, AI visibility changes, budget thresholds;
   email, Slack and signed webhooks.
 - [ ] Reports: templates, white-label branding, server-rendered PDF, schedules, email delivery.

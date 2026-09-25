@@ -29,9 +29,14 @@ src/
   projects/               projects and brand entities (own brand + competitors)
   credentials/            encrypted provider keys, DataForSEO verification, daily re-check,
                           the workspace's DataForSEO client (dataforseo.gateway.ts)
-  providers/              shared provider cache (provider_cache), provider error mapping
+  providers/              shared provider cache (provider_cache), cached parts (quote, budget
+                          check, cache and ledger for views made of several requests),
+                          provider error mapping
   keywords/               keyword metrics (Labs keyword overview), research (ideas,
                           suggestions, related keywords), keyword lists
+  domains/                domain overview of any domain (Labs and the backlink summary)
+  backlinks/              project backlinks: profile, history, new and lost links, lists,
+                          competitors' profiles and the link gap; Backlinks API requests
   rank-tracker/           tracked keywords, SERP checks (post and collect), read model
   site-audit/             audit runs; crawl and analysis run in the worker
   google/                 Google OAuth connections, Search Console and GA4 sources, sync
@@ -43,7 +48,7 @@ src/
     health/               liveness
     account/              GET /instance (sign-up mode), GET /me
     workspaces/           GET /workspaces/:id (membership and role)
-  reports/ alerts/ backlinks/ domains/                                        (M4)
+  reports/ alerts/                                                            (M4)
   billing/                cloud edition only                                  (M5)
 ```
 
@@ -171,7 +176,7 @@ usage ledger and checks the budget before paid work.
 | Keyword explorer *(M2)* | Labs keyword ideas, keyword suggestions, related keywords; keyword overview for the metrics of tracked keywords | Live, cached |
 | Search volume (bulk) | Keywords Data Google Ads search volume | Standard |
 | Domain overview *(M4)* | Labs domain rank overview, historical rank overview, ranked keywords, competitors; Backlinks summary | Live, cached |
-| Backlinks *(M4)* | Backlinks summary, history, referring domains, backlinks, anchors, new/lost time series, bulk ranks, domain intersection (link gap) | Live, cached |
+| Backlinks *(M4)* | Backlinks summary, history, referring domains, backlinks, anchors, new/lost time series, domain intersection (link gap) | Live, cached |
 | Site audit (optional provider) | On-Page API task-based crawl, pages, links, duplicates, Lighthouse | Standard |
 | AI visibility *(M3)* | AI Optimization API: LLM Scraper for ChatGPT and Gemini (`task_post` → `tasks_ready` → `task_get`); LLM Responses for Claude and Perplexity; LLM Responses models list (cached 1 day) | Standard queue / Live |
 | Sentiment *(M3)* | LLM Responses, the cheapest ChatGPT model, no web search | Live |
@@ -255,23 +260,31 @@ all workspaces through `provider_cache`, and never refreshed on a schedule:
 | Monthly organic history (last 12 months) | Labs `historical_rank_overview` | 7 days |
 | Top keywords by estimated traffic (100) | Labs `ranked_keywords` | 7 days |
 | Organic competitors (10) | Labs `competitors_domain` | 7 days |
-| Backlink profile: rank (0–100 scale), backlinks, referring domains and main domains, nofollow shares, spam score | Backlinks `summary` | 7 days |
-| Monthly backlink history, lists (referring domains, backlinks, anchors), daily new and lost, competitors' ranks, link gap | Backlinks `history`, `referring_domains`, `backlinks`, `anchors`, `timeseries_new_lost_summary`, `bulk_ranks`, `domain_intersection` | 7 days |
+| Backlink profile: rank (0–100 scale), backlinks, referring domains and main domains, nofollow shares, spam score; also each competitor's profile | Backlinks `summary` | 7 days |
+| Monthly backlink history, lists (referring domains, backlinks, anchors), daily new and lost, link gap | Backlinks `history`, `referring_domains`, `backlinks`, `anchors`, `timeseries_new_lost_summary`, `domain_intersection` | 7 days |
 
 - **Targets** are hosts without `www.` (`example.com`, `blog.example.com`); URLs are reduced
   to their host. Labs data needs a market (location and language); backlink data does not.
+- **Parts.** A view is a set of cached requests (`providers/cached-parts.service.ts`), each
+  keyed by a versioned operation and its parameters, so views share them: the backlink
+  summary of a domain is the same entry on the domain overview, the project backlinks page
+  and a competitor comparison. Keys hold a number of months or days rather than dates, so an
+  entry stays usable for its whole 7 days.
 - **Quote first.** Every load returns the cost of its parts that are not cached (0 when all
   are), and runs only with the budget to cover it; each response is written to the usage
-  ledger with what DataForSEO charged. A domain overview costs about 0.08, a project's
-  backlink profile about 0.15.
+  ledger with what DataForSEO charged (with the project, for project pages). Parts that
+  succeed are cached and billed even when another fails, so trying again pays only for the
+  rest. A domain overview costs about 0.09, a project's backlink profile about 0.16 and its
+  comparison about 0.05 per competitor.
 - **Provenance.** Responses carry, per source (Labs, Backlinks), when the data was fetched
-  and whether it came from the cache.
-- **Refresh** (D23; built with the project backlinks page, for both pages). Data stays fresh
-  for 7 days: backlink profiles change slowly, and the daily new and lost links come from
-  DataForSEO's own series, so a week-old load still shows them day by day. A Refresh loads
-  the data again before it expires: its quote counts every part as missing, it runs only
-  after the cost is shown and confirmed, and the new response replaces the cached one for
-  every workspace and goes to the usage ledger like any other load.
+  (its oldest part) and whether it came from the cache.
+- **Refresh** (D23). Data stays fresh for 7 days: backlink profiles change slowly, and the
+  daily new and lost links come from DataForSEO's own series, so a week-old load still shows
+  them day by day. A refresh (`refresh: true` on the domain overview's quote and run, and on
+  the project backlinks loads) fetches every part again before it expires: its quote counts
+  every part as missing, the pages run it only after showing that cost, and the new
+  responses replace the cached ones for every workspace and go to the usage ledger like any
+  other load.
 - **History** comes from DataForSEO's own monthly series (`historical_rank_overview`,
   `backlinks/history`) and new and lost links from its new/lost series, never from
   differences between totals of our own snapshots, so no snapshot tables are needed.
@@ -285,6 +298,27 @@ summary. Only missing parts are paid for; parts that succeed are cached and bill
 another fails, so trying again pays only for the rest. Position changes of keywords compare
 absolute ranks with the previous month, as DataForSEO reports them. A domain Labs does not
 know returns empty sections, and a backlink summary without links is `null`.
+
+**Project backlinks** (`/workspaces/:id/projects/:projectId/backlinks`). The project's
+domain is the target, with its `includeSubdomains` setting (the history endpoint always
+counts subdomains):
+
+- `GET` (viewers and above, `read`) returns the report when every part is cached, `null`
+  otherwise, with what loading the missing parts and what a refresh would cost. Reading
+  cached data never costs anything, so viewers see what a member loaded.
+- `POST` (members and above, `run:paid`; body `{ "refresh": true }` to refresh) loads the
+  missing parts: the summary, 12 months of history (as of the first day of each month), 30
+  days of new and lost links ending the day before the load, the 100 referring domains
+  passing the most rank, the strongest link of each of the 100 strongest referring domains
+  (`one_per_domain`) and the 100 anchors used by the most referring domains.
+- `GET` and `POST …/backlinks/competitors` do the same for the comparison, loaded on its own
+  so its cost is paid only when wanted: the project's summary, each competitor's first
+  domain's summary and, per competitor, a domain intersection with the competitor as target
+  and the project's domain excluded (its 100 strongest referring domains that do not link to
+  the project). One request per competitor, because an intersection of several targets only
+  keeps domains that link to all of them. The link gap merges them: domains linking to the
+  most competitors first, then by rank, without the domains of the project's own brands.
+  Without competitors the comparison has nothing to load (`POST` answers 409).
 
 ## AI visibility
 
@@ -390,12 +424,16 @@ code.
   Tools call the same services with the same workspace membership, roles and scopes:
   `list_projects`, `get_rankings`, `get_ai_visibility`, `list_ai_prompts`,
   `get_ai_answers`, `list_ai_sources`, `get_site_audit`, `list_audit_pages`,
-  `get_audit_page`, `get_keyword_ideas`, `get_domain_overview`, `add_ai_prompts` and
-  `run_site_audit`. `get_domain_overview` analyzes any domain (the project's own by default)
-  in the project's market and returns its 50 best keywords.
-- Tools that spend money (`get_keyword_ideas` and `get_domain_overview` when the result is
-  not cached, `add_ai_prompts`) need the `run:paid` scope and return the estimated cost
-  first; they run only when called again with `confirm_cost_usd` of at least that estimate.
+  `get_audit_page`, `get_keyword_ideas`, `get_domain_overview`, `get_backlinks`,
+  `get_link_gap`, `add_ai_prompts` and `run_site_audit`. `get_domain_overview` analyzes any
+  domain (the project's own by default) in the project's market and returns its 50 best
+  keywords; `get_backlinks` returns the project's backlink profile with the top rows of its
+  lists, and `get_link_gap` the competitors' profiles and the link gap.
+- Tools that spend money (`get_keyword_ideas`, `get_domain_overview`, `get_backlinks` and
+  `get_link_gap` when the result is not cached or `refresh` is set, `add_ai_prompts`) need
+  the `run:paid` scope and the member role and return the estimated cost first; they run
+  only when called again with `confirm_cost_usd` of at least that estimate. Cached backlink
+  data is free for read keys and viewers.
 - Workspace settings → API & MCP shows the endpoint and ready-made client configuration.
 
 ## Billing (cloud edition)
