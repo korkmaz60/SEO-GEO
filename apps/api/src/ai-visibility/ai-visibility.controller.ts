@@ -38,6 +38,7 @@ import {
   CurrentPrincipal,
   CurrentWorkspace,
   RequireRole,
+  RequireScope,
   WorkspaceScoped,
 } from "../auth/decorators.js";
 import type { Principal, WorkspaceContext } from "../auth/principal.js";
@@ -109,6 +110,7 @@ export class AiVisibilityController {
   }
 
   @Post("settings/quote")
+  @RequireScope("read")
   @HttpCode(200)
   @RequireRole("member")
   @ApiOperation({ summary: "Estimated cost per period and month of the saved or given settings" })
@@ -146,6 +148,7 @@ export class AiVisibilityController {
   }
 
   @Post("prompts")
+  @RequireScope("run:paid")
   @HttpCode(200)
   @RequireRole("member")
   @ApiOperation({ summary: "Add prompts; they are asked right away and then on schedule" })
@@ -198,6 +201,7 @@ export class AiVisibilityController {
   }
 
   @Post("run")
+  @RequireScope("run:paid")
   @HttpCode(202)
   @RequireRole("member")
   @ApiOperation({ summary: "Ask the prompts that are due now instead of at the next hourly run" })

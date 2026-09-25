@@ -23,6 +23,7 @@ import {
   CurrentPrincipal,
   CurrentWorkspace,
   RequireRole,
+  RequireScope,
   WorkspaceScoped,
 } from "../auth/decorators.js";
 import type { Principal, WorkspaceContext } from "../auth/principal.js";
@@ -51,6 +52,7 @@ export class RankTrackerController {
   }
 
   @Post("keywords/quote")
+  @RequireScope("read")
   @HttpCode(200)
   @RequireRole("member")
   @ApiOperation({ summary: "Preview adding keywords: duplicates, invalid entries and costs" })
@@ -64,6 +66,7 @@ export class RankTrackerController {
   }
 
   @Post("keywords")
+  @RequireScope("run:paid")
   @HttpCode(200)
   @RequireRole("member")
   @ApiOperation({ summary: "Track keywords; they are checked right away and then on schedule" })
@@ -116,6 +119,7 @@ export class RankTrackerController {
   }
 
   @Post("check")
+  @RequireScope("run:paid")
   @HttpCode(202)
   @RequireRole("member")
   @ApiOperation({ summary: "Check due keywords now instead of at the next hourly run" })

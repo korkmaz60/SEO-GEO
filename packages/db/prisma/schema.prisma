@@ -134,6 +134,7 @@ model Organization {
   auditRuns           AuditRun[]
   prompts             Prompt[]
   aiRuns              AiRun[]
+  apiKeys             WorkspaceApiKey[]
 
   @@map("organization")
 }
@@ -187,8 +188,9 @@ model Apikey {
   lastRefillAt        DateTime? @map("last_refill_at") @db.Timestamptz(3)
   enabled             Boolean?  @default(true)
   rateLimitEnabled    Boolean?  @default(true) @map("rate_limit_enabled")
-  rateLimitTimeWindow Int?      @default(86400000) @map("rate_limit_time_window")
-  rateLimitMax        Int?      @default(10) @map("rate_limit_max")
+  /// Per-key rate limit: 600 requests a minute (see auth.ts).
+  rateLimitTimeWindow Int?      @default(60000) @map("rate_limit_time_window")
+  rateLimitMax        Int?      @default(600) @map("rate_limit_max")
   requestCount        Int?      @default(0) @map("request_count")
   remaining           Int?
   lastRequest         DateTime? @map("last_request") @db.Timestamptz(3)
@@ -197,6 +199,8 @@ model Apikey {
   updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   permissions         String?
   metadata            String?
+
+  workspaceKey WorkspaceApiKey?
 
   @@index([configId])
   @@index([referenceId])
@@ -284,6 +288,21 @@ model BrandEntity {
 
   @@index([workspaceId, projectId])
   @@map("brand_entity")
+}
+
+/// A workspace-bound API key: the key (in `apikey`) acts as its creator, only in this
+/// workspace and only with these scopes (`read`, `write`, `run:paid`).
+model WorkspaceApiKey {
+  keyId       String   @id @map("key_id") @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  scopes      String[]
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  key       Apikey       @relation(fields: [keyId], references: [id], onDelete: Cascade)
+  workspace Organization @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("workspace_api_key")
 }
 
 // ── Workspace-level entities ───────────────────────────────────────────────────────

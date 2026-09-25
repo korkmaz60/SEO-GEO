@@ -33,6 +33,19 @@ export class PromptsService {
     private readonly settings: AiSettingsService,
   ) {}
 
+  /** What adding prompts would do and cost for one period; nothing is saved. */
+  async preview(
+    workspaceId: string,
+    projectId: string,
+    input: CreatePrompts,
+  ): Promise<{ prompts: string[]; duplicates: number; invalid: number; costUsd: number }> {
+    const project = await this.project(workspaceId, projectId);
+    const { fresh, duplicates, invalid } = await this.prepare(project, input);
+    const costUsd =
+      fresh.length > 0 ? await this.settings.periodCost(workspaceId, projectId, fresh.length) : 0;
+    return { prompts: fresh, duplicates, invalid, costUsd };
+  }
+
   /** Adds prompts; they are asked right away and then on the project's schedule. */
   async create(
     workspaceId: string,
@@ -41,25 +54,8 @@ export class PromptsService {
     userId: string,
   ): Promise<CreatePromptsResult> {
     const project = await this.project(workspaceId, projectId);
-    const market = {
-      locationCode: input.locationCode ?? project.defaultLocationCode,
-      languageCode: input.languageCode ?? project.defaultLanguageCode,
-    };
-    let invalid = 0;
-    const unique = new Set<string>();
-    for (const raw of input.prompts) {
-      const text = normalizePrompt(raw);
-      if (text === "") continue;
-      if (text.length < MIN_PROMPT_LENGTH || text.length > MAX_PROMPT_LENGTH) invalid++;
-      else unique.add(text);
-    }
-    const existing = await this.prisma.prompt.findMany({
-      where: { projectId, text: { in: [...unique] }, ...market },
-      select: { text: true },
-    });
-    const known = new Set(existing.map((row) => row.text));
-    const fresh = [...unique].filter((text) => !known.has(text));
-    const result = { added: 0, duplicates: known.size, invalid };
+    const { market, fresh, duplicates, invalid } = await this.prepare(project, input);
+    const result = { added: 0, duplicates, invalid };
     if (fresh.length === 0) return result;
 
     const stored = await this.prisma.prompt.count({ where: { projectId } });
@@ -90,6 +86,29 @@ export class PromptsService {
     return { ...result, added: count };
   }
 
+  /** Normalized new prompts in the market, with duplicates and invalid entries counted. */
+  private async prepare(project: Project, input: CreatePrompts) {
+    const market = {
+      locationCode: input.locationCode ?? project.defaultLocationCode,
+      languageCode: input.languageCode ?? project.defaultLanguageCode,
+    };
+    let invalid = 0;
+    const unique = new Set<string>();
+    for (const raw of input.prompts) {
+      const text = normalizePrompt(raw);
+      if (text === "") continue;
+      if (text.length < MIN_PROMPT_LENGTH || text.length > MAX_PROMPT_LENGTH) invalid++;
+      else unique.add(text);
+    }
+    const existing = await this.prisma.prompt.findMany({
+      where: { projectId: project.id, text: { in: [...unique] }, ...market },
+      select: { text: true },
+    });
+    const known = new Set(existing.map((row) => row.text));
+    const fresh = [...unique].filter((text) => !known.has(text));
+    return { market, fresh, duplicates: known.size, invalid };
+  }
+
   async update(
     workspaceId: string,
     projectId: string,
@@ -103,8 +122,8 @@ export class PromptsService {
         ...(input.active !== undefined ? { active: input.active } : {}),
       },
     });
+    // A prompt made active again is asked by the next hourly check.
     if (count === 0) throw ProblemException.notFound("Prompt not found.");
-    if (input.active) await this.runs.requestCheck(projectId);
   }
 
   /** Deletes prompts with their answers. */

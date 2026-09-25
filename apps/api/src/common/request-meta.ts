@@ -5,6 +5,8 @@ import type { AuthenticatedRequest } from "../auth/principal.js";
 /** Who did something, for the audit log. */
 export interface RequestMeta {
   userId: string | null;
+  /** The API key the request was made with, if any. */
+  apiKeyId?: string | null;
   ip: string | null;
   userAgent: string | null;
 }
@@ -15,6 +17,7 @@ export const Meta = createParamDecorator(
     const userAgent = request.headers["user-agent"];
     return {
       userId: request.principal?.user.id ?? null,
+      apiKeyId: request.principal?.apiKey?.id ?? null,
       ip: request.ip ?? null,
       userAgent: typeof userAgent === "string" ? userAgent.slice(0, 512) : null,
     };

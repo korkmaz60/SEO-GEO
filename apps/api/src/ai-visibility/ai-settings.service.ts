@@ -25,7 +25,6 @@ import {
   modelOf,
   pickDefaultModel,
 } from "./ai-platforms.js";
-import { AiRunsService } from "./ai-runs.service.js";
 import { loadAiSettings } from "./ai-settings.js";
 
 /** How a project's prompts are asked, what that costs, and the models on offer. */
@@ -35,7 +34,6 @@ export class AiSettingsService {
     private readonly prisma: PrismaService,
     private readonly credentials: CredentialsService,
     private readonly models: AiModelsService,
-    private readonly runs: AiRunsService,
     private readonly audit: AuditService,
   ) {}
 
@@ -83,8 +81,8 @@ export class AiSettingsService {
         tx,
       );
     });
-    // Newly enabled platforms or samples are asked right away.
-    await this.runs.requestCheck(projectId);
+    // Newly enabled platforms and samples are asked by the next hourly check (or "run now",
+    // which needs the run:paid scope).
     return next;
   }
 

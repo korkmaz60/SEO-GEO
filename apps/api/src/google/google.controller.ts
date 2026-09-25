@@ -36,6 +36,7 @@ import {
   CurrentPrincipal,
   CurrentWorkspace,
   RequireRole,
+  SessionOnly,
   WorkspaceScoped,
 } from "../auth/decorators.js";
 import type { Principal, WorkspaceContext } from "../auth/principal.js";
@@ -85,6 +86,7 @@ export class GoogleConnectionsController {
   }
 
   @Post("authorize")
+  @SessionOnly()
   @HttpCode(200)
   @RequireRole("admin")
   @ApiOperation({ summary: "Start connecting a Google account; returns the consent URL" })
@@ -111,6 +113,7 @@ export class GoogleConnectionsController {
   }
 
   @Delete(":connectionId")
+  @SessionOnly()
   @HttpCode(204)
   @RequireRole("admin")
   @ApiOperation({ summary: "Disconnect a Google account and stop its imports" })

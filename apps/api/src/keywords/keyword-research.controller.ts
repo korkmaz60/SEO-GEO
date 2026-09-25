@@ -23,6 +23,7 @@ import {
   CurrentPrincipal,
   CurrentWorkspace,
   RequireRole,
+  RequireScope,
   WorkspaceScoped,
 } from "../auth/decorators.js";
 import type { Principal, WorkspaceContext } from "../auth/principal.js";
@@ -39,6 +40,7 @@ export class KeywordResearchController {
   constructor(private readonly research: KeywordResearchService) {}
 
   @Post("quote")
+  @RequireScope("read")
   @HttpCode(200)
   @RequireRole("member")
   @ApiOperation({ summary: "Cost of a keyword research request (0 when cached)" })
@@ -50,6 +52,7 @@ export class KeywordResearchController {
   }
 
   @Post()
+  @RequireScope("run:paid")
   @HttpCode(200)
   @RequireRole("member")
   @ApiOperation({ summary: "Keyword ideas, suggestions or related keywords with metrics" })

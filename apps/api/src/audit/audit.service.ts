@@ -24,6 +24,7 @@ export class AuditService {
         workspaceId: event.workspaceId,
         action: event.action,
         actorUserId: event.meta?.userId ?? null,
+        actorApiKeyId: event.meta?.apiKeyId ?? null,
         targetType: event.target?.type ?? null,
         targetId: event.target?.id ?? null,
         metadata: event.metadata ?? {},
