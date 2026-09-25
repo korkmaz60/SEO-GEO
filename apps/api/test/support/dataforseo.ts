@@ -174,7 +174,7 @@ function serpResult(posted: PostedTask, serp: FakeSerp) {
     location_code: posted.locationCode,
     language_code: posted.languageCode,
     check_url: `https://www.google.com.tr/search?q=${encodeURIComponent(posted.keyword)}`,
-    datetime: "2026-09-24 06:12:31 +00:00",
+    datetime: providerTime(60),
     spell: null,
     item_types: [...new Set(items.map((item) => (item as { type: string }).type))],
     se_results_count: 1_000_000,
@@ -207,6 +207,11 @@ function labsItem(keyword: string, metrics: FakeKeywordMetrics) {
   };
 }
 
+/** A provider timestamp `minutesAgo` before now, formatted like DataForSEO's `datetime`. */
+function providerTime(minutesAgo: number): string {
+  const iso = new Date(Date.now() - minutesAgo * 60_000).toISOString();
+  return `${iso.slice(0, 10)} ${iso.slice(11, 19)} +00:00`;
+}
 function hostOf(url: string): string {
   return new URL(url).hostname;
 }
@@ -218,7 +223,7 @@ function scraperResult(posted: PostedTask, platform: string, answer: FakeAiAnswe
     language_code: posted.languageCode,
     model: platform === "chat_gpt" ? "gpt-5" : "gemini-2.5-flash",
     check_url: `https://chatgpt.com/?q=${encodeURIComponent(posted.keyword)}`,
-    datetime: "2026-09-24 10:12:31 +00:00",
+    datetime: providerTime(5),
     markdown: answer.text,
     search_results: [],
     sources: (answer.sources ?? []).map((url) => ({
@@ -244,7 +249,7 @@ function aiModeResult(posted: PostedTask, answer: FakeAiAnswer) {
     location_code: posted.locationCode,
     language_code: posted.languageCode,
     check_url: `https://www.google.com.tr/search?q=${encodeURIComponent(posted.keyword)}&udm=50`,
-    datetime: "2026-09-24 10:16:10 +00:00",
+    datetime: providerTime(1),
     item_types: ["ai_overview"],
     items_count: 1,
     items: [
@@ -274,7 +279,7 @@ function liveResult(model: string, text: string, sources: readonly string[], cos
     reasoning_tokens: 0,
     web_search: sources.length > 0,
     money_spent: Math.max(0, cost - 0.0006),
-    datetime: "2026-09-24 10:14:02 +00:00",
+    datetime: providerTime(3),
     items: [
       {
         type: "message",
