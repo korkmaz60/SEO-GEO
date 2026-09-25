@@ -32,6 +32,7 @@ export function ConfirmDialog({
   confirmLabel,
   confirmText,
   destructive = true,
+  disabled = false,
   onConfirm,
 }: {
   trigger?: ReactElement;
@@ -42,6 +43,8 @@ export function ConfirmDialog({
   confirmLabel: string;
   confirmText?: string;
   destructive?: boolean;
+  /** Keeps the action locked, e.g. while its cost is being quoted. */
+  disabled?: boolean;
   /** Throw to keep the dialog open; the error message is shown as a toast. */
   onConfirm: () => Promise<void>;
 }) {
@@ -54,7 +57,7 @@ export function ConfirmDialog({
   };
   const [typed, setTyped] = useState("");
   const [pending, setPending] = useState(false);
-  const locked = confirmText !== undefined && typed.trim() !== confirmText;
+  const locked = disabled || (confirmText !== undefined && typed.trim() !== confirmText);
 
   async function confirm() {
     setPending(true);

@@ -178,7 +178,7 @@
     },
     "backlinks": {
       "title": "Backlinkler",
-      "description": "Referans veren alan adları, bağlantı metinleri ve kazanılan/kaybedilen bağlantılar.",
+      "description": "Yönlendiren alan adları, bağlantı metinleri, kazanılan ve kaybedilen bağlantılar ve rakiplerinizle bağlantı açığı.",
       "emptyTitle": "Backlink verisi yok",
       "emptyBody": "Backlink profili ve rakip karşılaştırmaları DataForSEO Backlinks API üzerinden gelecek."
     },
@@ -1364,6 +1364,194 @@
         "high": "yüksek"
       },
       "firstSeen": "İlk görülme"
+    }
+  },
+  "refreshData": {
+    "button": "Yenile",
+    "title": "Veriler yeniden yüklensin mi?",
+    "body": "Bu veriler {relative} ({date}) alındı. DataForSEO'dan yeniden yüklemek en fazla {cost} tutar. Yeni veriler herkes için önbellekteki kopyanın yerini alır ve 7 gün saklanır.",
+    "confirm": "Yenile · {cost}",
+    "failed": "Veriler yenilenemedi."
+  },
+  "backlinks": {
+    "failed": "Backlink verileri yüklenemedi.",
+    "retry": "Tekrar dene",
+    "loading": "{domain} backlinkleri DataForSEO'dan alınıyor…",
+    "load": {
+      "title": "{domain} backlinkleri son 7 günde yüklenmedi",
+      "body": "DataForSEO'dan yüklemek en fazla {cost} tutar. Veriler 7 gün saklanır; bu sürede yeniden açmak çalışma alanındaki herkes için ücretsizdir.",
+      "run": "Yükle · {cost}",
+      "viewerTitle": "Henüz backlink verisi yok",
+      "viewerBody": "{domain} backlinkleri son 7 günde yüklenmedi. Çalışma alanının bir üyesi bunları DataForSEO'dan yükleyebilir."
+    },
+    "providerMissing": {
+      "title": "DataForSEO bağlı değil",
+      "body": "Backlink verileri DataForSEO hesabınızdan gelir. Sağlayıcı ayarlarından bağlayın.",
+      "askAdmin": "Backlink verileri çalışma alanının DataForSEO hesabından gelir; bağlaması için bir yöneticiye başvurun.",
+      "action": "DataForSEO'yu bağla"
+    },
+    "visit": "{domain} adresini yeni sekmede aç",
+    "scopeSubdomains": "Alan adına ve alt alan adlarına canlı bağlantılar",
+    "scopeHost": "Yalnızca bu adrese canlı bağlantılar",
+    "cost": "Bu yüklemenin maliyeti {cost}",
+    "fetched": "{relative} alındı",
+    "provenance": "Kaynak: DataForSEO Backlinks API, {date} tarihinde alındı ve 7 gün saklanır. Sayılar DataForSEO tarayıcısının bulduğu canlı bağlantıları kapsar; güç, bağlantıların ağırlığını 0–100 arasında gösteren bir DataForSEO ölçüsüdür, Google metriği değildir.",
+    "firstSeen": "DataForSEO, {domain} adresine ilk bağlantıyı {date} tarihinde gördü.",
+    "kpi": {
+      "rank": "Alan adı gücü",
+      "rankDetail": "0–100, bağlantıların ağırlığına göre",
+      "referringDomains": "Yönlendiren alan adı",
+      "referringDomainsDetail": "{main} ana alan adı · {share} nofollow",
+      "backlinks": "Backlink",
+      "brokenDetail": "{count} kırık",
+      "newDomains": "Kazanılan alan adı",
+      "newDetail": "{count} kazanılan backlink · {days} gün",
+      "lostDomains": "Kaybedilen alan adı",
+      "lostDetail": "{count} kaybedilen backlink · {days} gün",
+      "spamScore": "Spam skoru",
+      "spamDetail": "Bağlantıların ortalaması · {level}",
+      "noLinks": "Bilinen bağlantı yok",
+      "noSeries": "Veri yok"
+    },
+    "spam": {
+      "low": "düşük",
+      "medium": "orta",
+      "high": "yüksek"
+    },
+    "history": {
+      "title": "Backlink geçmişi",
+      "description": "Son 12 ayın her birinin ilk günündeki durum.",
+      "metric": "Ölçüm",
+      "show": {
+        "referringDomains": "Alan adı",
+        "backlinks": "Backlink",
+        "rank": "Güç"
+      },
+      "referringDomains": "Yönlendiren alan adı",
+      "backlinks": "Backlink",
+      "rank": "Alan adı gücü",
+      "month": "Ay",
+      "tableView": "Tablo olarak göster",
+      "emptyTitle": "Geçmiş yok",
+      "emptyBody": "DataForSEO'da bu site için iki aydan az backlink geçmişi var."
+    },
+    "newLost": {
+      "title": "Kazanılan ve kaybedilen",
+      "description": "Gün gün, {from} – {to}.",
+      "descriptionEmpty": "30 gün boyunca gün gün.",
+      "metric": "Ölçüm",
+      "referringDomains": "Alan adı",
+      "backlinks": "Backlink",
+      "new": "Kazanılan",
+      "lost": "Kaybedilen",
+      "day": "Gün",
+      "totals": "{new} kazanılan · {lost} kaybedilen",
+      "none": "Bu günlerde kazanılan ya da kaybedilen bağlantı yok.",
+      "tableView": "Tablo olarak göster",
+      "emptyTitle": "Seri yok",
+      "emptyBody": "DataForSEO bu günler için kazanılan ve kaybedilen bağlantı döndürmedi."
+    },
+    "tabs": {
+      "referring-domains": "Yönlendiren alan adları",
+      "backlinks": "Backlinkler",
+      "anchors": "Bağlantı metinleri",
+      "competitors": "Rakipler"
+    },
+    "lists": {
+      "filter": "Filtrele",
+      "matches": "{shown} satırdan {count} tanesi eşleşiyor",
+      "noResults": "Filtreyle eşleşen bir şey yok.",
+      "visit": "{domain} adresini yeni sekmede aç"
+    },
+    "referringDomains": {
+      "summary": "En çok güç aktaran {shown} alan adı, toplam {total}",
+      "emptyTitle": "Yönlendiren alan adı yok",
+      "emptyBody": "DataForSEO bu siteye canlı bağlantı bulmadı.",
+      "columns": {
+        "domain": "Alan adı",
+        "rank": "Güç",
+        "backlinks": "Backlink",
+        "spamScore": "Spam skoru",
+        "firstSeen": "İlk görülme"
+      }
+    },
+    "backlinkList": {
+      "summary": "{shown} alan adının her birinden en güçlü bağlantı, toplam {total}",
+      "emptyTitle": "Backlink yok",
+      "emptyBody": "DataForSEO bu siteye canlı bağlantı bulmadı.",
+      "open": "Bağlantı veren sayfayı aç",
+      "image": "Görsel bağlantısı",
+      "noAnchor": "Bağlantı metni yok",
+      "new": "Yeni",
+      "broken": "Kırık",
+      "columns": {
+        "source": "Bağlantı veren sayfa",
+        "anchor": "Bağlantı metni",
+        "target": "Hedef",
+        "domainRank": "Alan adı gücü",
+        "firstSeen": "İlk görülme"
+      }
+    },
+    "anchors": {
+      "summary": "En çok alan adının kullandığı {shown} bağlantı metni, toplam {total}",
+      "emptyTitle": "Bağlantı metni yok",
+      "emptyBody": "DataForSEO bu siteye canlı bağlantı bulmadı.",
+      "noText": "Metin yok (ör. görseller)",
+      "columns": {
+        "anchor": "Bağlantı metni",
+        "referringDomains": "Yönlendiren alan adı",
+        "backlinks": "Backlink",
+        "nofollow": "Nofollow",
+        "firstSeen": "İlk görülme"
+      }
+    },
+    "competitors": {
+      "failed": "Karşılaştırma yüklenemedi.",
+      "emptyTitle": "Karşılaştırılacak rakip yok",
+      "emptyBody": "Backlink profillerini karşılaştırmak ve rakiplerinize bağlantı verip size vermeyen alan adlarını bulmak için proje ayarlarından rakip ekleyin.",
+      "settings": "Proje ayarları",
+      "load": {
+        "title": "{count} rakiple karşılaştır",
+        "body": "Rakiplerin backlink profilleri ve onlara bağlantı verip {domain} adresine vermeyen alan adları DataForSEO'dan en fazla {cost} tutar ve 7 gün saklanır.",
+        "viewer": "Rakiplerin backlink profilleri ve onlara bağlantı verip {domain} adresine vermeyen alan adları son 7 günde yüklenmedi. Çalışma alanının bir üyesi bunları yükleyebilir.",
+        "run": "Karşılaştır · {cost}"
+      },
+      "loading": "Rakiplerinizin backlinkleri DataForSEO'dan alınıyor…",
+      "intro": "{domain} ve rakiplerinin backlink profilleri ile aralarındaki bağlantı açığı.",
+      "cost": "Bu yüklemenin maliyeti {cost}",
+      "fetched": "{relative} alındı",
+      "profiles": {
+        "title": "Backlink profilleri",
+        "description": "Her rakibin proje ayarlarındaki ilk alan adı, alt alan adları dahil.",
+        "you": "(siz)",
+        "noLinks": "Bilinen bağlantı yok",
+        "analyze": "{domain} alan adını Alan Adı Genel Bakışı'nda aç",
+        "columns": {
+          "brand": "Marka",
+          "rank": "Alan adı gücü",
+          "referringDomains": "Yönlendiren alan adı",
+          "backlinks": "Backlink",
+          "nofollow": "Nofollow",
+          "spamScore": "Spam skoru",
+          "actions": "İşlemler"
+        }
+      },
+      "gap": {
+        "title": "Bağlantı açığı",
+        "description": "Her rakibin en güçlü 100 yönlendiren alan adı arasından {domain} adresine bağlantı vermeyenler. Daha çok rakibe bağlantı verenler önce gelir: size de bağlantı verme olasılıkları en yüksek olanlar onlardır.",
+        "emptyTitle": "Bağlantı açığı yok",
+        "emptyBody": "Rakiplerinize bağlantı veren en güçlü alan adları size de bağlantı veriyor ya da DataForSEO rakiplerinize bağlantı bilmiyor.",
+        "competitor": "Rakip",
+        "allCompetitors": "Tüm rakipler",
+        "summary": "{count} alan adı",
+        "columns": {
+          "domain": "Alan adı",
+          "linksTo": "Bağlantı verdiği",
+          "rank": "Güç",
+          "backlinks": "Backlink",
+          "firstSeen": "İlk görülme"
+        }
+      }
     }
   },
   "siteAudit": {

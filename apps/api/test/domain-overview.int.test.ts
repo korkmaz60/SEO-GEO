@@ -382,4 +382,48 @@ describe.skipIf(!TEST_SERVER_URL)("domain overview", () => {
       .expect(200);
     await prisma.budget.delete({ where: { workspaceId: workspace } });
   });
+
+  it("loads every part again on a refresh, quoted in full (D23)", async () => {
+    const request = { domain: "example.com", ...market };
+    const cached = DomainOverviewSchema.parse(
+      (await owner.post(api("/research/domains")).send(request).expect(200)).body,
+    );
+    expect(cached.costUsd).toBe(0);
+
+    const quote = await owner
+      .post(api("/research/domains/quote"))
+      .send({ ...request, refresh: true })
+      .expect(200);
+    expect(quote.body).toEqual({
+      domain: "example.com",
+      cached: false,
+      estimatedCostUsd: FULL_ESTIMATE,
+    });
+
+    const calls = providerCalls().length;
+    const entries = (await ledger()).length;
+    const refreshed = DomainOverviewSchema.parse(
+      (
+        await owner
+          .post(api("/research/domains"))
+          .send({ ...request, refresh: true })
+          .expect(200)
+      ).body,
+    );
+    expect(providerCalls()).toHaveLength(calls + 5);
+    expect(await ledger()).toHaveLength(entries + 5);
+    expect(refreshed.costUsd).toBeGreaterThan(0);
+    expect(refreshed.sources.labs.cached).toBe(false);
+    expect(refreshed.sources.backlinks.cached).toBe(false);
+    expect(Date.parse(refreshed.sources.labs.fetchedAt)).toBeGreaterThan(
+      Date.parse(cached.sources.labs.fetchedAt),
+    );
+
+    // Everyone gets the refreshed data from the cache now.
+    const after = DomainOverviewSchema.parse(
+      (await owner.post(api("/research/domains")).send(request).expect(200)).body,
+    );
+    expect(after.costUsd).toBe(0);
+    expect(after.sources.labs.fetchedAt).toBe(refreshed.sources.labs.fetchedAt);
+  });
 });

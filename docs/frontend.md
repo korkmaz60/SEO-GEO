@@ -37,7 +37,8 @@ chart components · next-intl · next-themes · lucide-react · cmdk · Geist Sa
 /:workspace/:project/ai-visibility/competitors       share of voice
 /:workspace/:project/rank-tracker                    tracked keywords, visibility, share of voice
 /:workspace/:project/site-audit                      audit runs, issues, pages, history
-/:workspace/:project/backlinks                       backlink profile (M4)
+/:workspace/:project/backlinks                       backlink profile, history, new and lost
+                                                     links, lists and competitors (`?tab=`)
 /:workspace/:project/search-console                  Search Console and GA4 performance;
                                                      Google connection and property choice
 /:workspace/:project/reports                         reports and schedules (M4)
@@ -149,7 +150,9 @@ Charts follow the data-viz method: form first, color by job, palette validated.
 - **Status** (good / warning / serious / critical) uses its own fixed steps, never as a
   series color.
 - **Sequential** (magnitude, e.g. position heatmaps): one blue ramp, light → dark.
-- **Diverging** (e.g. rank change): blue ↔ red with a neutral gray midpoint.
+- **Diverging** (e.g. rank change): blue ↔ red with a neutral gray midpoint. New and lost
+  links are bars above (`--chart-1`, new) and below (`--chart-8`, lost) a zero baseline; the
+  pair was validated for color-vision deficiency in both themes (ΔE ≥ 19).
 - Never dual axes. Thin marks, 2 px lines, rounded bar ends, recessive grid, hover tooltip
   on every chart, legend for two or more series.
 
@@ -167,7 +170,9 @@ Charts follow the data-viz method: form first, color by job, palette validated.
   `1,234.5` in English); compact notation for large values in tiles.
 - **Rank deltas:** a lower position number is better. Moving from 8 to 3 is `▲5` in the
   positive color.
-- Dates show a relative time with the absolute timestamp in the tooltip.
+- Dates show a relative time with the absolute timestamp in the tooltip. Relative times take
+  the current time from `useNow` (or the moment a dialog opened), never from `new Date()`
+  during render, which the React Compiler would memoize into a stale "1 second ago".
 - Each KPI tile shows value, change versus the previous period, a sparkline when history
   exists, and a provenance tooltip (source, method, updated at, cost of the last refresh).
 - Rates computed from small samples show a "low sample" badge (see [geo-aeo.md](geo-aeo.md)).
@@ -183,6 +188,10 @@ Charts follow the data-viz method: form first, color by job, palette validated.
   `?domain=&market=`, so an overview can be shared and competitors opened with the back
   button working. A cached result opens right away; anything else shows its cost and runs
   only when confirmed.
+- Cached provider data says when it was fetched and offers a Refresh (D23) whose dialog
+  shows that date and the cost before anything is loaded again. Project backlinks open for
+  free from the cache, for viewers too; loading them, and the comparison with competitors on
+  its own tab, shows the cost first.
 
 ## Internationalization
 
@@ -211,10 +220,10 @@ apps/web/
     app-shell/                  sidebar, header, switchers, command palette
     data/                       KPI tile, metric source, empty state, deltas, score ring,
                                 safe external links
-    charts/                     time series chart (with table view), sparkline
+    charts/                     time series chart and new/lost bars (with table views), sparkline
     rank-tracker/ keywords/     feature components, one folder per module
     site-audit/ search-console/
-    overview/
+    domains/ backlinks/ overview/
   i18n/                         next-intl request config
   lib/                          api client, query client, formatters, navigation config
   messages/                     tr.json, en.json

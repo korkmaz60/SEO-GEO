@@ -49,6 +49,7 @@ describe.skipIf(!TEST_SERVER_URL)("MCP server", () => {
         keywords: [["kahve makinesi", 4, 1820, 6]],
         competitors: [["rakip.example", 48, 12.5]],
         backlinks: { rank: 31, backlinks: 5120, referringDomains: 240 },
+        referringDomains: [["kaynak.example.org", 48, 20]],
       },
     },
   });
@@ -159,6 +160,8 @@ describe.skipIf(!TEST_SERVER_URL)("MCP server", () => {
       "get_audit_page",
       "get_keyword_ideas",
       "get_domain_overview",
+      "get_backlinks",
+      "get_link_gap",
       "add_ai_prompts",
       "run_site_audit",
     ]);
@@ -294,6 +297,48 @@ describe.skipIf(!TEST_SERVER_URL)("MCP server", () => {
     expect(cached.data).toMatchObject({ domain: "example.com", costUsd: 0 });
     const invalid = await callTool(paidKey, "get_domain_overview", { ...args, domain: "a b" });
     expect(invalid).toMatchObject({ isError: true, text: "Enter a domain such as example.com." });
+
+    // A refresh is paid again, whatever the cache holds.
+    const refresh = await callTool(paidKey, "get_domain_overview", { ...args, refresh: true });
+    expect(refresh.data).toMatchObject({ confirmationRequired: true, estimatedCostUsd });
+  });
+
+  it("gives the project's backlinks after a confirmed estimate, then for free", async () => {
+    const args = { project_id: projectId, limit: 5 };
+    const refused = await callTool(readKey, "get_backlinks", args);
+    expect(refused.text).toBe("This API key does not have the run:paid scope.");
+
+    const estimate = await callTool(paidKey, "get_backlinks", args);
+    expect(estimate.data).toMatchObject({ confirmationRequired: true });
+    const { estimatedCostUsd } = estimate.data as { estimatedCostUsd: number };
+    expect(dataForSeo.calls.some((url) => url.includes("referring_domains"))).toBe(false);
+
+    const loaded = await callTool(paidKey, "get_backlinks", {
+      ...args,
+      confirm_cost_usd: estimatedCostUsd,
+    });
+    expect(loaded).toMatchObject({
+      isError: false,
+      data: {
+        target: "example.com",
+        profile: { rank: 31, referringDomains: 240 },
+        referringDomains: { total: 240, top: [{ domain: "kaynak.example.org", rank: 48 }] },
+        backlinks: { top: [{ from: "https://kaynak.example.org/yazi", dofollow: true }] },
+        newLost: { newReferringDomains: 60, lostReferringDomains: 30 },
+      },
+    });
+    expect((loaded.data as { costUsd: number }).costUsd).toBeGreaterThan(0);
+
+    // Cached now: free for a read key.
+    const cached = await callTool(readKey, "get_backlinks", args);
+    expect(cached.data).toMatchObject({ target: "example.com", costUsd: 0 });
+
+    // The link gap needs competitors.
+    const gap = await callTool(paidKey, "get_link_gap", { project_id: projectId });
+    expect(gap).toMatchObject({
+      isError: true,
+      text: "The project has no competitors; add them in the project settings.",
+    });
   });
 
   it("adds prompts after confirmation and starts audits with the write scope", async () => {

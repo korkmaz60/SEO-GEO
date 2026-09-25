@@ -15,6 +15,8 @@ export const DomainOverviewRequestSchema = z.strictObject({
   domain: z.string().trim().min(1).max(2048),
   locationCode: LocationCodeSchema,
   languageCode: LanguageCodeSchema,
+  /** Load every part again even when it is cached (D23); the quote then covers all parts. */
+  refresh: z.boolean().optional(),
 });
 export type DomainOverviewRequest = z.infer<typeof DomainOverviewRequestSchema>;
 

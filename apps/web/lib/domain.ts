@@ -28,3 +28,14 @@ export function analyzedHost(input: string): string | null {
   }
   return host.startsWith("www.") ? host.slice(4) : host;
 }
+
+/** The path and query of a URL for a narrow column, e.g. `/kahve?renk=siyah`. */
+export function pathOf(url: string | null): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return `${parsed.pathname}${parsed.search}` || "/";
+  } catch {
+    return url;
+  }
+}

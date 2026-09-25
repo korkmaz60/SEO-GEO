@@ -4,6 +4,7 @@ import { AiVisibilityController } from "../ai-visibility/ai-visibility.controlle
 import { WorkspaceApiKeysController } from "../api-keys/workspace-api-keys.controller.js";
 import { WorkspaceApiKeysService } from "../api-keys/workspace-api-keys.service.js";
 import { AuditController } from "../audit/audit.controller.js";
+import { BacklinksController } from "../backlinks/backlinks.controller.js";
 import { CredentialsController } from "../credentials/credentials.controller.js";
 import { DomainOverviewController } from "../domains/domain-overview.controller.js";
 import {
@@ -38,6 +39,7 @@ import { UsageController } from "../usage/usage.controller.js";
     KeywordResearchController,
     KeywordListsController,
     DomainOverviewController,
+    BacklinksController,
     SiteAuditController,
     GoogleCallbackController,
     GoogleConnectionsController,
