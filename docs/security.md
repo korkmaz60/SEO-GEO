@@ -42,6 +42,12 @@
 - API keys are refused on `/api/auth/*` (`403`): a key cannot change a password or email,
   create or list keys, or manage sessions, workspaces and members. Key management in the
   versioned API is session-only (`@SessionOnly()`).
+- *Planned (D24):* OAuth 2.1 for MCP clients: authorization code with PKCE (S256) only;
+  exact redirect URIs (HTTPS, or loopback with any port); a consent page for every new
+  grant that names the client and its redirect host and warns when a client only has
+  loopback redirects; short-lived access tokens bound to the MCP endpoint, rotating refresh
+  tokens, both stored hashed and revocable; no tokens in URLs. Open client registration is
+  rate-limited, and registrations that never get a grant expire.
 
 ### Authorization
 - Role matrix and API-key scopes are defined in [backend.md](backend.md); enforced by

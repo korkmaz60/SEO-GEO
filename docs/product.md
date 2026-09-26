@@ -58,7 +58,8 @@ using DataForSEO, SEO-GEO competes on the product layer:
 | Site audit | Own crawler with robots.txt respect; issue catalog with severities, explanations and fixes; AI crawler access and `llms.txt`; run history and diffs; DataForSEO On-Page as an optional provider later | M2 |
 | Search Console & GA4 | OAuth connection, property selection, daily query/page sync, organic and AI assistant traffic from GA4 | M2 |
 | AI visibility (GEO/AEO) | Prompt library, scheduled runs per AI platform, mentions, citations, share of voice, sentiment, cited sources, AI Overview / AI Mode, citability score | M3 |
-| Public API & MCP | Workspace-scoped API keys, OpenAPI, MCP tools over the same services | M3 |
+| Page experience | Core Web Vitals from the Chrome UX Report (real users) and Lighthouse lab audits through PageSpeed Insights, kept apart | M4 |
+| Public API & MCP | Workspace-scoped API keys, OpenAPI, MCP tools over the same services; OAuth sign-in for hosted assistants such as Claude's connectors (M4) | M3–M4 |
 | Reports & alerts | Server-rendered PDF (white-label), schedules and email delivery, alert rules (email, Slack, webhook) | M4 |
 | Backlinks & domain overview | Domain metrics and history, referring domains, anchors, new/lost links, competitor gaps | M4 |
 | Content | Optimizer and briefs based on SERP + AI citations, schema and `llms.txt` generators | M5 |

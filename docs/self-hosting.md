@@ -120,6 +120,12 @@ Scripts and AI assistants use the REST API (`/api/v1`) and the MCP server
 Paid tools return the estimated cost first and run only after the client confirms it. Keys
 can be revoked on the same page; each key is limited to 600 requests per minute.
 
+Claude's custom connectors (claude.ai, Claude Desktop and mobile) connect from Anthropic's
+servers, not from your computer: they need an installation reachable over public HTTPS and
+OAuth sign-in, which is planned (D24 in [README.md](README.md)). Until then, connect Claude
+through Claude Code as above, or use another client that can send the header. A
+`localhost` address only works for clients on the same machine.
+
 ### HTTPS
 
 The bundled Caddy obtains and renews certificates from Let's Encrypt:
@@ -189,3 +195,4 @@ while the api and worker are stopped.
 | AI visibility shows no answers | DataForSEO is not connected, no platform is enabled in *AI visibility → Settings*, the budget stopped scheduled answers (see the notifications), or the worker is not running. Queued answers usually arrive within minutes. |
 | An MCP client gets `401` | The key is wrong, expired or revoked; create a new one in *Workspace settings → API & MCP*. |
 | An MCP tool answers that the key lacks a scope | Create a key with more access; paid tools need a key that allows paid actions. |
+| Claude's *Add custom connector* says the URL must start with `https://` | Custom connectors reach the server from Anthropic's network and sign in with OAuth, which is planned (D24); connect through Claude Code with the key header for now. |

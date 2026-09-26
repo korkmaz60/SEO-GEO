@@ -25,6 +25,7 @@ chart components · next-intl · next-themes · lucide-react · cmdk · Geist Sa
 /sign-in, /sign-up, /verify-email                    authentication
 /forgot-password, /reset-password, /two-factor
 /invite/:invitationId                                accept a workspace invitation
+/oauth/consent                                       let an MCP client in (D24, planned)
 /onboarding                                          workspace → first project → DataForSEO
 /account                                             profile, password, 2FA, API keys, sessions
 /:workspace                                          opens the first project (admins without
@@ -36,7 +37,8 @@ chart components · next-intl · next-themes · lucide-react · cmdk · Geist Sa
 /:workspace/:project/ai-visibility/sources           cited sources and pages
 /:workspace/:project/ai-visibility/competitors       share of voice
 /:workspace/:project/rank-tracker                    tracked keywords, visibility, share of voice
-/:workspace/:project/site-audit                      audit runs, issues, pages, history
+/:workspace/:project/site-audit                      audit runs, issues, pages, history, page
+                                                     experience (D25, planned)
 /:workspace/:project/backlinks                       backlink profile, history, new and lost
                                                      links, lists and competitors (`?tab=`)
 /:workspace/:project/search-console                  Search Console and GA4 performance;
@@ -52,16 +54,17 @@ chart components · next-intl · next-themes · lucide-react · cmdk · Geist Sa
 /:workspace/settings/providers                       DataForSEO key, Google OAuth client, connected
                                                      Google accounts
 /:workspace/settings/usage                           monthly spend and budget
-/:workspace/settings/api                             workspace API keys, MCP client setup
+/:workspace/settings/api                             workspace API keys, MCP client setup,
+                                                     connected OAuth clients (D24, planned)
 /:workspace/settings/audit-log                       audit log (admins)
 /design                                              living style guide
 /healthz                                             container health check
 ```
 
 Workspace and project segments are slugs. Top-level route names (`account`, `api`,
-`design`, `invite`, `onboarding`, `sign-in`, …) cannot be used as workspace slugs, and
-workspace-level names (`projects`, `research`, `settings`, …) cannot be used as project
-slugs; the lists live in `packages/contracts`.
+`design`, `invite`, `oauth`, `onboarding`, `sign-in`, …) cannot be used as workspace
+slugs, and workspace-level names (`projects`, `research`, `settings`, …) cannot be used as
+project slugs; the lists live in `packages/contracts`.
 
 Signed-out visitors are redirected to `/sign-in?next=…` by `proxy.ts` (an optimistic
 cookie check); pages still verify the session with the api. The browser only talks to the
