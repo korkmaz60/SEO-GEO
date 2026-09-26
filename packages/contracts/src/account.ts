@@ -33,6 +33,7 @@ export const RESERVED_WORKSPACE_SLUGS = [
   "forgot-password",
   "help",
   "invite",
+  "oauth",
   "onboarding",
   "reset-password",
   "sign-in",
