@@ -48,6 +48,8 @@ src/
     health/               liveness
     account/              GET /instance (sign-up mode), GET /me
     workspaces/           GET /workspaces/:id (membership and role)
+  page-experience/        Chrome UX Report and PageSpeed Insights (D25)       (M4)
+  oauth/                  OAuth 2.1 sign-in for MCP clients (D24)             (M4)
   reports/ alerts/                                                            (M4)
   billing/                cloud edition only                                  (M5)
 ```
@@ -381,6 +383,29 @@ code.
 - One active run per project; runs can be canceled. Pages, links and issues are kept for
   the last 10 runs of a project; older runs keep their summary and score.
 
+## Page experience (planned, D25)
+
+- **Field data** from the Chrome UX Report API for the project's origin and its key pages,
+  phone and desktop: LCP, INP and CLS at the 75th percentile (with FCP and TTFB) and the
+  share of good, needs-improvement and poor visits over the last 28 days, plus weekly
+  history from the CrUX History API. Core Web Vitals pass when LCP ≤ 2.5 s, INP ≤ 200 ms
+  and CLS ≤ 0.1 at the 75th percentile. Sites and pages with too little traffic have no
+  record and show "not enough real-user data", never zero.
+- **Lab data** from the PageSpeed Insights API (Lighthouse on Google's servers) for chosen
+  pages (the home page, the pages with the most Search Console clicks, or pages the user
+  picks), phone and desktop: the four category scores, lab LCP, TBT, CLS and Speed Index,
+  and Lighthouse's recommendations. Lab values are labeled as lab, and TBT is never shown
+  as INP, the demo's mistake ([audit](audit/2026-09-demo-audit.md)).
+- Both APIs are free with a Google API key: `GOOGLE_API_KEY` for the installation, or the
+  workspace's own key in Settings → Providers (checked with a test call, encrypted like
+  other credentials). Runs go through the worker within Google's quotas, weekly and on
+  demand; results describe public pages, so they are cached across workspaces for a day.
+- Shown in a site audit tab and on the project overview (does the site pass Core Web
+  Vitals?), and through the `get_page_experience` MCP tool.
+- No Lighthouse of our own: Chrome in the worker image would add hundreds of megabytes and
+  CPU-heavy runs whose results depend on the machine, and DataForSEO's On-Page Lighthouse
+  charges for the same audit.
+
 ## Google Search Console and GA4
 
 - **OAuth.** Authorization code flow with PKCE (S256), `access_type=offline` and
@@ -435,6 +460,27 @@ code.
   only when called again with `confirm_cost_usd` of at least that estimate. Cached backlink
   data is free for read keys and viewers.
 - Workspace settings → API & MCP shows the endpoint and ready-made client configuration.
+- **OAuth sign-in (planned, D24).** Claude's custom connectors (claude.ai, Claude Desktop and
+  mobile) connect from Anthropic's servers and cannot send an API key, so MCP clients will
+  also be able to sign in with OAuth 2.1 as the MCP authorization spec describes:
+  - An MCP request without credentials gets `401` with
+    `WWW-Authenticate: Bearer resource_metadata="…"`. The protected resource metadata
+    (RFC 9728) names the installation as the authorization server, whose metadata
+    (RFC 8414) offers dynamic client registration (RFC 7591) and client ID metadata
+    documents. The web app forwards `/.well-known/oauth-*` to the api as it does `/api/*`.
+  - Authorization code with PKCE (S256) only. Redirect URIs are HTTPS or loopback and match
+    exactly, apart from the loopback port: Claude uses
+    `https://claude.ai/api/mcp/auth_callback`, Claude Code `http://localhost:<port>/callback`
+    or `http://127.0.0.1:<port>/callback`.
+  - The consent page (`/oauth/consent`) names the client and its redirect host, and the user
+    picks one workspace and an access level: read only; read and write; or also paid
+    actions. They become the token's scopes, and the token acts as the user like a
+    workspace key (D19).
+  - Access tokens are short-lived, bound to the MCP endpoint and refused elsewhere; refresh
+    tokens rotate. Connected clients are listed in API & MCP settings with revoke, and
+    grants and revocations are in the audit log. Paid tools keep the `confirm_cost_usd` step.
+  - It needs `WEB_URL` on public HTTPS. API keys stay for scripts and for clients that send
+    a header, such as Claude Code.
 
 ## Billing (cloud edition)
 

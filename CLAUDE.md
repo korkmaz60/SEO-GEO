@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 Guidance for Claude Code sessions in this repository. The product and technical design live
-in [`docs/`](docs/README.md) (decisions D1–D23): read the doc of a module before changing it
+in [`docs/`](docs/README.md) (decisions D1–D25): read the doc of a module before changing it
 and update it in the same change.
 
 ## Working with the owner

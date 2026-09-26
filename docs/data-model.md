@@ -66,6 +66,10 @@ Managed by Better Auth; our extra fields are added through its schema options.
 | `apikey` | id, reference_id (user), name, start, prefix, key (hash), enabled, rate limit (600 per minute), request_count, last_request, expires_at, metadata | Better Auth API keys; a key acts as its user |
 | `workspace_api_key` | key_id (PK → `apikey`), workspace_id, scopes[] (`read`, `write`, `run:paid`), created_at | binds a key to one workspace with scopes; keys without a row are personal keys |
 
+*Planned (D24):* OAuth for MCP clients adds registered clients (name, redirect URIs or
+metadata document URL), grants (user, client, workspace, scopes, revoked_at) and hashed
+access and refresh tokens with expiry and rotation.
+
 ## Workspace-level entities
 
 | Table | Key columns | Notes |
@@ -132,6 +136,11 @@ deletes them.
 
 Issue definitions (severity, category, scope) live in code; titles, explanations and fixes
 are translated in the web app's message catalogs, not stored in the database.
+
+*Planned (D25):* page experience keeps field records (origin or URL, form factor,
+collection period, p75 values and the good, needs-improvement and poor shares) and lab
+results (URL, strategy, Lighthouse version, category scores, lab metrics, recommendations)
+in separate tables, so field and lab values cannot be mixed.
 
 ## AI visibility (GEO/AEO)
 

@@ -95,10 +95,19 @@ In this order, each shipped on its own:
   own. Backlink data is kept 7 days, readable for free (viewers too), with a Refresh that
   shows its cost on this page and on the domain overview (D23); `get_backlinks` and
   `get_link_gap` MCP tools.
-- [ ] Alerts: rank drops, new critical audit issues, AI visibility changes, budget thresholds;
-  email, Slack and signed webhooks.
+- [ ] Page experience (D25): Core Web Vitals of the site and its key pages from the Chrome UX
+  Report (real users, phone and desktop, weekly history) and Lighthouse audits of chosen
+  pages through the PageSpeed Insights API, field and lab data kept apart; a site audit tab,
+  the project overview and a `get_page_experience` MCP tool. Before alerts and reports so
+  they can use it.
+- [ ] Alerts: rank drops, new critical audit issues, AI visibility changes, Core Web Vitals
+  regressions, budget thresholds; email, Slack and signed webhooks.
 - [ ] Reports: templates, white-label branding, server-rendered PDF, schedules, email delivery.
 - [ ] Client viewer access per project and read-only share links.
+- [ ] MCP sign-in with OAuth (D24): Claude's custom connectors (web, Desktop, mobile) and
+  other hosted assistants connect to `https://<domain>/api/v1/mcp` without an API key; a
+  consent page picks the workspace and access level; connected apps are listed and
+  revocable in API & MCP settings. Needs an installation reachable over public HTTPS.
 - [ ] OpenTelemetry traces and metrics.
 
 ## M5 — Content and growth
