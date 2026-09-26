@@ -280,6 +280,33 @@ describe("extractPageFacts", () => {
     // Headings, link text and paragraphs; not scripts, SVG titles or image alt text.
     expect(facts.wordCount).toBe(6);
   });
+
+  // The main content leaves headers out; the page facts are read from the whole page.
+  const paragraph = `<p>${words(20)}</p>`;
+
+  it.each([
+    ["the article's header", `<article><header><h1>Title</h1></header>${paragraph}</article>`],
+    [
+      "a site header outside the article",
+      `<header><h1>Title</h1></header><article>${paragraph}</article>`,
+    ],
+    [
+      "a site header when the body is the main content",
+      `<header><h1>Title</h1></header>${paragraph}`,
+    ],
+  ])("counts an H1 in %s", (_, body) => {
+    const facts = extractPageFacts(layout(body), "https://example.com/blog/post");
+    expect(facts.h1).toEqual(["Title"]);
+    expect(facts.content.readability.words).toBe(20);
+  });
+
+  it("reads meta tags that a page puts in a header of the body", () => {
+    const facts = extractPageFacts(
+      `<body><header><meta name="viewport" content="width=device-width"><meta property="og:title" content="Title"></header>${paragraph}</body>`,
+      "https://example.com/",
+    );
+    expect(facts).toMatchObject({ hasViewport: true, hasOpenGraph: true });
+  });
 });
 
 describe("helpers", () => {
