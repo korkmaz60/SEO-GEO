@@ -267,13 +267,8 @@ export function extractPageFacts(html: string, pageUrl: string): PageFacts {
   const hasByline = $(BYLINE)
     .toArray()
     .some((element) => squash($(element).text()) !== "");
-  const content = extractContent($, {
-    hasAuthor: jsonLd.hasAuthor || types.has("Person") || metaAuthor || hasByline,
-    modified,
-    published,
-  });
 
-  return {
+  const facts: Omit<PageFacts, "content"> = {
     title: titles[0] ?? null,
     titleCount: titles.length,
     metaDescription: descriptions[0] ?? null,
@@ -295,8 +290,15 @@ export function extractPageFacts(html: string, pageUrl: string): PageFacts {
     contentHash: words > 0 ? createHash("sha1").update(text.toLowerCase()).digest("hex") : null,
     hasViewport: $('meta[name="viewport" i]').length > 0,
     hasOpenGraph: $('meta[property^="og:" i]').length > 0,
-    content,
   };
+  // Last: it removes headers, navigation and footers from the document, and a page's H1
+  // often sits in the header of its article.
+  const content = extractContent($, {
+    hasAuthor: jsonLd.hasAuthor || types.has("Person") || metaAuthor || hasByline,
+    modified,
+    published,
+  });
+  return { ...facts, content };
 }
 
 /**

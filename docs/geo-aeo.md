@@ -160,7 +160,8 @@ words) does not count against the page.
 | AI search crawler access | 0.10 | `robots.txt` lets the AI search crawlers fetch the page: OAI-SearchBot, ChatGPT-User, PerplexityBot, Perplexity-User, Claude-SearchBot and Claude-User (share allowed) |
 
 The main content is the page's single `article`, else `main` or `[role=main]`, else the
-body, without navigation, headers, footers, forms and scripts. Question headings are
+body, without navigation, headers, footers, forms and scripts; the H1 is read from the whole
+page (headers included), and the title stands in when there is none. Question headings are
 recognized by a question mark or a question word (Turkish stems such as `hangi`, `nere`,
 `nasıl` and particles `mı/mi/mu/mü`; English `what`, `how`, `why`, …). The language is
 the page's `lang`, else the project's default language.

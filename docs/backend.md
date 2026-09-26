@@ -361,7 +361,9 @@ code.
   the remaining parameters sorted.
 - Parsing with cheerio (parse5): title, meta description, robots directives, canonical,
   headings, hreflang, `lang`, viewport, JSON-LD types (and invalid blocks), images without
-  alt text, links with anchors and `nofollow`, word count and a content hash.
+  alt text, links with anchors and `nofollow`, word count and a content hash, all from the
+  whole page (an H1 inside a `header` counts). The main content for the citability score is
+  read last, because extracting it removes navigation, headers and footers from the document.
 - JavaScript rendering is not part of M2.
 - The issue catalog lives in `packages/contracts` (43 issues with severity, category and
   scope); the rules that find them are in `packages/core/src/audit`. Titles, explanations
